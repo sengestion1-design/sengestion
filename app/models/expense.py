@@ -8,6 +8,8 @@ class ExpenseCategory(db.Model):
     __tablename__ = "expense_categories"
 
     id = db.Column(db.Integer, primary_key=True)                 # Unique identifier
+    # Propriétaire : chaque gérant a ses propres catégories (isolation OWASP).
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     name = db.Column(db.String(100), nullable=False)             # Category name
 
     expenses = db.relationship("Expense", backref="category", lazy=True)

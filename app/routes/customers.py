@@ -256,8 +256,10 @@ def create():
 
     # Photo de carte scannée : on ne garde que les chemins qu'on a nous-mêmes générés.
     card_image = request.form.get("card_image") or None
-    if card_image and not card_image.startswith("uploads/cartes/"):
-        card_image = None          # anti-injection : ignore tout chemin non conforme
+    # Anti-injection / path traversal : uniquement nos chemins, jamais de "..".
+    if card_image and (not card_image.startswith("uploads/cartes/")
+                       or ".." in card_image):
+        card_image = None
 
     contact = Contact(
         user_id=current_user.id,
@@ -487,7 +489,8 @@ def delete(contact_id):
     name = contact.name
     endpoint = _list_endpoint_for(contact)
     # Nettoyage : supprimer aussi la photo de carte associée (évite les orphelins).
-    if contact.card_image and contact.card_image.startswith("uploads/cartes/"):
+    if (contact.card_image and contact.card_image.startswith("uploads/cartes/")
+            and ".." not in contact.card_image):
         import os
         try:
             os.remove(os.path.join(current_app.static_folder, contact.card_image))

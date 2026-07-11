@@ -18,6 +18,22 @@ from app.utils.validators import validate_password
 auth_bp = Blueprint("auth", __name__)
 
 
+def _safe_next(target: str | None) -> str:
+    """Retourne l'URL `next` si elle est locale et sûre, sinon le dashboard.
+
+    Protège contre l'open redirect : on n'accepte qu'un chemin relatif interne
+    (commence par un seul '/'), jamais une URL absolue ni un '//host' protocol-relative.
+    """
+    if not target:
+        return url_for("dashboard.index")
+    # Rejette les URLs absolues (http://…), protocol-relative (//…) et les backslashs.
+    if target.startswith("//") or "://" in target or "\\" in target:
+        return url_for("dashboard.index")
+    if not target.startswith("/"):
+        return url_for("dashboard.index")
+    return target
+
+
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
@@ -116,8 +132,7 @@ def login():
 
             login_user(user)
             log_action(user.id, "login", {"email": email})
-            next_page = request.args.get("next")
-            return redirect(next_page or url_for("dashboard.index"))
+            return redirect(_safe_next(request.args.get("next")))
 
         flash("E-mail ou mot de passe incorrect.", "danger")
 

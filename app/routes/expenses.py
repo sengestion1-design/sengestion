@@ -33,11 +33,24 @@ DEFAULT_CATEGORIES = [
 # ─────────────────────────── Helpers ───────────────────────────
 
 def _ensure_default_categories():
-    """Crée les catégories par défaut si aucune n'existe encore."""
-    if ExpenseCategory.query.count() == 0:
+    """Crée les catégories par défaut du gérant courant si aucune n'existe encore.
+
+    Les catégories sont propres à chaque gérant (isolation OWASP).
+    """
+    if ExpenseCategory.query.filter_by(user_id=current_user.id).count() == 0:
         for name in DEFAULT_CATEGORIES:
-            db.session.add(ExpenseCategory(name=name))
+            db.session.add(ExpenseCategory(name=name, user_id=current_user.id))
         db.session.commit()
+
+
+def _owned_category_or_404(category_id):
+    """Retourne une catégorie du gérant courant, sinon 404."""
+    cat = ExpenseCategory.query.filter_by(
+        id=category_id, user_id=current_user.id
+    ).first()
+    if cat is None:
+        abort(404)
+    return cat
 
 
 def _parse_amount(raw):
@@ -108,7 +121,7 @@ def index():
     ).all()
 
     total = sum((e.amount or Decimal("0")) for e in expenses)
-    categories = ExpenseCategory.query.order_by(ExpenseCategory.name).all()
+    categories = ExpenseCategory.query.filter_by(user_id=current_user.id).order_by(ExpenseCategory.name).all()
 
     return render_template(
         "expenses/index.html",
@@ -127,7 +140,7 @@ def index():
 def new():
     """Formulaire de création d'une dépense."""
     _ensure_default_categories()
-    categories = ExpenseCategory.query.order_by(ExpenseCategory.name).all()
+    categories = ExpenseCategory.query.filter_by(user_id=current_user.id).order_by(ExpenseCategory.name).all()
     return render_template(
         "expenses/form.html",
         expense=None,
@@ -153,13 +166,13 @@ def create():
         errors.append("Le montant doit être un nombre supérieur à 0.")
     if expense_date is None:
         errors.append("La date est invalide.")
-    if category_id and not ExpenseCategory.query.get(category_id):
+    if category_id and not ExpenseCategory.query.filter_by(id=category_id, user_id=current_user.id).first():
         errors.append("La catégorie sélectionnée est introuvable.")
 
     if errors:
         for msg in errors:
             flash(msg, "danger")
-        categories = ExpenseCategory.query.order_by(ExpenseCategory.name).all()
+        categories = ExpenseCategory.query.filter_by(user_id=current_user.id).order_by(ExpenseCategory.name).all()
         return render_template(
             "expenses/form.html",
             expense=None,
@@ -193,7 +206,7 @@ def create():
 def edit(expense_id):
     """Formulaire d'édition d'une dépense du gérant."""
     expense = _owned_expense_or_404(expense_id)
-    categories = ExpenseCategory.query.order_by(ExpenseCategory.name).all()
+    categories = ExpenseCategory.query.filter_by(user_id=current_user.id).order_by(ExpenseCategory.name).all()
     return render_template(
         "expenses/form.html",
         expense=expense,
@@ -221,13 +234,13 @@ def update(expense_id):
         errors.append("Le montant doit être un nombre supérieur à 0.")
     if expense_date is None:
         errors.append("La date est invalide.")
-    if category_id and not ExpenseCategory.query.get(category_id):
+    if category_id and not ExpenseCategory.query.filter_by(id=category_id, user_id=current_user.id).first():
         errors.append("La catégorie sélectionnée est introuvable.")
 
     if errors:
         for msg in errors:
             flash(msg, "danger")
-        categories = ExpenseCategory.query.order_by(ExpenseCategory.name).all()
+        categories = ExpenseCategory.query.filter_by(user_id=current_user.id).order_by(ExpenseCategory.name).all()
         return render_template(
             "expenses/form.html",
             expense=expense,
@@ -277,7 +290,7 @@ def delete(expense_id):
 def categories():
     """Gestion des catégories de dépenses (partagées entre gérants)."""
     _ensure_default_categories()
-    items = ExpenseCategory.query.order_by(ExpenseCategory.name).all()
+    items = ExpenseCategory.query.filter_by(user_id=current_user.id).order_by(ExpenseCategory.name).all()
     # nb de dépenses du gérant courant par catégorie (pour info suppression)
     usage = {}
     for cat in items:
@@ -302,13 +315,14 @@ def create_category():
         return redirect(url_for("expenses.categories"))
 
     existing = ExpenseCategory.query.filter(
+        ExpenseCategory.user_id == current_user.id,
         db.func.lower(ExpenseCategory.name) == name.lower()
     ).first()
     if existing:
         flash("Cette catégorie existe déjà.", "warning")
         return redirect(url_for("expenses.categories"))
 
-    category = ExpenseCategory(name=name)
+    category = ExpenseCategory(name=name, user_id=current_user.id)
     db.session.add(category)
     db.session.commit()
 
@@ -324,8 +338,8 @@ def create_category():
 @login_required
 @subscription_required
 def delete_category(category_id):
-    """Supprime une catégorie (interdit si le gérant y a des dépenses)."""
-    category = ExpenseCategory.query.get_or_404(category_id)
+    """Supprime une catégorie du gérant (interdit si elle a des dépenses)."""
+    category = _owned_category_or_404(category_id)
 
     used = Expense.query.filter_by(
         user_id=current_user.id, category_id=category_id
