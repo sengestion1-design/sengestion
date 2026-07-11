@@ -1147,7 +1147,9 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         inner_rows.append([Paragraph("Déjà réglé", st_tl), Paragraph(f"{_fmt(paid)} FCFA", st_tv)])
         inner_rows.append([Paragraph("Reste à payer", st_ttcl),
                            Paragraph(f"{_fmt(due)} FCFA", st_ttcv)])
-    inner = Table(inner_rows, colWidths=[52 * mm, 46 * mm])
+    # Largeur du bloc = moitié droite du contenu (colle au bord droit).
+    box_w = CONTENT_W / 2 + 6 * mm
+    inner = Table(inner_rows, colWidths=[box_w * 0.52, box_w * 0.48])
     inner_style = [
         ("LEFTPADDING", (0, 0), (-1, -1), 14), ("RIGHTPADDING", (0, 0), (-1, -1), 14),
         ("TOPPADDING", (0, 0), (-1, -1), 8), ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
@@ -1163,7 +1165,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     words_p = Paragraph(_amount_words(amount_incl), st_words)
     # Box collée à droite (hAlign RIGHT), largeur = celle des totaux internes.
-    box = Table([[inner], [words_p]], colWidths=[98 * mm], hAlign="RIGHT")
+    box = Table([[inner], [words_p]], colWidths=[box_w], hAlign="RIGHT")
     box.setStyle(TableStyle([
         ("BOX", (0, 0), (-1, -1), 1, HAIRLINE),
         ("ROUNDEDCORNERS", [8, 8, 8, 8]),
