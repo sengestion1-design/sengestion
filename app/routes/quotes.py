@@ -764,7 +764,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     PAGE_W, PAGE_H = A4
     ML = MR = 16 * mm
     CONTENT_W = PAGE_W - ML - MR
-    HEADER_H = 42 * mm                        # hauteur du bandeau marine
+    HEADER_H = 44 * mm                        # hauteur de la zone d'en-tête (jusqu'au liseré or)
 
     def _abs(rel):
         if not rel:
@@ -813,58 +813,61 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     buffer = BytesIO()
 
-    # ── Bandeau marine (en-tête) + pied de page dessinés sur chaque page ──
+    # ── En-tête blanc épuré + pied de page dessinés sur chaque page ──
     def _decorate(canvas, doc_):
         canvas.saveState()
-        # Bandeau marine plein en haut
-        canvas.setFillColor(MARINE)
-        canvas.rect(0, PAGE_H - HEADER_H, PAGE_W, HEADER_H, fill=1, stroke=0)
-        # Fin liseré or sous le bandeau
-        canvas.setFillColor(OR)
-        canvas.rect(0, PAGE_H - HEADER_H - 3, PAGE_W, 3, fill=1, stroke=0)
+        top = PAGE_H - 16 * mm
 
-        # Marque : logo si dispo, sinon nom
-        top = PAGE_H - 15 * mm
+        # Marque : logo si dispo, sinon nom en marine.
+        # coord_y = position de départ des coordonnées, sous la marque (jamais de chevauchement).
+        LOGO_MAX_H = 15 * mm
         if logo_path:
             try:
-                img = RLImage(logo_path, width=44 * mm, height=16 * mm, kind="proportional")
-                img.drawOn(canvas, ML, PAGE_H - 26 * mm)
+                img = RLImage(logo_path, width=44 * mm, height=LOGO_MAX_H, kind="proportional")
+                iw, ih = img.wrap(0, 0)
+                img.drawOn(canvas, ML, PAGE_H - 13 * mm - ih)
+                coord_y = PAGE_H - 13 * mm - ih - 4 * mm
             except Exception:
-                canvas.setFillColor(colors.white)
-                canvas.setFont("Times-Bold", 22)
-                canvas.drawString(ML, top - 6, brand_name)
+                canvas.setFillColor(MARINE)
+                canvas.setFont("Times-Bold", 24)
+                canvas.drawString(ML, top - 8, brand_name)
+                coord_y = PAGE_H - 24 * mm
         else:
-            canvas.setFillColor(colors.white)
-            canvas.setFont("Times-Bold", 22)
-            canvas.drawString(ML, top - 6, brand_name)
+            canvas.setFillColor(MARINE)
+            canvas.setFont("Times-Bold", 24)
+            canvas.drawString(ML, top - 8, brand_name)
+            coord_y = PAGE_H - 24 * mm
 
-        # Coordonnées émetteur (petit, sous la marque)
-        canvas.setFillColor(colors.HexColor("#C7D0DE"))
-        canvas.setFont("Helvetica", 7.6)
-        y = PAGE_H - 29 * mm
+        # Coordonnées émetteur (petit, gris marine, sous la marque)
+        canvas.setFillColor(INK_SOFT)
+        canvas.setFont("Helvetica", 8)
+        y = coord_y
         for line in issuer_lines[:3]:
             canvas.drawString(ML, y, line[:95])
-            y -= 4.2 * mm
+            y -= 4.4 * mm
 
-        # Titre document (DEVIS / FACTURE) + numéro à droite
-        canvas.setFillColor(OR)
-        canvas.setFont("Times-Bold", 30)
-        canvas.drawRightString(PAGE_W - MR, top - 4, title)
-        canvas.setFillColor(colors.white)
+        # Titre document (DEVIS / FACTURE) en marine + numéro à droite
+        canvas.setFillColor(MARINE)
+        canvas.setFont("Times-Bold", 32)
+        canvas.drawRightString(PAGE_W - MR, top - 6, title)
+        canvas.setFillColor(MARINE)
         canvas.setFont("Helvetica-Bold", 10.5)
-        canvas.drawRightString(PAGE_W - MR, top - 11 * mm, f"N° {number}")
-        canvas.setFillColor(colors.HexColor("#C7D0DE"))
+        canvas.drawRightString(PAGE_W - MR, top - 13 * mm, f"N° {number}")
+        canvas.setFillColor(INK_SOFT)
         canvas.setFont("Helvetica", 8.5)
-        canvas.drawRightString(PAGE_W - MR, top - 15 * mm, f"Date : {d}")
+        canvas.drawRightString(PAGE_W - MR, top - 17 * mm, f"Date : {d}")
+
+        # Liseré or épais sous l'en-tête (le seul aplat de couleur)
+        canvas.setFillColor(OR)
+        canvas.rect(ML, PAGE_H - HEADER_H, CONTENT_W, 2.5, fill=1, stroke=0)
 
         # ── Pied de page ──
-        footer_brand = brand_name
         canvas.setFillColor(HAIRLINE)
         canvas.rect(ML, 15 * mm, CONTENT_W, 0.6, fill=1, stroke=0)
         canvas.setFillColor(INK_SOFT)
         canvas.setFont("Helvetica", 7.6)
         canvas.drawString(ML, 11 * mm,
-                          f"{footer_brand} — Montants exprimés en francs CFA (FCFA).")
+                          f"{brand_name} — Montants exprimés en francs CFA (FCFA).")
         canvas.drawRightString(PAGE_W - MR, 11 * mm, f"Page {doc_.page}")
         canvas.restoreState()
 
