@@ -16,8 +16,8 @@
         enctype="multipart/form-data" class="settings-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    {# ─── Section 1 : Identité entreprise ─── #}
-    <section class="card settings-section">
+    {# ─── Section 1 : Identité entreprise (pleine largeur) ─── #}
+    <section class="card settings-section settings-section--full">
       <h2 class="settings-title"><i data-lucide="building-2"></i> Identité de l'entreprise</h2>
       <div class="form-grid-2">
         <div class="form-group">
@@ -113,7 +113,7 @@
       </div>
     </section>
 
-    <div style="display:flex; gap:12px; margin-top:var(--space-2);">
+    <div class="settings-actions" style="display:flex; gap:12px;">
       <button type="submit" class="btn btn-accent">
         <i data-lucide="check" style="width:16px;height:16px;vertical-align:-3px;"></i>
         Enregistrer les paramètres
@@ -122,8 +122,18 @@
   </form>
 
   <style>
-    .settings-form { max-width: 960px; }
-    .settings-section { margin-bottom: var(--space-6); }
+    /* Grille pleine largeur : Identité en haut sur toute la largeur,
+       puis les autres sections réparties en 2 colonnes. */
+    .settings-form {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      align-items: start;
+    }
+    .settings-section { margin-bottom: 0; }
+    .settings-section--full { grid-column: 1 / -1; }   /* pleine largeur */
+    .settings-actions { grid-column: 1 / -1; }
     .settings-title {
       display: flex; align-items: center; gap: 8px;
       font-family: var(--font-display); font-size: var(--text-lg);
@@ -148,6 +158,9 @@
     .settings-file { font-size: var(--text-sm); width: 100%; }
     .settings-remove { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-sm); color: rgba(2,26,61,0.62); margin-top: 8px; cursor: pointer; }
 
+    @media (max-width: 1024px) {
+      .settings-form { grid-template-columns: 1fr; }   /* une colonne sur petits écrans */
+    }
     @media (max-width: 768px) {
       .settings-images { grid-template-columns: 1fr; }
     }
