@@ -104,7 +104,7 @@ def update():
         # Suppression explicite demandée ?
         if request.form.get(f"remove_{field}") == "1":
             old = getattr(s, field)
-            if old and old.startswith("uploads/settings/"):
+            if old and old.startswith("uploads/settings/") and ".." not in old:
                 try:
                     os.remove(os.path.join(current_app.static_folder, old))
                 except OSError:
@@ -115,7 +115,7 @@ def update():
         if path:
             # remplacer l'ancienne image
             old = getattr(s, field)
-            if old and old.startswith("uploads/settings/"):
+            if old and old.startswith("uploads/settings/") and ".." not in old:
                 try:
                     os.remove(os.path.join(current_app.static_folder, old))
                 except OSError:
