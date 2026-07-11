@@ -824,9 +824,9 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     CARD_BG = colors.HexColor("#F8F9FB")
 
     PAGE_W, PAGE_H = A4
-    ML = MR = 16 * mm
+    ML = MR = 15 * mm
     CONTENT_W = PAGE_W - ML - MR
-    HEADER_H = 58 * mm
+    HEADER_H = 40 * mm
 
     def _abs(rel):
         if not rel:
@@ -909,12 +909,12 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                 pass
         # Nom entreprise (gros, gras)
         canvas.setFillColor(MARINE)
-        canvas.setFont("Helvetica-Bold", 19)
-        canvas.drawString(ML, PAGE_H - 28 * mm, brand_name)
+        canvas.setFont("Helvetica-Bold", 18)
+        canvas.drawString(ML + 34 * mm, PAGE_H - 15 * mm, brand_name)
         # Coordonnées
         canvas.setFillColor(INK_SOFT)
         canvas.setFont("Helvetica", 10)
-        y = PAGE_H - 33 * mm
+        y = PAGE_H - 24 * mm
         if addr:
             canvas.drawString(ML, y, addr[:90]); y -= 4.6 * mm
         tel_bits = " / ".join(x for x in (phone,) if x)
@@ -926,7 +926,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         if legal_line:
             canvas.setFont("Helvetica", 8)
             canvas.setFillColor(colors.HexColor("#8A93A0"))
-            canvas.drawString(ML, PAGE_H - HEADER_H + 5 * mm, legal_line[:130])
+            canvas.drawString(ML, PAGE_H - HEADER_H + 3 * mm, legal_line[:130])
 
         # Bloc numéro à droite
         canvas.setFillColor(colors.HexColor("#8A93A0"))
@@ -959,7 +959,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     doc = SimpleDocTemplate(
         buffer, pagesize=A4,
         leftMargin=ML, rightMargin=MR,
-        topMargin=HEADER_H + 8 * mm, bottomMargin=20 * mm,
+        topMargin=HEADER_H + 3 * mm, bottomMargin=11 * mm,
         title=f"{title} {number}",
     )
     story = []
@@ -980,7 +980,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         return wrap
 
     story.append(_eyebrow("DESTINATAIRE"))
-    story.append(Spacer(1, 5 * mm))
+    story.append(Spacer(1, 2 * mm))
 
     # ── Carte CLIENT (bordée) | carte OBJET (fond bleu) ──
     cust_name = customer.name if customer else "—"
@@ -992,7 +992,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             cust_extra.append(customer.email)
         if customer.phone:
             cust_extra.append(customer.phone)
-    client_body = f"<font size=8.5 color='#5A6472'><b>C L I E N T</b></font><br/><br/><b>{cust_name}</b>"
+    client_body = f"<font size=8.5 color='#5A6472'><b>C L I E N T</b></font><br/><b>{cust_name}</b>"
     if cust_extra:
         client_body += "<br/>" + "<br/>".join(cust_extra)
     client_card = Table([[Paragraph(client_body, st_big)]], colWidths=[CONTENT_W * 0.60 - 3 * mm])
@@ -1002,11 +1002,11 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("ROUNDEDCORNERS", [6, 6, 6, 6]),
         ("LEFTPADDING", (0, 0), (-1, -1), 14),
         ("RIGHTPADDING", (0, 0), (-1, -1), 14),
-        ("TOPPADDING", (0, 0), (-1, -1), 14),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 16),
+        ("TOPPADDING", (0, 0), (-1, -1), 12),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
     ]))
 
-    obj_text = (f"<font size=8.5 color='#5A6472'><b>O B J E T</b></font><br/><br/>"
+    obj_text = (f"<font size=8.5 color='#5A6472'><b>O B J E T</b></font><br/>"
                 f"{('Devis de prestation' if is_devis else 'Facture')}")
     if settings and getattr(settings, "footer_note", None):
         pass
@@ -1028,11 +1028,11 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("LEFTPADDING", (1, 0), (1, 0), 3 * mm), ("RIGHTPADDING", (1, 0), (1, 0), 0),
     ]))
     story.append(dest)
-    story.append(Spacer(1, 8 * mm))
+    story.append(Spacer(1, 4.5 * mm))
 
     # ── Eyebrow + Tableau des prestations ──
     story.append(_eyebrow("DÉTAIL DES PRESTATIONS"))
-    story.append(Spacer(1, 4 * mm))
+    story.append(Spacer(1, 2.5 * mm))
 
     col_desc = CONTENT_W - (24 * mm + 34 * mm + 40 * mm)
     thst = ParagraphStyle("thh", fontName="Helvetica-Bold", fontSize=8.5,
@@ -1054,13 +1054,13 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("TOPPADDING", (0, 0), (-1, 0), 8), ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
         ("LEFTPADDING", (0, 0), (-1, -1), 12), ("RIGHTPADDING", (0, 0), (-1, -1), 12),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 1), (-1, -1), 9), ("BOTTOMPADDING", (0, 1), (-1, -1), 9),
+        ("TOPPADDING", (0, 1), (-1, -1), 6), ("BOTTOMPADDING", (0, 1), (-1, -1), 6),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, ROW_ALT]),
         ("LINEBELOW", (0, 1), (-1, -1), 0.5, HAIRLINE),
         ("LINEBELOW", (0, -1), (-1, -1), 1.5, MARINE),
     ]))
     story.append(table)
-    story.append(Spacer(1, 7 * mm))
+    story.append(Spacer(1, 2.5 * mm))
 
     # ── Bloc totaux encadré (à droite) ──
     tva = (Decimal(str(amount_incl or 0)) - Decimal(str(amount_excl or 0)))
@@ -1115,11 +1115,11 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
     ]))
     story.append(totals_holder)
-    story.append(Spacer(1, 8 * mm))
+    story.append(Spacer(1, 4.5 * mm))
 
     # ── CONDITIONS (barre latérale) ──
     story.append(_eyebrow("CONDITIONS"))
-    story.append(Spacer(1, 3 * mm))
+    story.append(Spacer(1, 2 * mm))
     cond_txt = (str(settings.footer_note) if settings and settings.footer_note
                 else ("Paiement à réception de la facture."
                       + (f" Devis valable jusqu'au {d_valid}." if is_devis and d_valid else "")))
@@ -1131,29 +1131,29 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("TOPPADDING", (0, 0), (-1, -1), 12), ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
     ]))
     story.append(cond)
-    story.append(Spacer(1, 8 * mm))
+    story.append(Spacer(1, 4.5 * mm))
 
     # ── SIGNATURES : cadre "Bon pour accord" | cachet ──
     story.append(_eyebrow("SIGNATURES"))
-    story.append(Spacer(1, 4 * mm))
+    story.append(Spacer(1, 2.5 * mm))
     accord = Table(
         [[Paragraph("<b>BON POUR ACCORD — CLIENT</b>", st_label)],
          [Paragraph("<i>Nom, date &amp; signature précédés de « Lu et approuvé »</i>", st_muted)],
-         [Spacer(1, 16 * mm)]],
+         [Spacer(1, 5 * mm)]],
         colWidths=[CONTENT_W * 0.58],
     )
     accord.setStyle(TableStyle([
         ("BOX", (0, 0), (-1, -1), 1, HAIRLINE), ("ROUNDEDCORNERS", [6, 6, 6, 6]),
-        ("LEFTPADDING", (0, 0), (-1, -1), 14), ("RIGHTPADDING", (0, 0), (-1, -1), 14),
-        ("TOPPADDING", (0, 0), (0, 0), 14), ("BOTTOMPADDING", (0, 0), (0, 0), 4),
-        ("TOPPADDING", (0, 1), (0, 1), 0), ("BOTTOMPADDING", (0, 2), (0, 2), 8),
+        ("LEFTPADDING", (0, 0), (-1, -1), 12), ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+        ("TOPPADDING", (0, 0), (0, 0), 10), ("BOTTOMPADDING", (0, 0), (0, 0), 3),
+        ("TOPPADDING", (0, 1), (0, 1), 0), ("BOTTOMPADDING", (0, 2), (0, 2), 4),
     ]))
 
     stamp_inner = [[Paragraph(f"<font size=8.5 color='#5A6472'><b>CACHET &amp; SIGNATURE — "
                               f"{brand_name.upper()}</b></font>", st_label)]]
     if stamp_path:
         try:
-            stamp_inner.append([RLImage(stamp_path, width=52 * mm, height=26 * mm, kind="proportional")])
+            stamp_inner.append([RLImage(stamp_path, width=44 * mm, height=18 * mm, kind="proportional")])
         except Exception:
             pass
     stamp_c = Table(stamp_inner, colWidths=[CONTENT_W * 0.38])
@@ -1169,28 +1169,27 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("LEFTPADDING", (1, 0), (1, 0), 4 * mm), ("RIGHTPADDING", (1, 0), (1, 0), 0),
     ]))
     story.append(sign)
-    story.append(Spacer(1, 8 * mm))
+    story.append(Spacer(1, 3 * mm))
 
-    # ── QR code "signer en ligne" ──
+    # ── Bandeau QR "signer en ligne" (QR à gauche + texte) ──
     try:
         import qrcode
-        qr_url = f"{brand_name} — {title} {number}"
-        qr_img = qrcode.make(qr_url)
+        qr_img = qrcode.make(f"{brand_name} — {title} {number}")
         from io import BytesIO as _BIO
         _qb = _BIO(); qr_img.save(_qb, format="PNG"); _qb.seek(0)
-        qr_cell = RLImage(_qb, width=26 * mm, height=26 * mm)
+        qr_cell = RLImage(_qb, width=18 * mm, height=18 * mm)
     except Exception:
         qr_cell = Paragraph("", st_muted)
     qr_txt = Paragraph(
-        "<font size=12 color='#021A3D'><b>✍ Signature électronique</b></font><br/><br/>"
-        "Scannez ce QR code pour consulter et <b>signer ce devis en ligne</b>.<br/>"
-        "<font size=9 color='#5A6472'><i>Signature sécurisée — valeur juridique</i></font>",
+        "<font size=11 color='#021A3D'><b>✍ Signature électronique</b></font><br/>"
+        "Scannez ce QR code pour <b>consulter et signer ce devis en ligne</b>. "
+        "<font size=9 color='#5A6472'><i>Signature sécurisée — valeur juridique.</i></font>",
         st_muted)
-    qr_row = Table([[qr_cell, qr_txt]], colWidths=[32 * mm, CONTENT_W - 32 * mm])
+    qr_row = Table([[qr_cell, qr_txt]], colWidths=[22 * mm, CONTENT_W - 22 * mm])
     qr_row.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("LINEABOVE", (0, 0), (-1, 0), 1, HAIRLINE),
-        ("TOPPADDING", (0, 0), (-1, -1), 12),
+        ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ("LEFTPADDING", (0, 0), (0, 0), 0), ("LEFTPADDING", (1, 0), (1, 0), 8),
     ]))
     story.append(qr_row)
