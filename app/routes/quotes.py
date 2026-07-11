@@ -919,25 +919,23 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(totals)
     story.append(Spacer(1, 10 * mm))
 
-    # Cachet + signature (images des paramètres), côte à côte à droite.
+    # Cachet signé (une seule image : signature apposée sur le cachet), à droite.
     stamp_path = _abs(settings.stamp) if settings else None
-    sig_path = _abs(settings.signature) if settings else None
-    if stamp_path or sig_path:
-        cells = []
-        for path, label in ((sig_path, "Signature"), (stamp_path, "Cachet")):
-            if path:
-                try:
-                    cells.append([
-                        RLImage(path, width=40 * mm, height=24 * mm, kind="proportional"),
-                    ])
-                except Exception:
-                    pass
-        if cells:
-            marks = Table([[c[0] for c in cells]],
-                          colWidths=[45 * mm] * len(cells), hAlign="RIGHT")
-            marks.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "BOTTOM")]))
-            story.append(marks)
+    if stamp_path:
+        try:
+            mark = Table(
+                [[Paragraph("<font color='#5b6472' size=8>Cachet &amp; signature</font>", muted)],
+                 [RLImage(stamp_path, width=45 * mm, height=30 * mm, kind="proportional")]],
+                colWidths=[50 * mm], hAlign="RIGHT",
+            )
+            mark.setStyle(TableStyle([
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+            ]))
+            story.append(mark)
             story.append(Spacer(1, 6 * mm))
+        except Exception:
+            pass
 
     # Mentions personnalisées (conditions de paiement…).
     if settings and settings.footer_note:
