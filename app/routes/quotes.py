@@ -1054,7 +1054,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             cust_extra.append(customer.email)
         if customer.phone:
             cust_extra.append(customer.phone)
-    client_body = f"<font size=8.5 color='#021A3D'><b>C L I E N T</b></font><br/><b>{cust_name}</b>"
+    client_body = f"<font size=8.5 color='#021A3D'><b>CLIENT</b></font><br/><b>{cust_name}</b>"
     if cust_extra:
         client_body += "<br/>" + "<br/>".join(cust_extra)
     client_card = Table([[Paragraph(client_body, st_body)]], colWidths=[CONTENT_W * 0.60 - 3 * mm])
@@ -1068,7 +1068,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
     ]))
 
-    obj_text = (f"<font size=8.5 color='#021A3D'><b>O B J E T</b></font><br/>"
+    obj_text = (f"<font size=8.5 color='#021A3D'><b>OBJET</b></font><br/>"
                 f"{('Devis de prestation' if is_devis else 'Facture')}")
     if settings and getattr(settings, "footer_note", None):
         pass
