@@ -27,6 +27,9 @@ class CompanySettings(db.Model):
     website = db.Column(db.String(150))
     ninea = db.Column(db.String(50))                          # identifiant fiscal SN
     rccm = db.Column(db.String(50))                           # registre du commerce SN
+    rc = db.Column(db.String(50))                             # numéro RC
+    legal_form = db.Column(db.String(50))                     # forme juridique (SARL, SA…)
+    capital = db.Column(db.String(50))                        # capital social
 
     # --- Images (chemins relatifs à /static) ---
     logo = db.Column(db.String(255))

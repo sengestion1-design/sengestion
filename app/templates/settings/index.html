@@ -50,6 +50,21 @@
           <input type="text" id="rccm" name="rccm" class="form-input"
                  maxlength="50" value="{{ s.rccm or '' }}" placeholder="Registre du commerce">
         </div>
+        <div class="form-group">
+          <label class="form-label" for="rc">RC</label>
+          <input type="text" id="rc" name="rc" class="form-input"
+                 maxlength="50" value="{{ s.rc or '' }}" placeholder="Numéro RC">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="legal_form">Forme juridique</label>
+          <input type="text" id="legal_form" name="legal_form" class="form-input"
+                 maxlength="50" value="{{ s.legal_form or '' }}" placeholder="Ex. SARL, SA, SUARL">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="capital">Capital social</label>
+          <input type="text" id="capital" name="capital" class="form-input"
+                 maxlength="50" value="{{ s.capital or '' }}" placeholder="Ex. 5 000 000 FCFA">
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label" for="address">Adresse</label>
