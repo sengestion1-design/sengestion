@@ -764,7 +764,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     PAGE_W, PAGE_H = A4
     ML = MR = 16 * mm
     CONTENT_W = PAGE_W - ML - MR
-    HEADER_H = 44 * mm                        # hauteur de la zone d'en-tête (jusqu'au liseré or)
+    HEADER_H = 52 * mm                        # hauteur de la zone d'en-tête (jusqu'au liseré or)
 
     def _abs(rel):
         if not rel:
@@ -801,15 +801,15 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                                 textColor=OR, alignment=TA_RIGHT, leading=32)
     st_docnum = ParagraphStyle("docnum", fontName="Helvetica-Bold", fontSize=11,
                                textColor=colors.white, alignment=TA_RIGHT, leading=16)
-    st_label = ParagraphStyle("label", fontName="Helvetica-Bold", fontSize=7.5,
-                              textColor=OR, leading=11)   # eyebrow
-    st_body = ParagraphStyle("body", fontName="Helvetica", fontSize=9.5,
-                             textColor=MARINE, leading=14)
+    st_label = ParagraphStyle("label", fontName="Helvetica-Bold", fontSize=9,
+                              textColor=OR, leading=13)   # eyebrow (micro-label)
+    st_body = ParagraphStyle("body", fontName="Helvetica", fontSize=12,
+                             textColor=MARINE, leading=17)     # texte courant = 12 pt (charte)
     st_body_b = ParagraphStyle("bodyb", parent=st_body, fontName="Helvetica-Bold")
-    st_muted = ParagraphStyle("muted", fontName="Helvetica", fontSize=8.5,
-                              textColor=INK_SOFT, leading=13)
-    st_cell = ParagraphStyle("cell", fontName="Helvetica", fontSize=9.5,
-                             textColor=MARINE, leading=13)
+    st_muted = ParagraphStyle("muted", fontName="Helvetica", fontSize=10,
+                              textColor=INK_SOFT, leading=15)
+    st_cell = ParagraphStyle("cell", fontName="Helvetica", fontSize=12,
+                             textColor=MARINE, leading=16)     # cellules tableau = 12 pt
 
     buffer = BytesIO()
 
@@ -838,13 +838,13 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             canvas.drawString(ML, top - 8, brand_name)
             coord_y = PAGE_H - 24 * mm
 
-        # Coordonnées émetteur (petit, gris marine, sous la marque)
+        # Coordonnées émetteur (12 pt — charte typographique)
         canvas.setFillColor(INK_SOFT)
-        canvas.setFont("Helvetica", 8)
+        canvas.setFont("Helvetica", 12)
         y = coord_y
         for line in issuer_lines[:3]:
             canvas.drawString(ML, y, line[:95])
-            y -= 4.4 * mm
+            y -= 5.6 * mm
 
         # Titre document (DEVIS / FACTURE) en marine + numéro à droite
         canvas.setFillColor(MARINE)
@@ -944,8 +944,8 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         Paragraph("MONTANT", ParagraphStyle("thr3", fontName="Helvetica-Bold", fontSize=8.5,
                   textColor=colors.white, alignment=TA_RIGHT, leading=11)),
     ]]
-    st_num = ParagraphStyle("num", fontName="Helvetica", fontSize=9.5,
-                            textColor=MARINE, alignment=TA_RIGHT, leading=13)
+    st_num = ParagraphStyle("num", fontName="Helvetica", fontSize=12,
+                            textColor=MARINE, alignment=TA_RIGHT, leading=16)
     st_num_c = ParagraphStyle("numc", parent=st_num, alignment=TA_CENTER)
     for it in items:
         data.append([
@@ -975,14 +975,14 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     # ── Bloc totaux (encadré marine, TTC en or) ──
     tva = (Decimal(str(amount_incl or 0)) - Decimal(str(amount_excl or 0)))
-    st_tot_lbl = ParagraphStyle("tl", fontName="Helvetica", fontSize=9.5,
-                                textColor=INK_SOFT, leading=14)
-    st_tot_val = ParagraphStyle("tv", fontName="Helvetica-Bold", fontSize=9.5,
-                                textColor=MARINE, alignment=TA_RIGHT, leading=14)
-    st_ttc_lbl = ParagraphStyle("ttcl", fontName="Helvetica-Bold", fontSize=11.5,
-                                textColor=MARINE, leading=16)
-    st_ttc_val = ParagraphStyle("ttcv", fontName="Helvetica-Bold", fontSize=12,
-                                textColor=MARINE, alignment=TA_RIGHT, leading=15)
+    st_tot_lbl = ParagraphStyle("tl", fontName="Helvetica", fontSize=12,
+                                textColor=INK_SOFT, leading=16)
+    st_tot_val = ParagraphStyle("tv", fontName="Helvetica-Bold", fontSize=12,
+                                textColor=MARINE, alignment=TA_RIGHT, leading=16)
+    st_ttc_lbl = ParagraphStyle("ttcl", fontName="Helvetica-Bold", fontSize=13,
+                                textColor=MARINE, leading=17)
+    st_ttc_val = ParagraphStyle("ttcv", fontName="Helvetica-Bold", fontSize=13,
+                                textColor=MARINE, alignment=TA_RIGHT, leading=17)
 
     rows = [
         [Paragraph("Total HT", st_tot_lbl), Paragraph(f"{_fmt(amount_excl)} FCFA", st_tot_val)],
