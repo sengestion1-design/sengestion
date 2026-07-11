@@ -909,7 +909,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             legal_bits.append(f"RCCM : {settings.rccm}")
         if settings.ninea:
             legal_bits.append(f"NINEA : {settings.ninea}")
-        lf = " ".join(x for x in (settings.legal_form, ("— Cap. " + settings.capital)
+        lf = " ".join(x for x in (settings.legal_form, ("- Cap. " + settings.capital)
                       if settings.capital else "") if x).strip()
         if lf:
             legal_bits.append(lf)
@@ -1012,7 +1012,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         canvas.setFillColor(INK_SOFT)
         canvas.setFont(FONT_BODY, 7.6)
         canvas.drawString(ML, 11 * mm,
-                          f"{brand_name} — Montants exprimés en francs CFA (FCFA).")
+                          f"{brand_name} - Montants exprimés en francs CFA (FCFA).")
         canvas.drawRightString(PAGE_W - MR, 11 * mm, f"Page {doc_.page}")
         canvas.restoreState()
 
@@ -1045,7 +1045,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(Spacer(1, 2 * mm))
 
     # ── Carte CLIENT (bordée) | carte OBJET (fond bleu) ──
-    cust_name = customer.name if customer else "—"
+    cust_name = customer.name if customer else "-"
     cust_extra = []
     if customer:
         if customer.company:
@@ -1197,7 +1197,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(_eyebrow("SIGNATURES"))
     story.append(Spacer(1, 2.5 * mm))
     accord = Table(
-        [[Paragraph("<b>BON POUR ACCORD — CLIENT</b>", st_label)],
+        [[Paragraph("<b>BON POUR ACCORD - CLIENT</b>", st_label)],
          [Paragraph("Nom, date &amp; signature précédés de « Lu et approuvé »", st_muted)],
          [Spacer(1, 13 * mm)]],           # espace pour la signature manuscrite
         colWidths=[CONTENT_W * 0.58],
@@ -1209,7 +1209,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("TOPPADDING", (0, 1), (0, 1), 0), ("BOTTOMPADDING", (0, 2), (0, 2), 4),
     ]))
 
-    stamp_inner = [[Paragraph(f"<font size=8.5 color='#021A3D'><b>CACHET &amp; SIGNATURE — "
+    stamp_inner = [[Paragraph(f"<font size=8.5 color='#021A3D'><b>CACHET &amp; SIGNATURE - "
                               f"{brand_name.upper()}</b></font>", st_label)]]
     if stamp_path:
         try:
@@ -1234,7 +1234,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     # ── Bandeau QR "signer en ligne" (QR à gauche + texte) ──
     try:
         import qrcode
-        qr_img = qrcode.make(f"{brand_name} — {title} {number}")
+        qr_img = qrcode.make(f"{brand_name} - {title} {number}")
         from io import BytesIO as _BIO
         _qb = _BIO(); qr_img.save(_qb, format="PNG"); _qb.seek(0)
         qr_cell = RLImage(_qb, width=18 * mm, height=18 * mm)
@@ -1243,7 +1243,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     qr_txt = Paragraph(
         "<font size=11 color='#021A3D'><b>Signature électronique</b></font><br/>"
         "Scannez ce QR code pour <b>consulter et signer ce devis en ligne</b>. "
-        "<font size=9 color='#021A3D'>Signature sécurisée — valeur juridique.</font>",
+        "<font size=9 color='#021A3D'>Signature sécurisée - valeur juridique.</font>",
         st_muted)
     qr_row = Table([[qr_cell, qr_txt]], colWidths=[22 * mm, CONTENT_W - 22 * mm])
     qr_row.setStyle(TableStyle([
