@@ -1,0 +1,123 @@
+{% extends "layouts/app.html" %}
+{% set active = 'customers' %}
+{% block title %}{{ customer.name }} — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ customer.name }}</h1>
+      <p class="page-subtitle">{{ customer.company or 'Client particulier' }}</p>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <a href="{{ url_for('customers.edit', customer_id=customer.id) }}" class="btn btn-accent">
+        <i data-lucide="pencil" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Modifier
+      </a>
+      <a href="{{ url_for('customers.index') }}" class="btn btn-secondary">
+        <i data-lucide="arrow-left" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Retour
+      </a>
+    </div>
+  </div>
+
+  {# ── Coordonnées ── #}
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-header"><h2 class="card-title">Coordonnées</h2></div>
+    <dl class="detail-grid">
+      <div>
+        <dt class="detail-label">Entreprise</dt>
+        <dd class="detail-value">{{ customer.company or '—' }}</dd>
+      </div>
+      <div>
+        <dt class="detail-label">Email</dt>
+        <dd class="detail-value">
+          {% if customer.email %}<a href="mailto:{{ customer.email }}">{{ customer.email }}</a>{% else %}—{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="detail-label">Téléphone</dt>
+        <dd class="detail-value">
+          {% if customer.phone %}<a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>{% else %}—{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="detail-label">Client depuis</dt>
+        <dd class="detail-value">
+          {{ customer.created_at.strftime('%d/%m/%Y') if customer.created_at else '—' }}
+        </dd>
+      </div>
+      <div style="grid-column:1/-1;">
+        <dt class="detail-label">Adresse</dt>
+        <dd class="detail-value" style="white-space:pre-line;">{{ customer.address or '—' }}</dd>
+      </div>
+    </dl>
+  </div>
+
+  {# ── Devis ── #}
+  <div class="card" style="margin-bottom:24px; padding:0; overflow:hidden;">
+    <div class="card-header" style="padding:20px 24px 0;"><h2 class="card-title">Devis</h2></div>
+    {% if quotes %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Numéro</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th style="text-align:right;">Montant TTC</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in quotes %}
+          <tr>
+            <td style="font-weight:600; color:var(--marine);">{{ q.number or '—' }}</td>
+            <td>{{ q.quote_date.strftime('%d/%m/%Y') if q.quote_date else '—' }}</td>
+            <td><span class="badge badge-neutral">{{ q.status }}</span></td>
+            <td style="text-align:right;">{{ '{:,.0f}'.format(q.amount_incl_tax or 0)|replace(',', ' ') }} FCFA</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p style="font-size:16px; color:var(--muted); padding:12px 24px 24px; margin:0;">
+      Aucun devis pour ce client.
+    </p>
+    {% endif %}
+  </div>
+
+  {# ── Factures ── #}
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="card-header" style="padding:20px 24px 0;"><h2 class="card-title">Factures</h2></div>
+    {% if invoices %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Numéro</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th style="text-align:right;">Montant TTC</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in invoices %}
+          <tr>
+            <td style="font-weight:600; color:var(--marine);">{{ inv.number or '—' }}</td>
+            <td>{{ inv.invoice_date.strftime('%d/%m/%Y') if inv.invoice_date else '—' }}</td>
+            <td><span class="badge badge-neutral">{{ inv.status }}</span></td>
+            <td style="text-align:right;">{{ '{:,.0f}'.format(inv.amount_incl_tax or 0)|replace(',', ' ') }} FCFA</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p style="font-size:16px; color:var(--muted); padding:12px 24px 24px; margin:0;">
+      Aucune facture pour ce client.
+    </p>
+    {% endif %}
+  </div>
+
+{% endblock %}

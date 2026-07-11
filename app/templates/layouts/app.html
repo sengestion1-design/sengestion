@@ -1,0 +1,161 @@
+{% extends "layouts/base.html" %}
+
+{#
+  Layout applicatif — design "Minimaliste Premium" (maquette-1 validée).
+  Navbar marine + sidebar BLANCHE (item actif = jaune pâle + barre or).
+  Variable attendue : active = identifiant du menu actif (ex. 'dashboard', 'customers'…)
+#}
+
+{% block navbar %}
+<nav class="navbar">
+  <button class="navbar-burger" id="burger" aria-label="Ouvrir le menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <a class="navbar-logo" href="{{ url_for('dashboard.index') }}">
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion" class="navbar-logo-img">
+  </a>
+
+  <div class="navbar-spacer"></div>
+
+  {% if current_user.status == 'trial' %}
+  <span class="navbar-badge">Essai gratuit — {{ current_user.days_left }} jour{{ 's' if current_user.days_left > 1 else '' }} restant{{ 's' if current_user.days_left > 1 else '' }}</span>
+  {% endif %}
+
+  <div class="navbar-user" title="{{ current_user.name }}">
+    <div class="navbar-avatar" aria-hidden="true">{{ current_user.name[:1] | upper }}</div>
+    <div class="navbar-user-info">
+      <span class="navbar-user-name">{{ current_user.name }}</span>
+      <span class="navbar-user-role">{{ 'Administrateur' if current_user.role == 'admin' else 'Gérant' }}</span>
+    </div>
+  </div>
+
+  <a class="navbar-logout" href="{{ url_for('auth.logout') }}" title="Déconnexion" aria-label="Déconnexion">
+    <i data-lucide="log-out"></i>
+  </a>
+</nav>
+{% endblock %}
+
+{# Les flash sont rendus dans .main-content (voir plus bas), pas en tête de page #}
+{% block flash %}{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+
+  <!-- SIDEBAR blanche -->
+  <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
+    {% if current_user.role == 'admin' %}
+    <div class="sidebar-section-label">Administration</div>
+    <a class="sidebar-item {{ 'active' if active == 'admin' }}" href="{{ url_for('admin.index') }}">
+      <span class="sidebar-icon"><i data-lucide="shield-check"></i></span>
+      Abonnements
+    </a>
+    {% else %}
+    <div class="sidebar-section-label">Pilotage</div>
+
+    <a class="sidebar-item {{ 'active' if active == 'dashboard' }}" href="{{ url_for('dashboard.index') }}">
+      <span class="sidebar-icon"><i data-lucide="layout-dashboard"></i></span>
+      Tableau de bord
+    </a>
+
+    <div class="sidebar-section-label">Commercial</div>
+
+    <a class="sidebar-item {{ 'active' if active == 'contacts' }}" href="{{ url_for('contacts.index') }}">
+      <span class="sidebar-icon"><i data-lucide="contact"></i></span>
+      Contacts
+    </a>
+
+    <a class="sidebar-item {{ 'active' if active == 'prospects' }}" href="{{ url_for('contacts.prospects') }}">
+      <span class="sidebar-icon"><i data-lucide="trending-up"></i></span>
+      Prospects
+    </a>
+
+    <a class="sidebar-item {{ 'active' if active == 'customers' }}" href="{{ url_for('customers.index') }}">
+      <span class="sidebar-icon"><i data-lucide="users"></i></span>
+      Clients
+    </a>
+
+    <a class="sidebar-item {{ 'active' if active == 'quotes' }}" href="{{ url_for('quotes.index') }}">
+      <span class="sidebar-icon"><i data-lucide="file-text"></i></span>
+      Devis
+    </a>
+
+    <a class="sidebar-item {{ 'active' if active == 'invoices' }}" href="{{ url_for('invoices.index') }}">
+      <span class="sidebar-icon"><i data-lucide="receipt"></i></span>
+      Factures
+    </a>
+
+    <div class="sidebar-section-label">Finances</div>
+
+    <a class="sidebar-item {{ 'active' if active == 'expenses' }}" href="{{ url_for('expenses.index') }}">
+      <span class="sidebar-icon"><i data-lucide="wallet"></i></span>
+      Charges &amp; Dépenses
+    </a>
+
+    <div class="sidebar-section-label">Analyse</div>
+
+    <a class="sidebar-item {{ 'active' if active == 'reports' }}" href="#">
+      <span class="sidebar-icon"><i data-lucide="bar-chart-3"></i></span>
+      Rapports
+    </a>
+
+    <a class="sidebar-item {{ 'active' if active == 'messages' }}" href="#">
+      <span class="sidebar-icon"><i data-lucide="send"></i></span>
+      Relances
+    </a>
+    {% endif %}
+
+    <!-- FOOTER SIDEBAR -->
+    <div class="sidebar-footer">
+      <a class="sidebar-footer-item" href="{{ url_for('auth.logout') }}">
+        <span class="sidebar-icon"><i data-lucide="log-out"></i></span>
+        Déconnexion
+      </a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="main-content">
+
+    {# Messages flash — rendus ICI pour rester alignés avec le contenu (à droite de la sidebar) #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert" aria-live="polite">
+              {% if category == 'success' %}
+                <i data-lucide="circle-check" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px;"></i>
+              {% elif category == 'danger' %}
+                <i data-lucide="circle-x" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px;"></i>
+              {% elif category == 'warning' %}
+                <i data-lucide="triangle-alert" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px;"></i>
+              {% else %}
+                <i data-lucide="info" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px;"></i>
+              {% endif %}
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block page %}{% endblock %}
+  </main>
+</div>
+
+<script defer>
+  document.addEventListener('DOMContentLoaded', function () {
+    var burger  = document.getElementById('burger');
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebar-overlay');
+    function toggle() {
+      sidebar.classList.toggle('is-open');
+      overlay.classList.toggle('is-visible');
+      if (burger) burger.classList.toggle('is-open');
+    }
+    if (burger)  burger.addEventListener('click', toggle);
+    if (overlay) overlay.addEventListener('click', toggle);
+  });
+</script>
+{% endblock %}

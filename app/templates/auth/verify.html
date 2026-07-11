@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+{% block title %}Vérification e-mail — SenGestion{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card" style="text-align:center;">
+
+    <div class="auth-brand">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion" class="auth-logo">
+    </div>
+
+    <h1 class="auth-title">Vérifiez votre e-mail</h1>
+    <p class="auth-sub">
+      Nous avons envoyé un code à 6 chiffres à<br><strong>{{ email }}</strong>
+    </p>
+
+    <form method="POST" action="{{ url_for('auth.verify') }}" style="margin-top:28px; text-align:left;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label" for="code">Code de vérification</label>
+        <input class="form-input" type="text" id="code" name="code"
+               required inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+               autocomplete="one-time-code"
+               style="text-align:center; letter-spacing:8px; font-size:22px; font-weight:700;"
+               placeholder="••••••">
+      </div>
+
+      <button type="submit" class="btn btn-accent btn-block">Vérifier</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('auth.resend_code') }}" style="margin-top:14px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-ghost btn-block"
+              style="background:transparent; color:var(--or-texte); font-weight:600;">
+        Renvoyer un code
+      </button>
+    </form>
+
+    <p class="auth-alt" style="margin-top:12px;">Le code est valable 15 minutes.</p>
+
+  </div>
+</div>
+{% endblock %}

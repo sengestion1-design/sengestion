@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SenGestion — Maquette Minimaliste Premium</title>
+<style>
+  /* ============================================================
+     RESET & BASE
+  ============================================================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --marine:    #021A3D;
+    --or:        #F2B10E;
+    --jaune-pale:#E8E7A2;
+    --blanc:     #FFFFFF;
+    --fond:      #F9FAFB;
+    --texte:     #4A554F;
+    --bordure:   #D9DCDB;
+    --sidebar-w: 228px;
+    --nav-h:     60px;
+  }
+
+  html { font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: var(--texte); background: #F9FAFB; }
+
+  /* ============================================================
+     SÉPARATEUR ENTRE ÉCRANS
+  ============================================================ */
+  .screen-sep {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 36px 48px;
+    background: #F9FAFB;
+  }
+  .screen-sep-line { flex: 1; height: 1px; background: var(--bordure); }
+  .screen-sep-label {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--texte);
+    background: #F9FAFB;
+    padding: 6px 18px;
+    border: 1px solid var(--bordure);
+    border-radius: 20px;
+  }
+
+  /* ============================================================
+     SHELL ÉCRAN (wrapper de la maquette)
+  ============================================================ */
+  .screen-shell {
+    max-width: 1380px;
+    margin: 0 auto;
+    background: var(--fond);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 24px rgba(2,26,61,0.08);
+  }
+  .screen-label-top {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--marine);
+    padding: 22px 48px 0;
+    background: #F9FAFB;
+  }
+
+  /* ============================================================
+     NAVBAR
+  ============================================================ */
+  .navbar {
+    height: var(--nav-h);
+    background: var(--marine);
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    gap: 20px;
+    position: relative;
+    z-index: 10;
+  }
+  .navbar-logo {
+    font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--blanc);
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .navbar-logo-dot {
+    width: 8px; height: 8px;
+    background: var(--or);
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .navbar-spacer { flex: 1; }
+  .navbar-badge {
+    background: #F2B10E;
+    border: 1px solid #F2B10E;
+    color: var(--marine);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+  .navbar-notif {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    position: relative;
+    color: rgba(255,255,255,0.7);
+    transition: background 0.15s;
+  }
+  .navbar-notif:hover { background: rgba(255,255,255,0.06); }
+  .notif-dot {
+    position: absolute; top: 7px; right: 7px;
+    width: 7px; height: 7px;
+    background: var(--or);
+    border-radius: 50%;
+    border: 2px solid var(--marine);
+  }
+  .navbar-user {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .navbar-user:hover { background: rgba(255,255,255,0.06); }
+  .navbar-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--or);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--marine);
+    flex-shrink: 0;
+  }
+  .navbar-user-info { display: flex; flex-direction: column; }
+  .navbar-user-name { font-size: 13px; font-weight: 600; color: var(--blanc); line-height: 1.2; }
+  .navbar-user-role { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.2; }
+  .navbar-chevron { color: rgba(255,255,255,0.4); }
+
+  /* ============================================================
+     LAYOUT (sidebar + contenu)
+  ============================================================ */
+  .app-layout {
+    display: flex;
+    min-height: calc(100vh - var(--nav-h));
+    min-height: 700px;
+  }
+
+  /* ============================================================
+     SIDEBAR
+  ============================================================ */
+  .sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: var(--blanc);
+    border-right: 1px solid var(--bordure);
+    padding: 24px 0 24px;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bordure);
+    padding: 0 20px;
+    margin-bottom: 6px;
+    margin-top: 20px;
+  }
+  .sidebar-section-label:first-child { margin-top: 0; }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 20px;
+    margin: 1px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--texte);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    text-decoration: none;
+  }
+  .sidebar-item:hover { background: var(--fond); color: var(--marine); }
+  .sidebar-item.active {
+    background: #E8E7A2;
+    color: var(--marine);
+    font-weight: 600;
+    border-left: 3px solid #F2B10E;
+    padding-left: 17px;
+  }
+  .sidebar-item.active .sidebar-icon { color: var(--marine); }
+  .sidebar-icon { width: 16px; height: 16px; flex-shrink: 0; }
+  .sidebar-badge {
+    margin-left: auto;
+    background: var(--jaune-pale);
+    color: var(--marine);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px 0;
+    border-top: 1px solid var(--bordure);
+  }
+  .sidebar-footer-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--texte);
+    padding: 8px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .sidebar-footer-item:hover { background: var(--fond); }
+
+  /* ============================================================
+     MAIN CONTENT
+  ============================================================ */
+  .main-content {
+    flex: 1;
+    background: var(--fond);
+    padding: 32px 36px;
+    overflow: hidden;
+  }
+
+  /* ============================================================
+     BANDEAU ESSAI GRATUIT
+  ============================================================ */
+  .trial-banner {
+    background: var(--or);
+    border-radius: 10px;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .trial-banner-icon { color: var(--marine); flex-shrink: 0; }
+  .trial-banner-text { flex: 1; }
+  .trial-banner-title { font-size: 14px; font-weight: 700; color: var(--marine); }
+  .trial-banner-sub { font-size: 13px; color: var(--marine); opacity: 0.75; margin-top: 1px; }
+  .trial-banner-cta {
+    background: var(--marine);
+    color: var(--blanc);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 20px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+  .trial-banner-cta:hover { opacity: 0.85; }
+
+  /* ============================================================
+     PAGE HEADER
+  ============================================================ */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .page-header-left { flex: 1; }
+  .page-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--marine);
+    margin-bottom: 4px;
+  }
+  .page-title {
+    font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--marine);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .page-subtitle { font-size: 14px; color: var(--texte); margin-top: 4px; }
+  .btn-primary {
+    background: var(--or);
+    color: var(--marine);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 11px 22px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ============================================================
+     KPI CARDS
+  ============================================================ */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--blanc);
+    border: 1px solid var(--bordure);
+    border-radius: 10px;
+    padding: 22px 22px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .kpi-card:hover { box-shadow: 0 2px 12px rgba(2,26,61,0.07); }
+  .kpi-card-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .accent-or { background: var(--or); }
+  .accent-marine { background: var(--marine); }
+  .accent-pale { background: var(--jaune-pale); }
+  .accent-or-fonce { background: var(--marine); }
+
+  .kpi-icon-wrap {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .kpi-icon-wrap.bg-or-pale { background: #E8E7A2; color: var(--marine); }
+  .kpi-icon-wrap.bg-marine-pale { background: rgba(2,26,61,0.07); color: var(--marine); }
+  .kpi-icon-wrap.bg-pale { background: var(--jaune-pale); color: var(--marine); }
+  .kpi-icon-wrap.bg-green-pale { background: #E8E7A2; color: #021A3D; }
+
+  .kpi-label { font-size: 12px; font-weight: 600; color: var(--texte); letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 6px; }
+  .kpi-value {
+    font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--marine);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .kpi-delta.up { background: #E8E7A2; color: #021A3D; }
+  .kpi-delta.down { background: rgba(2,26,61,0.06); color: #021A3D; }
+  .kpi-delta.neutral { background: var(--fond); color: var(--texte); }
+
+  /* ============================================================
+     SECTION RACCOURCIS
+  ============================================================ */
+  .section-title {
+    font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--marine);
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+  }
+  .shortcuts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .shortcut-card {
+    background: var(--blanc);
+    border: 1px solid var(--bordure);
+    border-radius: 10px;
+    padding: 18px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: box-shadow 0.12s, border-color 0.12s;
+  }
+  .shortcut-card:hover {
+    border-color: var(--or);
+    box-shadow: 0 1px 8px #E8E7A2;
+  }
+  .shortcut-icon {
+    width: 40px; height: 40px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .shortcut-label { font-size: 14px; font-weight: 600; color: var(--marine); }
+  .shortcut-sub { font-size: 12px; color: var(--texte); margin-top: 2px; }
+
+  /* ============================================================
+     TABLE (activité récente)
+  ============================================================ */
+  .table-wrap {
+    background: var(--blanc);
+    border: 1px solid var(--bordure);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .table-header {
+    display: flex;
+    align-items: center;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--bordure);
+    gap: 12px;
+  }
+  .table-header-title {
+    font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--marine);
+    flex: 1;
+  }
+  .table-header-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--marine);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .table-header-link:hover { text-decoration: underline; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--fond); }
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--texte);
+    padding: 11px 22px;
+    border-bottom: 1px solid var(--bordure);
+  }
+  tbody tr { border-bottom: 1px solid var(--bordure); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--fond); }
+  tbody td { padding: 13px 22px; font-size: 14px; color: var(--texte); vertical-align: middle; }
+  .td-primary { font-weight: 600; color: var(--marine); }
+  .td-mono { font-family: 'Courier New', monospace; font-size: 13px; }
+
+  /* BADGES STATUT */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .badge-paye { background: #E8E7A2; color: #021A3D; }
+  .badge-paye .badge-dot { background: #021A3D; }
+  .badge-envoye { background: rgba(2,26,61,0.08); color: #021A3D; }
+  .badge-envoye .badge-dot { background: #021A3D; }
+  .badge-brouillon { background: var(--fond); color: var(--texte); border: 1px solid var(--bordure); }
+  .badge-brouillon .badge-dot { background: var(--bordure); }
+  .badge-accepte { background: #E8E7A2; color: #021A3D; }
+  .badge-accepte .badge-dot { background: #021A3D; }
+  .badge-refuse { background: rgba(2,26,61,0.06); color: #021A3D; }
+  .badge-refuse .badge-dot { background: #021A3D; }
+  .badge-en-attente { background: #E8E7A2; color: #021A3D; }
+  .badge-en-attente .badge-dot { background: #021A3D; }
+
+  /* ACTIONS */
+  .action-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--bordure);
+    background: var(--blanc);
+    color: var(--texte);
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .action-btn:hover { background: var(--fond); border-color: var(--marine); color: var(--marine); }
+  .actions-cell { display: flex; gap: 6px; }
+
+  /* ============================================================
+     FILTRES TABS (Écran B)
+  ============================================================ */
+  .filter-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--blanc);
+    border: 1px solid var(--bordure);
+    border-radius: 9px;
+    padding: 4px;
+    width: fit-content;
+    margin-bottom: 20px;
+  }
+  .filter-tab {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--texte);
+    border: none;
+    background: transparent;
+    transition: background 0.12s, color 0.12s;
+  }
+  .filter-tab:hover { background: var(--fond); }
+  .filter-tab.active {
+    background: var(--marine);
+    color: var(--blanc);
+  }
+
+  /* KPI 2 colonnes pour Écran B */
+  .kpi-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+    max-width: 520px;
+  }
+
+  /* ============================================================
+     RESPONSIVE / PRINT-PREVIEW UTILITIES
+  ============================================================ */
+  .spacer-xl { height: 36px; }
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+
+  /* ============================================================
+     PAGE WRAPPER
+  ============================================================ */
+  .page-pad { padding: 28px 48px; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LABEL ÉCRAN A
+============================================================ -->
+<div class="page-pad">
+  <div class="screen-label-top">Écran A — Tableau de bord</div>
+</div>
+
+<!-- ============================================================
+     ÉCRAN A — TABLEAU DE BORD
+============================================================ -->
+<div class="page-pad" style="padding-top:0; padding-bottom: 0;">
+<div class="screen-shell">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="navbar-logo" href="#">
+      <span class="navbar-logo-dot"></span>
+      SenGestion
+    </a>
+    <div class="navbar-spacer"></div>
+    <span class="navbar-badge">Essai gratuit — 9 jours restants</span>
+
+    <!-- Icône notifications -->
+    <div class="navbar-notif" title="Notifications">
+      <div class="notif-dot"></div>
+      <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+    </div>
+
+    <!-- User -->
+    <div class="navbar-user">
+      <div class="navbar-avatar">AS</div>
+      <div class="navbar-user-info">
+        <span class="navbar-user-name">Awa Sarr</span>
+        <span class="navbar-user-role">Administratrice</span>
+      </div>
+      <svg class="navbar-chevron" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </div>
+  </nav>
+
+  <!-- LAYOUT -->
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section-label">Navigation</div>
+
+      <!-- Tableau de bord — actif -->
+      <a class="sidebar-item active" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+        Tableau de bord
+      </a>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-4a4 4 0 100-8 4 4 0 000 8z"/>
+        </svg>
+        Contacts & Clients
+        <span class="sidebar-badge">48</span>
+      </a>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/>
+        </svg>
+        Devis & Factures
+        <span class="sidebar-badge">12</span>
+      </a>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+        </svg>
+        Charges & Dépenses
+      </a>
+
+      <div class="sidebar-section-label">Analyse</div>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        Rapports
+      </a>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        Relances
+        <span class="sidebar-badge">3</span>
+      </a>
+
+      <!-- FOOTER SIDEBAR -->
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          Paramètres
+        </div>
+        <div class="sidebar-footer-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          Déconnexion
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="main-content">
+
+      <!-- BANDEAU ESSAI GRATUIT -->
+      <div class="trial-banner">
+        <svg class="trial-banner-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div class="trial-banner-text">
+          <div class="trial-banner-title">Il vous reste 9 jours d'essai gratuit</div>
+          <div class="trial-banner-sub">Passez à l'offre Pro pour conserver toutes vos données et continuer sans interruption.</div>
+        </div>
+        <button class="trial-banner-cta">Activer mon abonnement</button>
+      </div>
+
+      <!-- EN-TÊTE PAGE -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-eyebrow">Vue d'ensemble</div>
+          <h1 class="page-title">Tableau de bord</h1>
+          <p class="page-subtitle">Juillet 2026 — Dakar, Sénégal</p>
+        </div>
+        <button class="btn-primary">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nouvelle facture
+        </button>
+      </div>
+
+      <!-- KPI CARDS -->
+      <div class="kpi-grid">
+
+        <!-- Clients -->
+        <div class="kpi-card">
+          <div class="kpi-card-accent accent-marine"></div>
+          <div class="kpi-icon-wrap bg-marine-pale">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-4a4 4 0 100-8 4 4 0 000 8z"/>
+            </svg>
+          </div>
+          <div class="kpi-label">Clients actifs</div>
+          <div class="kpi-value">48</div>
+          <span class="kpi-delta up">
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+            +6 ce mois
+          </span>
+        </div>
+
+        <!-- Devis -->
+        <div class="kpi-card">
+          <div class="kpi-card-accent accent-pale"></div>
+          <div class="kpi-icon-wrap bg-pale">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h3M7 20h10a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v13a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <div class="kpi-label">Devis en cours</div>
+          <div class="kpi-value">12</div>
+          <span class="kpi-delta neutral">4 en attente</span>
+        </div>
+
+        <!-- Factures -->
+        <div class="kpi-card">
+          <div class="kpi-card-accent accent-or"></div>
+          <div class="kpi-icon-wrap bg-or-pale">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div class="kpi-label">Factures émises</div>
+          <div class="kpi-value">31</div>
+          <span class="kpi-delta up">
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+            +3 cette semaine
+          </span>
+        </div>
+
+        <!-- Trésorerie -->
+        <div class="kpi-card">
+          <div class="kpi-card-accent accent-or-fonce"></div>
+          <div class="kpi-icon-wrap bg-green-pale">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="kpi-label">Trésorerie nette</div>
+          <div class="kpi-value" style="font-size:22px;">4 820 000</div>
+          <div style="font-size:11px;color:var(--texte);margin-top:2px;margin-bottom:4px;">FCFA</div>
+          <span class="kpi-delta up">
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+            +12 % vs juin
+          </span>
+        </div>
+      </div>
+
+      <!-- RACCOURCIS MODULES -->
+      <div class="section-title">Accès rapide</div>
+      <div class="shortcuts-grid">
+
+        <div class="shortcut-card">
+          <div class="shortcut-icon" style="background:#E8E7A2;">
+            <svg width="18" height="18" fill="none" stroke="#021A3D" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="shortcut-label">Nouveau devis</div>
+            <div class="shortcut-sub">Créer et envoyer</div>
+          </div>
+        </div>
+
+        <div class="shortcut-card">
+          <div class="shortcut-icon" style="background:rgba(2,26,61,0.07);">
+            <svg width="18" height="18" fill="none" stroke="#021A3D" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="shortcut-label">Émettre une facture</div>
+            <div class="shortcut-sub">Depuis un devis accepté</div>
+          </div>
+        </div>
+
+        <div class="shortcut-card">
+          <div class="shortcut-icon" style="background:var(--jaune-pale);">
+            <svg width="18" height="18" fill="none" stroke="#021A3D" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-4a4 4 0 100-8 4 4 0 000 8z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="shortcut-label">Ajouter un client</div>
+            <div class="shortcut-sub">Contacts & entreprises</div>
+          </div>
+        </div>
+
+        <div class="shortcut-card">
+          <div class="shortcut-icon" style="background:#E8E7A2;">
+            <svg width="18" height="18" fill="none" stroke="#021A3D" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="shortcut-label">Saisir une dépense</div>
+            <div class="shortcut-sub">Charges & fournisseurs</div>
+          </div>
+        </div>
+
+        <div class="shortcut-card">
+          <div class="shortcut-icon" style="background:rgba(2,26,61,0.08);">
+            <svg width="18" height="18" fill="none" stroke="#021A3D" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+          </div>
+          <div>
+            <div class="shortcut-label">Envoyer une relance</div>
+            <div class="shortcut-sub">3 factures impayées</div>
+          </div>
+        </div>
+
+        <div class="shortcut-card">
+          <div class="shortcut-icon" style="background:rgba(2,26,61,0.08);">
+            <svg width="18" height="18" fill="none" stroke="#021A3D" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="shortcut-label">Rapport mensuel</div>
+            <div class="shortcut-sub">Juin 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITÉ RÉCENTE -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-header-title">Activité récente</div>
+          <a class="table-header-link" href="#">Voir tout →</a>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Référence</th>
+              <th>Client</th>
+              <th>Type</th>
+              <th>Montant (FCFA)</th>
+              <th>Statut</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-primary td-mono">FAC-2026-0031</td>
+              <td>Macodou Diallo SARL</td>
+              <td><span style="font-size:12px;color:var(--texte);">Facture</span></td>
+              <td class="td-primary">1 250 000</td>
+              <td><span class="badge badge-paye"><span class="badge-dot"></span>Payée</span></td>
+              <td style="font-size:13px;">08 juil. 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Télécharger">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-primary td-mono">DEV-2026-0018</td>
+              <td>Fatou Mbaye Commerce</td>
+              <td><span style="font-size:12px;color:var(--texte);">Devis</span></td>
+              <td class="td-primary">680 000</td>
+              <td><span class="badge badge-envoye"><span class="badge-dot"></span>Envoyé</span></td>
+              <td style="font-size:13px;">07 juil. 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Télécharger">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-primary td-mono">FAC-2026-0030</td>
+              <td>Groupe Sow & Associés</td>
+              <td><span style="font-size:12px;color:var(--texte);">Facture</span></td>
+              <td class="td-primary">2 100 000</td>
+              <td><span class="badge badge-envoye"><span class="badge-dot"></span>En attente</span></td>
+              <td style="font-size:13px;">05 juil. 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Relance">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-primary td-mono">DEV-2026-0017</td>
+              <td>El Hadji Ndiaye Transport</td>
+              <td><span style="font-size:12px;color:var(--texte);">Devis</span></td>
+              <td class="td-primary">450 000</td>
+              <td><span class="badge badge-accepte"><span class="badge-dot"></span>Accepté</span></td>
+              <td style="font-size:13px;">03 juil. 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Convertir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-primary td-mono">FAC-2026-0029</td>
+              <td>Aminata Cissé BTP</td>
+              <td><span style="font-size:12px;color:var(--texte);">Facture</span></td>
+              <td class="td-primary">875 000</td>
+              <td><span class="badge badge-paye"><span class="badge-dot"></span>Payée</span></td>
+              <td style="font-size:13px;">01 juil. 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Télécharger">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div><!-- /app-layout -->
+</div><!-- /screen-shell -->
+</div><!-- /page-pad -->
+
+
+<!-- ============================================================
+     SÉPARATEUR
+============================================================ -->
+<div class="screen-sep">
+  <div class="screen-sep-line"></div>
+  <div class="screen-sep-label">Écran A — Tableau de bord &nbsp;|&nbsp; Écran B — Devis &amp; Factures</div>
+  <div class="screen-sep-line"></div>
+</div>
+
+
+<!-- ============================================================
+     ÉCRAN B — DEVIS & FACTURES
+============================================================ -->
+<div class="page-pad" style="padding-top:0;">
+<div class="screen-label-top" style="padding-bottom: 16px;">Écran B — Devis &amp; Factures</div>
+<div class="screen-shell">
+
+  <!-- NAVBAR (identique) -->
+  <nav class="navbar">
+    <a class="navbar-logo" href="#">
+      <span class="navbar-logo-dot"></span>
+      SenGestion
+    </a>
+    <div class="navbar-spacer"></div>
+    <span class="navbar-badge">Essai gratuit — 9 jours restants</span>
+    <div class="navbar-notif" title="Notifications">
+      <div class="notif-dot"></div>
+      <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+    </div>
+    <div class="navbar-user">
+      <div class="navbar-avatar">AS</div>
+      <div class="navbar-user-info">
+        <span class="navbar-user-name">Awa Sarr</span>
+        <span class="navbar-user-role">Administratrice</span>
+      </div>
+      <svg class="navbar-chevron" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </div>
+  </nav>
+
+  <!-- LAYOUT -->
+  <div class="app-layout">
+
+    <!-- SIDEBAR (Devis & Factures actif) -->
+    <aside class="sidebar">
+      <div class="sidebar-section-label">Navigation</div>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+        Tableau de bord
+      </a>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-4a4 4 0 100-8 4 4 0 000 8z"/>
+        </svg>
+        Contacts & Clients
+      </a>
+
+      <!-- ACTIF -->
+      <a class="sidebar-item active" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/>
+        </svg>
+        Devis & Factures
+        <span class="sidebar-badge">12</span>
+      </a>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+        </svg>
+        Charges & Dépenses
+      </a>
+
+      <div class="sidebar-section-label">Analyse</div>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        Rapports
+      </a>
+
+      <a class="sidebar-item" href="#">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        Relances
+        <span class="sidebar-badge">3</span>
+      </a>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          Paramètres
+        </div>
+        <div class="sidebar-footer-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          Déconnexion
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENU DEVIS -->
+    <main class="main-content">
+
+      <!-- EN-TÊTE PAGE -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-eyebrow">Devis & Factures</div>
+          <h1 class="page-title">Devis</h1>
+          <p class="page-subtitle">12 devis au total — 4 en attente de réponse</p>
+        </div>
+        <button class="btn-primary">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nouveau devis
+        </button>
+      </div>
+
+      <!-- KPI 2 colonnes -->
+      <div class="kpi-grid-2">
+        <div class="kpi-card">
+          <div class="kpi-card-accent accent-or"></div>
+          <div class="kpi-icon-wrap bg-or-pale">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="kpi-label">Total TTC devis</div>
+          <div class="kpi-value" style="font-size:22px;">7 340 000</div>
+          <div style="font-size:11px;color:var(--texte);margin-top:2px;">FCFA</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-accent accent-marine"></div>
+          <div class="kpi-icon-wrap bg-marine-pale">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h3M7 20h10a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v13a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <div class="kpi-label">Nombre de devis</div>
+          <div class="kpi-value">12</div>
+          <span class="kpi-delta up" style="margin-top:4px;">
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+            +4 ce mois
+          </span>
+        </div>
+      </div>
+
+      <!-- FILTRES PAR STATUT -->
+      <div class="filter-tabs">
+        <button class="filter-tab active">Tous <span style="opacity:0.6;font-weight:400;">(12)</span></button>
+        <button class="filter-tab">Brouillon <span style="opacity:0.6;font-weight:400;">(2)</span></button>
+        <button class="filter-tab">Envoyé <span style="opacity:0.6;font-weight:400;">(4)</span></button>
+        <button class="filter-tab">Accepté <span style="opacity:0.6;font-weight:400;">(5)</span></button>
+        <button class="filter-tab">Refusé <span style="opacity:0.6;font-weight:400;">(1)</span></button>
+      </div>
+
+      <!-- TABLEAU DEVIS -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-header-title">Liste des devis</div>
+          <!-- Barre de recherche légère -->
+          <div style="display:flex;align-items:center;gap:8px;background:var(--fond);border:1px solid var(--bordure);border-radius:7px;padding:7px 14px;">
+            <svg width="14" height="14" fill="none" stroke="var(--texte)" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/>
+            </svg>
+            <span style="font-size:13px;color:var(--texte);opacity:0.6;">Rechercher un devis…</span>
+          </div>
+          <a class="table-header-link" href="#">Exporter CSV →</a>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>N° Devis</th>
+              <th>Client</th>
+              <th>Objet</th>
+              <th>Montant TTC (FCFA)</th>
+              <th>Statut</th>
+              <th>Date émission</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-primary td-mono">DEV-2026-0018</td>
+              <td>Fatou Mbaye Commerce</td>
+              <td style="font-size:13px;max-width:180px;">Fourniture matériel bureau</td>
+              <td class="td-primary">680 000</td>
+              <td><span class="badge badge-envoye"><span class="badge-dot"></span>Envoyé</span></td>
+              <td style="font-size:13px;">07 juil. 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Modifier">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Télécharger PDF">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-primary td-mono">DEV-2026-0017</td>
+              <td>El Hadji Ndiaye Transport</td>
+              <td style="font-size:13px;max-width:180px;">Logistique entrepôt Nord</td>
+              <td class="td-primary">450 000</td>
+              <td><span class="badge badge-accepte"><span class="badge-dot"></span>Accepté</span></td>
+              <td style="font-size:13px;">03 juil. 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Convertir en facture" style="background:#E8E7A2;border-color:#F2B10E;color:var(--marine);">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-primary td-mono">DEV-2026-0016</td>
+              <td>Ibrahima Fall Services</td>
+              <td style="font-size:13px;max-width:180px;">Maintenance informatique</td>
+              <td class="td-primary">320 000</td>
+              <td><span class="badge badge-brouillon"><span class="badge-dot"></span>Brouillon</span></td>
+              <td style="font-size:13px;">30 juin 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Modifier">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Supprimer" style="color:#021A3D;">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-primary td-mono">DEV-2026-0015</td>
+              <td>Rokhaya Diop Consulting</td>
+              <td style="font-size:13px;max-width:180px;">Audit organisationnel Q3</td>
+              <td class="td-primary">1 800 000</td>
+              <td><span class="badge badge-accepte"><span class="badge-dot"></span>Accepté</span></td>
+              <td style="font-size:13px;">27 juin 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Convertir en facture" style="background:#E8E7A2;border-color:#F2B10E;color:var(--marine);">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-primary td-mono">DEV-2026-0014</td>
+              <td>Moussa Koné Agro</td>
+              <td style="font-size:13px;max-width:180px;">Équipement stockage céréales</td>
+              <td class="td-primary">2 400 000</td>
+              <td><span class="badge badge-envoye"><span class="badge-dot"></span>Envoyé</span></td>
+              <td style="font-size:13px;">24 juin 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Relancer">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                  </button>
+                  <button class="action-btn" title="Télécharger PDF">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-primary td-mono">DEV-2026-0013</td>
+              <td>Ndéye Gueye Santé+</td>
+              <td style="font-size:13px;max-width:180px;">Fournitures médicales Q3</td>
+              <td class="td-primary">990 000</td>
+              <td><span class="badge badge-refuse"><span class="badge-dot"></span>Refusé</span></td>
+              <td style="font-size:13px;">20 juin 2026</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn" title="Voir">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="action-btn" title="Dupliquer">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- PAGINATION -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-top:1px solid var(--bordure);">
+          <span style="font-size:13px;color:var(--texte);">Affichage de 6 sur 12 devis</span>
+          <div style="display:flex;gap:4px;">
+            <button style="padding:6px 12px;border:1px solid var(--bordure);border-radius:6px;background:var(--blanc);font-size:13px;color:var(--texte);cursor:pointer;">Précédent</button>
+            <button style="padding:6px 12px;border:1px solid var(--marine);border-radius:6px;background:var(--marine);font-size:13px;color:var(--blanc);cursor:pointer;">1</button>
+            <button style="padding:6px 12px;border:1px solid var(--bordure);border-radius:6px;background:var(--blanc);font-size:13px;color:var(--texte);cursor:pointer;">2</button>
+            <button style="padding:6px 12px;border:1px solid var(--bordure);border-radius:6px;background:var(--blanc);font-size:13px;color:var(--texte);cursor:pointer;">Suivant</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div><!-- /app-layout -->
+</div><!-- /screen-shell -->
+</div><!-- /page-pad -->
+
+<div class="spacer-xl"></div>
+
+</body>
+</html>

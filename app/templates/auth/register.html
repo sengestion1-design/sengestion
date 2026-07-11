@@ -1,0 +1,50 @@
+{% extends "layouts/base.html" %}
+{% block title %}Créer un compte — SenGestion{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+
+    <div class="auth-brand">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion" class="auth-logo">
+    </div>
+
+    <h1 class="auth-title">Créer un compte</h1>
+    <p class="auth-sub">Rejoignez SenGestion</p>
+
+    <form method="POST" action="{{ url_for('auth.register') }}" style="margin-top:28px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label" for="nom">Nom complet</label>
+        <input class="form-input" type="text" id="nom" name="nom" required autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">E-mail</label>
+        <input class="form-input" type="email" id="email" name="email" required autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Mot de passe</label>
+        <input class="form-input" type="password" id="password" name="password"
+               required minlength="12" autocomplete="new-password"
+               pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}"
+               title="Au moins 12 caractères, avec majuscule, minuscule, chiffre et caractère spécial.">
+        <p class="form-hint">
+          12 caractères min., avec majuscule, minuscule, chiffre et caractère spécial.
+        </p>
+      </div>
+
+      <button type="submit" class="btn btn-accent btn-block" style="margin-top:8px;">
+        Créer mon compte
+      </button>
+    </form>
+
+    <p class="auth-alt">Déjà inscrit ?
+      <a href="{{ url_for('auth.login') }}">Se connecter</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

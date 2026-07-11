@@ -1,0 +1,76 @@
+{% extends "layouts/app.html" %}
+{% set active = 'customers' %}
+{% set editing = customer is not none %}
+{% block title %}{{ 'Modifier le client' if editing else 'Nouveau client' }} — SenGestion{% endblock %}
+
+{% block page %}
+
+  {% set f = form if form is defined else None %}
+  {% macro val(field, attr) -%}
+    {%- if f %}{{ f.get(field, '') }}{% elif customer %}{{ customer[attr] or '' }}{% endif -%}
+  {%- endmacro %}
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'Modifier le client' if editing else 'Nouveau client' }}</h1>
+      <p class="page-subtitle">
+        {{ 'Mettez à jour les informations du client.' if editing else 'Ajoutez un client à votre portefeuille.' }}
+      </p>
+    </div>
+    <a href="{{ url_for('customers.index') }}" class="btn btn-secondary">
+      <i data-lucide="arrow-left" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Retour
+    </a>
+  </div>
+
+  <div class="card" style="max-width:640px;">
+    <form method="post"
+          action="{{ url_for('customers.update', customer_id=customer.id) if editing else url_for('customers.create') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label" for="name">Nom <span class="required" aria-hidden="true">*</span></label>
+        <input type="text" id="name" name="name" class="form-input" required
+               maxlength="100" value="{{ val('name', 'name') }}"
+               placeholder="Ex. Amadou Diallo">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="company">Entreprise</label>
+        <input type="text" id="company" name="company" class="form-input"
+               maxlength="150" value="{{ val('company', 'company') }}"
+               placeholder="Ex. SARL Teranga">
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-input"
+                 maxlength="150" value="{{ val('email', 'email') }}"
+                 placeholder="client@exemple.sn">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">Téléphone</label>
+          <input type="tel" id="phone" name="phone" class="form-input"
+                 maxlength="20" value="{{ val('phone', 'phone') }}"
+                 placeholder="+221 77 000 00 00">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="address">Adresse</label>
+        <textarea id="address" name="address" class="form-textarea" rows="3"
+                  placeholder="Adresse postale">{{ val('address', 'address') }}</textarea>
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <button type="submit" class="btn btn-accent">
+          <i data-lucide="check" style="width:16px;height:16px;vertical-align:-3px;"></i>
+          {{ 'Enregistrer' if editing else 'Créer le client' }}
+        </button>
+        <a href="{{ url_for('customers.index') }}" class="btn btn-ghost">Annuler</a>
+      </div>
+    </form>
+  </div>
+
+{% endblock %}

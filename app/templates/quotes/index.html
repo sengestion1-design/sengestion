@@ -1,0 +1,139 @@
+{% extends "layouts/app.html" %}
+{% set active = 'quotes' %}
+{% block title %}Devis — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Devis</h1>
+      <p class="page-subtitle">Créez vos devis, éditez-les en PDF et convertissez-les en factures</p>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="{{ url_for('invoices.index') }}" class="btn btn-primary">
+        <i data-lucide="receipt" style="width:16px;height:16px;vertical-align:-3px;"></i> Factures
+      </a>
+      <a href="{{ url_for('quotes.new') }}" class="btn btn-accent">
+        <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i> Nouveau devis
+      </a>
+    </div>
+  </div>
+
+  {# ── KPI tiles ── #}
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; margin-bottom:32px;">
+
+    <div class="stat-card stat-card--accent">
+      <div class="stat-card__header">
+        <span class="stat-card__label">Total devis (TTC)</span>
+        <span class="stat-card__icon">
+          <i data-lucide="file-text" style="width:16px;height:16px;color:#F2B10E;"></i>
+        </span>
+      </div>
+      <p class="stat-card__value">{{ fmt(total_ttc) }}</p>
+      <p class="stat-card__sub">FCFA (résultat filtré)</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <span class="stat-card__label">Devis</span>
+        <span class="stat-card__icon stat-card__icon--pale">
+          <i data-lucide="list" style="width:16px;height:16px;color:#021A3D;"></i>
+        </span>
+      </div>
+      <p class="stat-card__value stat-card__value--marine">{{ count }}</p>
+      <p class="stat-card__sub">Enregistrement{{ 's' if count > 1 else '' }}</p>
+    </div>
+
+  </div>
+
+  {# ── Filtre par statut ── #}
+  <div class="card" style="padding:14px 20px; margin-bottom:24px;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <span style="font-size:16px; color:var(--muted); font-weight:600; margin-right:4px;">Statut :</span>
+      <a href="{{ url_for('quotes.index') }}"
+         class="filter-pill {{ 'filter-pill--active' if not selected_status }}">
+        Tous
+      </a>
+      {% for key, meta in statuses.items() %}
+      <a href="{{ url_for('quotes.index', status=key) }}"
+         class="filter-pill {{ 'filter-pill--active' if selected_status == key }}">
+        {{ meta[0] }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ── Tableau des devis ── #}
+  <div class="card" style="padding:0; overflow:hidden;">
+    {% if quotes %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Numéro</th>
+            <th>Client</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th style="text-align:right;">TTC (FCFA)</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in quotes %}
+          <tr>
+            <td style="white-space:nowrap;">
+              <a href="{{ url_for('quotes.show', quote_id=q.id) }}"
+                 style="color:var(--marine); font-weight:700; text-decoration:none;">
+                {{ q.number }}
+              </a>
+            </td>
+            <td>{{ q.customer.name if q.customer else '—' }}</td>
+            <td>
+              {% set meta = statuses.get(q.status, ('—', '#F9FAFB', '#5A6472')) %}
+              <span class="badge"
+                    style="background:{{ meta[1] }}; color:{{ meta[2] }}; padding:4px 12px;
+                           border-radius:999px; display:inline-block; font-weight:600;">
+                {{ meta[0] }}{% if q.invoice_id %} · facturé{% endif %}
+              </span>
+            </td>
+            <td style="color:var(--muted); white-space:nowrap;">
+              {{ q.quote_date.strftime('%d/%m/%Y') if q.quote_date else '—' }}
+            </td>
+            <td style="font-weight:700; text-align:right; white-space:nowrap;">{{ fmt(q.amount_incl_tax) }}</td>
+            <td class="col-actions">
+              <a href="{{ url_for('quotes.show', quote_id=q.id) }}"
+                 class="btn btn-ghost btn-sm" aria-label="Voir le devis {{ q.number }}">
+                <i data-lucide="eye" style="width:16px;height:16px;"></i>
+              </a>
+              <a href="{{ url_for('quotes.pdf', quote_id=q.id) }}" target="_blank"
+                 class="btn btn-ghost btn-sm" aria-label="PDF du devis {{ q.number }}">
+                <i data-lucide="file-down" style="width:16px;height:16px;"></i>
+              </a>
+              {% if not q.invoice_id %}
+              <a href="{{ url_for('quotes.edit', quote_id=q.id) }}"
+                 class="btn btn-ghost btn-sm" aria-label="Éditer le devis {{ q.number }}">
+                <i data-lucide="pencil" style="width:16px;height:16px;"></i>
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon"><i data-lucide="file-text"></i></div>
+      <h2 class="empty-state-title">Aucun devis pour le moment</h2>
+      <p class="empty-state-desc">
+        {% if selected_status %}Aucun devis avec ce statut.
+        {% else %}Créez votre premier devis en quelques clics.{% endif %}
+      </p>
+      <a href="{{ url_for('quotes.new') }}" class="btn btn-accent">
+        <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i> Nouveau devis
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+{% endblock %}

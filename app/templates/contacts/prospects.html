@@ -1,0 +1,123 @@
+{% extends "layouts/app.html" %}
+{% set active = 'prospects' %}
+{% block title %}Prospects — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">Pipeline commercial</div>
+      <h1 class="page-title">Prospects</h1>
+      <p class="page-subtitle">Vos pistes commerciales en cours de suivi ({{ contacts|length }})</p>
+    </div>
+    <a href="{{ url_for('contacts.new', kind='prospect') }}" class="btn btn-accent">
+      <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Nouveau prospect
+    </a>
+  </div>
+
+  {# ── Barre de recherche ── #}
+  <form method="get" action="{{ url_for('contacts.prospects') }}"
+        style="display:flex; gap:10px; align-items:center; margin-bottom:28px; max-width:540px;">
+    <label class="sr-only" for="q">Rechercher</label>
+    <input type="search" id="q" name="q" class="form-input"
+           value="{{ q }}" placeholder="Rechercher par nom ou entreprise…"
+           style="flex:1;">
+    <button type="submit" class="btn btn-primary">
+      <i data-lucide="search" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Rechercher
+    </button>
+    {% if q %}
+    <a href="{{ url_for('contacts.prospects') }}" class="btn btn-secondary">Réinitialiser</a>
+    {% endif %}
+  </form>
+
+  {% if contacts %}
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Entreprise</th>
+            <th>Fonction</th>
+            <th>Statut</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ct in contacts %}
+          {% set label, badge = statuses.get(ct.status, ('—', 'badge-neutral')) %}
+          <tr>
+            <td style="font-weight:600; color:var(--marine);">
+              {{ ct.first_name ~ ' ' if ct.first_name }}{{ ct.name }}
+            </td>
+            <td>{{ ct.company or '—' }}</td>
+            <td>{{ ct.role or '—' }}</td>
+            <td>
+              <span class="badge {{ badge }}">{{ label }}</span>
+              {% if ct.is_converted %}
+              <span class="badge badge-marine" title="Converti en client">Client</span>
+              {% endif %}
+            </td>
+            <td class="col-actions">
+              {% if not ct.is_converted %}
+              <form method="post" action="{{ url_for('contacts.convert', contact_id=ct.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Convertir « {{ ct.name }} » en client ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-accent btn-sm"
+                        aria-label="Convertir {{ ct.name }} en client">
+                  <i data-lucide="user-check" style="width:15px;height:15px;vertical-align:-3px;"></i>
+                  Convertir
+                </button>
+              </form>
+              {% else %}
+              <a href="{{ url_for('customers.show', customer_id=ct.customer_id) }}"
+                 class="btn btn-ghost btn-sm">Voir le client</a>
+              {% endif %}
+              <a href="{{ url_for('contacts.edit', contact_id=ct.id) }}"
+                 class="btn btn-ghost btn-sm" aria-label="Modifier {{ ct.name }}">
+                <i data-lucide="pencil" style="width:15px;height:15px;"></i>
+              </a>
+              <form method="post" action="{{ url_for('contacts.delete', contact_id=ct.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Supprimer le prospect « {{ ct.name }} » ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger btn-sm" aria-label="Supprimer {{ ct.name }}">
+                  <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon"><i data-lucide="trending-up"></i></div>
+    <h2 class="empty-state-title">
+      {% if q %}Aucun prospect trouvé{% else %}Aucun prospect pour le moment{% endif %}
+    </h2>
+    <p class="empty-state-desc">
+      {% if q %}
+        Aucun résultat pour « {{ q }} ». Essayez un autre terme.
+      {% else %}
+        Ajoutez une piste, ou passez un contact de votre carnet en prospect.
+      {% endif %}
+    </p>
+    {% if q %}
+      <a href="{{ url_for('contacts.prospects') }}" class="btn btn-secondary">Voir tous les prospects</a>
+    {% else %}
+      <a href="{{ url_for('contacts.new', kind='prospect') }}" class="btn btn-accent">
+        <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Nouveau prospect
+      </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+{% endblock %}

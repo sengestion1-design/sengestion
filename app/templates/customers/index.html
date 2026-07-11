@@ -1,0 +1,109 @@
+{% extends "layouts/app.html" %}
+{% set active = 'customers' %}
+{% block title %}Clients — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Clients</h1>
+      <p class="page-subtitle">Votre portefeuille clients ({{ customers|length }})</p>
+    </div>
+    <a href="{{ url_for('customers.new') }}" class="btn btn-accent">
+      <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Nouveau client
+    </a>
+  </div>
+
+  {# ── Barre de recherche ── #}
+  <form method="get" action="{{ url_for('customers.index') }}"
+        style="display:flex; gap:10px; align-items:center; margin-bottom:28px; max-width:540px;">
+    <label class="sr-only" for="q">Rechercher</label>
+    <input type="search" id="q" name="q" class="form-input"
+           value="{{ q }}" placeholder="Rechercher par nom ou entreprise…"
+           style="flex:1;">
+    <button type="submit" class="btn btn-primary">
+      <i data-lucide="search" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Rechercher
+    </button>
+    {% if q %}
+    <a href="{{ url_for('customers.index') }}" class="btn btn-secondary">Réinitialiser</a>
+    {% endif %}
+  </form>
+
+  {# ── Liste ── #}
+  {% if customers %}
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Entreprise</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in customers %}
+          <tr>
+            <td>
+              <a href="{{ url_for('customers.show', customer_id=c.id) }}"
+                 style="color:var(--marine); font-weight:600; text-decoration:none;">
+                {{ c.name }}
+              </a>
+            </td>
+            <td>{{ c.company or '—' }}</td>
+            <td>{{ c.email or '—' }}</td>
+            <td>{{ c.phone or '—' }}</td>
+            <td class="col-actions">
+              <a href="{{ url_for('customers.show', customer_id=c.id) }}"
+                 class="btn btn-ghost btn-sm" aria-label="Voir {{ c.name }}">
+                <i data-lucide="eye" style="width:15px;height:15px;"></i>
+              </a>
+              <a href="{{ url_for('customers.edit', customer_id=c.id) }}"
+                 class="btn btn-ghost btn-sm" aria-label="Modifier {{ c.name }}">
+                <i data-lucide="pencil" style="width:15px;height:15px;"></i>
+              </a>
+              <form method="post" action="{{ url_for('customers.delete', customer_id=c.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Supprimer le client « {{ c.name }} » ? Cette action est définitive.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger btn-sm" aria-label="Supprimer {{ c.name }}">
+                  <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon"><i data-lucide="users"></i></div>
+    <h2 class="empty-state-title">
+      {% if q %}Aucun client trouvé{% else %}Aucun client pour le moment{% endif %}
+    </h2>
+    <p class="empty-state-desc">
+      {% if q %}
+        Aucun résultat pour « {{ q }} ». Essayez un autre terme.
+      {% else %}
+        Commencez par ajouter votre premier client à votre portefeuille.
+      {% endif %}
+    </p>
+    {% if q %}
+      <a href="{{ url_for('customers.index') }}" class="btn btn-secondary">Voir tous les clients</a>
+    {% else %}
+      <a href="{{ url_for('customers.new') }}" class="btn btn-accent">
+        <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Nouveau client
+      </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+{% endblock %}

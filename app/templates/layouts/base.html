@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SenGestion{% endblock %}</title>
+
+  <!-- Favicon emoji -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+
+  <!-- Feuilles de style -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+
+  <!-- Lucide Icons v1.23.0 — version épinglée + hash SRI vérifié (sécurité) -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/lucide@1.23.0/dist/umd/lucide.min.js"
+    integrity="sha384-ouAVEJVCMsf8Svzn+BwqbaBhxBEA0xgeVBhHnxmWd+Wqyv18yhWCQwGegFD/OHLq"
+    crossorigin="anonymous"
+    defer></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) { lucide.createIcons(); }
+    });
+  </script>
+</head>
+<body>
+
+  <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+  {% block navbar %}{% endblock %}
+
+  <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+  <main id="main-content">
+
+    <!-- Flash messages (les layouts qui gèrent eux-mêmes les flash surchargent ce bloc) -->
+    {% block flash %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container" style="padding-top:1rem; padding-bottom:0;">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert" aria-live="polite">
+              {% if category == 'success' %}
+                <i data-lucide="circle-check" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px;"></i>
+              {% elif category == 'danger' %}
+                <i data-lucide="circle-x" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px;"></i>
+              {% elif category == 'warning' %}
+                <i data-lucide="triangle-alert" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px;"></i>
+              {% else %}
+                <i data-lucide="info" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px;"></i>
+              {% endif %}
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% endblock %}
+
+    {% block content %}{% endblock %}
+
+  </main>
+
+</body>
+</html>

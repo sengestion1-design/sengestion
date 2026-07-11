@@ -1,0 +1,27 @@
+# Environnement & secrets
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+
+# Base de données locale
+*.sqlite
+*.db
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+
+# Images de cartes de visite uploadées (ne pas versionner)
+app/static/uploads/cartes/*
+!app/static/uploads/cartes/.gitkeep

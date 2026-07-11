@@ -1,0 +1,88 @@
+{% extends "layouts/app.html" %}
+{% set active = 'expenses' %}
+{% block title %}Catégories de dépenses — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <a href="{{ url_for('expenses.index') }}" class="back-link">
+        <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Retour aux dépenses
+      </a>
+      <h1 class="page-title">Catégories de dépenses</h1>
+      <p class="page-subtitle">Organisez vos charges par nature (carburant, loyer, salaires…).</p>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+              gap:24px; align-items:start;">
+
+    {# ── Ajouter une catégorie ── #}
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom:20px;">Ajouter une catégorie</h2>
+      <form method="post" action="{{ url_for('expenses.create_category') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label class="form-label" for="name">
+            Nom de la catégorie <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input class="form-input" type="text" id="name" name="name" required
+                 maxlength="100" placeholder="Ex. Maintenance">
+        </div>
+        <button type="submit" class="btn btn-accent">
+          <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i> Ajouter
+        </button>
+      </form>
+    </div>
+
+    {# ── Liste des catégories ── #}
+    <div class="card" style="padding:0; overflow:hidden;">
+      {% if categories %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Catégorie</th>
+              <th style="text-align:center;">Mes dépenses</th>
+              <th style="text-align:right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cat in categories %}
+            <tr>
+              <td><span class="badge badge-pale">{{ cat.name }}</span></td>
+              <td style="text-align:center; color:var(--muted);">{{ usage[cat.id] }}</td>
+              <td style="text-align:right;">
+                {% if usage[cat.id] == 0 %}
+                <form method="post"
+                      action="{{ url_for('expenses.delete_category', category_id=cat.id) }}"
+                      style="display:inline;"
+                      onsubmit="return confirm('Supprimer la catégorie « {{ cat.name }} » ?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-danger btn-sm"
+                          aria-label="Supprimer la catégorie {{ cat.name }}">
+                    <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+                  </button>
+                </form>
+                {% else %}
+                <span style="font-size:16px; color:var(--muted);" title="Catégorie utilisée par des dépenses">
+                  Verrouillée
+                </span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state" style="padding:48px 20px;">
+        <div class="empty-state-icon"><i data-lucide="tags"></i></div>
+        <p class="empty-state-desc">Aucune catégorie. Ajoutez-en une à gauche.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+{% endblock %}

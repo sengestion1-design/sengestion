@@ -1,0 +1,191 @@
+{% extends "layouts/app.html" %}
+{% set the_kind = kind if kind is defined else (contact.kind if contact else 'contact') %}
+{% set active = 'prospects' if the_kind == 'prospect' else 'contacts' %}
+{% set editing = contact is not none %}
+{% set noun = 'prospect' if the_kind == 'prospect' else 'contact' %}
+{% set back_ep = 'contacts.prospects' if the_kind == 'prospect' else 'contacts.index' %}
+{% block title %}{{ ('Modifier le ' if editing else 'Nouveau ') ~ noun }} — SenGestion{% endblock %}
+
+{% block page %}
+
+  {% set f = form if form is defined else None %}
+  {% macro val(field, attr) -%}
+    {%- if f %}{{ f.get(field, '') }}{% elif contact %}{{ contact[attr] or '' }}{% endif -%}
+  {%- endmacro %}
+  {% set cur_status = (f.get('status') if f else (contact.status if contact else 'new')) %}
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        {% if from_scan %}Vérifier le contact scanné{% else %}{{ ('Modifier le ' if editing else 'Nouveau ') ~ noun }}{% endif %}
+      </h1>
+      <p class="page-subtitle">
+        {% if from_scan %}
+          Vérifiez les informations extraites par l’IA, corrigez si besoin, puis enregistrez.
+        {% elif the_kind == 'prospect' %}
+          {{ 'Mettez à jour ce prospect.' if editing else 'Ajoutez une piste à votre pipeline commercial.' }}
+        {% else %}
+          {{ 'Mettez à jour ce contact.' if editing else 'Ajoutez une personne à votre carnet d’adresses.' }}
+        {% endif %}
+      </p>
+    </div>
+    <a href="{{ url_for(back_ep) }}" class="btn btn-secondary">
+      <i data-lucide="arrow-left" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Retour
+    </a>
+  </div>
+
+  {% set the_card = card_image if card_image is defined and card_image else (contact.card_image if contact else None) %}
+
+  {% if from_scan %}
+  <div class="scan-info-banner" role="status">
+    <i data-lucide="sparkles" aria-hidden="true"></i>
+    <span>Champs pré-remplis automatiquement à partir de la carte scannée — vérifiez-les avant d'enregistrer.</span>
+  </div>
+  {% endif %}
+
+  {# Mise en page : carte à gauche, formulaire à droite (pleine largeur) #}
+  <div class="contact-form-grid {{ 'has-card' if the_card else 'no-card' }}">
+
+    {# ─── Colonne carte ─── #}
+    {% if the_card %}
+    <aside class="card scan-card-preview">
+      <div class="scan-card-preview-label">
+        <i data-lucide="image" style="width:15px;height:15px;vertical-align:-2px;"></i>
+        {{ 'Photo de la carte (sera enregistrée avec le contact)' if not editing else 'Photo de la carte de visite' }}
+      </div>
+      <img src="{{ url_for('static', filename=the_card) }}" alt="Carte de visite scannée"
+           class="scan-card-preview-img">
+    </aside>
+    {% endif %}
+
+    {# ─── Colonne formulaire ─── #}
+    <div class="card">
+    <form method="post"
+          action="{{ url_for('contacts.update', contact_id=contact.id) if editing else url_for('contacts.create') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="kind" value="{{ the_kind }}">
+      {% if from_scan %}<input type="hidden" name="source" value="business_card_scan">{% endif %}
+      {% if the_card %}<input type="hidden" name="card_image" value="{{ the_card }}">{% endif %}
+
+      <p class="form-required-hint">Les champs marqués <span class="required">*</span> sont obligatoires.</p>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="first_name">Prénom</label>
+          <input type="text" id="first_name" name="first_name" class="form-input"
+                 maxlength="100" value="{{ val('first_name', 'first_name') }}"
+                 placeholder="Ex. Fatou">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="name">Nom <span class="required" aria-hidden="true">*</span></label>
+          <input type="text" id="name" name="name" class="form-input" required
+                 maxlength="100" value="{{ val('name', 'name') }}"
+                 placeholder="Ex. Ndiaye">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="company">Entreprise</label>
+          <input type="text" id="company" name="company" class="form-input"
+                 maxlength="150" value="{{ val('company', 'company') }}"
+                 placeholder="Ex. SARL Teranga">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="role">Fonction</label>
+          <input type="text" id="role" name="role" class="form-input"
+                 maxlength="100" value="{{ val('role', 'role') }}"
+                 placeholder="Ex. Directrice achats">
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-input"
+                 maxlength="150" value="{{ val('email', 'email') }}"
+                 placeholder="prospect@exemple.sn">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">Téléphone</label>
+          <input type="tel" id="phone" name="phone" class="form-input"
+                 maxlength="20" value="{{ val('phone', 'phone') }}"
+                 placeholder="+221 77 000 00 00">
+        </div>
+      </div>
+
+      {# Le statut de pipeline ne concerne que les prospects (piste commerciale) #}
+      {% if the_kind == 'prospect' %}
+      <div class="form-group">
+        <label class="form-label" for="status">Statut du pipeline</label>
+        <select id="status" name="status" class="form-select">
+          {% for key, meta in statuses.items() %}
+          <option value="{{ key }}" {{ 'selected' if cur_status == key }}>{{ meta[0] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% else %}
+      <input type="hidden" name="status" value="new">
+      {% endif %}
+
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <button type="submit" class="btn btn-accent">
+          <i data-lucide="check" style="width:16px;height:16px;vertical-align:-3px;"></i>
+          {{ 'Enregistrer' if editing else ('Créer le prospect' if the_kind == 'prospect' else 'Créer le contact') }}
+        </button>
+        <a href="{{ url_for(back_ep) }}" class="btn btn-ghost">Annuler</a>
+      </div>
+    </form>
+    </div>{# /card formulaire #}
+
+  </div>{# /contact-form-grid #}
+
+  <style>
+    /* Bandeau info scan — jaune pâle (charte), discret, remplace le bandeau or imposant */
+    .scan-info-banner {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; margin-bottom: 20px;
+      background: var(--jaune-pale); border-radius: var(--radius-btn);
+      color: var(--marine); font-size: var(--text-sm); font-weight: var(--weight-medium);
+    }
+    .scan-info-banner i { width: 18px; height: 18px; flex-shrink: 0; color: var(--marine); }
+
+    /* Grille pleine largeur : carte à gauche, formulaire à droite */
+    .contact-form-grid {
+      display: grid;
+      gap: var(--space-6);
+      align-items: start;    /* chaque card à sa hauteur naturelle */
+      width: 100%;
+    }
+    .contact-form-grid.has-card { grid-template-columns: minmax(320px, 0.85fr) 2fr; }
+    .contact-form-grid.no-card  { grid-template-columns: 1fr; }
+    .contact-form-grid .card { margin: 0; }
+
+    /* Carte de visite — sticky, photo affichée en grand (remplit la card) */
+    .scan-card-preview { position: sticky; top: calc(var(--navbar-height) + var(--space-6)); }
+    .scan-card-preview-label {
+      font-size: var(--text-sm); color: rgba(2, 26, 61, 0.62);
+      font-weight: var(--weight-bold); margin-bottom: 14px; text-align: left;
+    }
+    .scan-card-preview-img {
+      display: block; width: 100%; height: auto;   /* la photo occupe toute la largeur de la card */
+      border-radius: var(--radius-btn);
+      box-shadow: 0 4px 16px rgba(2, 26, 61, 0.12);
+    }
+
+    /* Légende champs obligatoires */
+    .form-required-hint {
+      font-size: var(--text-sm); color: rgba(2, 26, 61, 0.62);
+      margin-bottom: var(--space-5);
+    }
+    .form-required-hint .required { color: var(--marine); font-weight: var(--weight-bold); }
+
+    /* Responsive : une seule colonne sous 1024px */
+    @media (max-width: 1024px) {
+      .contact-form-grid.has-card { grid-template-columns: 1fr; }
+      .scan-card-preview { position: static; }
+    }
+  </style>
+
+{% endblock %}

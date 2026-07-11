@@ -1,0 +1,56 @@
+"""NoSQL data-access service (MongoDB) — competency CP6.
+
+Activity logs are high-volume, semi-structured, relation-free data: an ideal
+NoSQL use case. Each user action (login, quote creation, etc.) is stored as a
+JSON document in the `activity_logs` collection.
+
+Demonstrates NoSQL CRUD: create (log_action), read (get_recent / count_by_action).
+
+Note: all calls are wrapped so that a MongoDB outage never breaks the app
+(logging is best-effort). In production MongoDB is always available.
+"""
+from datetime import datetime
+
+from flask import current_app
+
+from app.extensions import mongo
+
+COLLECTION = "activity_logs"
+
+
+def log_action(user_id, action: str, details: dict | None = None):
+    """CREATE — store a user action in MongoDB (best-effort)."""
+    doc = {
+        "user_id": user_id,
+        "action": action,
+        "details": details or {},
+        "created_at": datetime.utcnow(),
+    }
+    try:
+        result = mongo.db[COLLECTION].insert_one(doc)
+        return str(result.inserted_id)
+    except Exception as exc:  # noqa: BLE001
+        current_app.logger.warning("MongoDB log_action indisponible: %s", exc)
+        return None
+
+
+def get_recent(limit: int = 20) -> list[dict]:
+    """READ — latest actions, newest first (best-effort)."""
+    try:
+        cursor = mongo.db[COLLECTION].find().sort("created_at", -1).limit(limit)
+        logs = []
+        for doc in cursor:
+            doc["_id"] = str(doc["_id"])
+            logs.append(doc)
+        return logs
+    except Exception as exc:  # noqa: BLE001
+        current_app.logger.warning("MongoDB get_recent indisponible: %s", exc)
+        return []
+
+
+def count_by_action(action: str) -> int:
+    """READ/aggregation — count occurrences of an action (best-effort)."""
+    try:
+        return mongo.db[COLLECTION].count_documents({"action": action})
+    except Exception:  # noqa: BLE001
+        return 0

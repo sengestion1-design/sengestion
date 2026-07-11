@@ -1,0 +1,165 @@
+{% extends "layouts/app.html" %}
+{% set active = 'dashboard' %}
+{% block title %}Tableau de bord — SenGestion{% endblock %}
+
+{% block page %}
+
+  {# ── Bandeau essai gratuit ── #}
+  {% if user.status == 'trial' %}
+  <div class="trial-banner" role="status">
+    <i data-lucide="clock" class="trial-banner-icon" aria-hidden="true"></i>
+    <div class="trial-banner-text">
+      <div class="trial-banner-title">
+        Il vous reste {{ user.days_left }} jour{{ 's' if user.days_left > 1 else '' }} d'essai gratuit
+      </div>
+      <div class="trial-banner-sub">
+        Activez votre abonnement pour conserver toutes vos données et continuer sans interruption.
+      </div>
+    </div>
+    <a class="trial-banner-cta" href="{{ url_for('subscription.expired') }}">Activer mon abonnement</a>
+  </div>
+  {% endif %}
+
+  {# ── En-tête de page ── #}
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">Vue d'ensemble</div>
+      <h1 class="page-title">Tableau de bord</h1>
+      <p class="page-subtitle">Votre activité commerciale — {{ user.company or 'SenGestion' }}</p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('quotes.new') }}">
+      <i data-lucide="plus" aria-hidden="true"></i>
+      Nouveau devis
+    </a>
+  </div>
+
+  {# ── KPI tiles ── #}
+  <div class="kpi-grid">
+
+    <div class="kpi-card">
+      <div class="kpi-card-accent accent-marine"></div>
+      <div class="kpi-icon-wrap bg-marine-pale"><i data-lucide="users"></i></div>
+      <div class="kpi-label">Clients actifs</div>
+      <div class="kpi-value">{{ stats.customers if stats else 0 }}</div>
+      <span class="kpi-delta neutral">Total enregistrés</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-card-accent accent-pale"></div>
+      <div class="kpi-icon-wrap bg-pale"><i data-lucide="file-text"></i></div>
+      <div class="kpi-label">Devis en cours</div>
+      <div class="kpi-value">{{ stats.quotes if stats else 0 }}</div>
+      <span class="kpi-delta neutral">Ce mois</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-card-accent accent-or"></div>
+      <div class="kpi-icon-wrap bg-or-pale"><i data-lucide="receipt"></i></div>
+      <div class="kpi-label">Factures émises</div>
+      <div class="kpi-value">{{ stats.invoices if stats else 0 }}</div>
+      <span class="kpi-delta neutral">Ce mois</span>
+    </div>
+
+    <div class="kpi-card kpi-card--accent">
+      <div class="kpi-icon-wrap"><i data-lucide="trending-up"></i></div>
+      <div class="kpi-label">Trésorerie nette</div>
+      <div class="kpi-value">{{ '{:,.0f}'.format(stats.balance).replace(',', ' ') if stats and stats.balance is not none else '—' }}</div>
+      <div class="kpi-unit">FCFA — solde estimé</div>
+    </div>
+
+  </div>
+
+  {# ── Accès rapide ── #}
+  <div class="section-title-plain">Accès rapide</div>
+  <div class="shortcuts-grid">
+
+    <a class="shortcut-card" href="{{ url_for('quotes.index') }}">
+      <span class="shortcut-icon"><i data-lucide="plus"></i></span>
+      <div>
+        <div class="shortcut-label">Nouveau devis</div>
+        <div class="shortcut-sub">Créer et envoyer</div>
+      </div>
+    </a>
+
+    <a class="shortcut-card" href="{{ url_for('invoices.index') }}">
+      <span class="shortcut-icon"><i data-lucide="file-text"></i></span>
+      <div>
+        <div class="shortcut-label">Émettre une facture</div>
+        <div class="shortcut-sub">Depuis un devis accepté</div>
+      </div>
+    </a>
+
+    <a class="shortcut-card" href="{{ url_for('customers.new') }}">
+      <span class="shortcut-icon"><i data-lucide="user-plus"></i></span>
+      <div>
+        <div class="shortcut-label">Ajouter un client</div>
+        <div class="shortcut-sub">Contacts &amp; entreprises</div>
+      </div>
+    </a>
+
+    <a class="shortcut-card" href="{{ url_for('expenses.index') }}">
+      <span class="shortcut-icon"><i data-lucide="credit-card"></i></span>
+      <div>
+        <div class="shortcut-label">Saisir une dépense</div>
+        <div class="shortcut-sub">Charges &amp; fournisseurs</div>
+      </div>
+    </a>
+
+    <a class="shortcut-card" href="#">
+      <span class="shortcut-icon"><i data-lucide="send"></i></span>
+      <div>
+        <div class="shortcut-label">Envoyer une relance</div>
+        <div class="shortcut-sub">Factures impayées</div>
+      </div>
+    </a>
+
+    <a class="shortcut-card" href="#">
+      <span class="shortcut-icon"><i data-lucide="bar-chart-3"></i></span>
+      <div>
+        <div class="shortcut-label">Rapport mensuel</div>
+        <div class="shortcut-sub">Analyses &amp; KPIs</div>
+      </div>
+    </a>
+
+  </div>
+
+  {# ── Activité récente ── #}
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-header-title">Activité récente</div>
+      <a class="table-header-link" href="#">Voir tout →</a>
+    </div>
+
+    {% if recent_logs %}
+    <div class="table-wrapper">
+      <table class="table" aria-label="Journal d'activité">
+        <thead>
+          <tr>
+            <th scope="col">Action</th>
+            <th scope="col">Détails</th>
+            <th scope="col">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in recent_logs %}
+          <tr>
+            <td class="td-primary">{{ log.action }}</td>
+            <td class="td-muted td-clamp">{{ log.details }}</td>
+            <td class="td-muted td-nowrap">
+              {{ log.created_at.strftime('%d/%m/%Y %H:%M') if log.created_at else '—' }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i data-lucide="inbox" aria-hidden="true"></i>
+      <p>Aucune activité pour le moment.</p>
+      <p class="empty-state-desc">Vos dernières actions apparaîtront ici.</p>
+    </div>
+    {% endif %}
+  </div>
+
+{% endblock %}

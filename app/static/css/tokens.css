@@ -1,0 +1,184 @@
+/* =============================================================================
+   SenGestion — Design Tokens v3.0  ·  Minimaliste Premium
+   Charte officielle STRICTE : Marine #021A3D · Or #F2B10E · Jaune pâle #E8E7A2
+   Règle absolue : or & jaune pâle = FOND/accent uniquement. Texte sur clair = marine.
+   Statuts distingués par nuances marine/or/jaune pâle (comme la maquette de référence).
+   ============================================================================= */
+
+:root {
+
+  /* ── Couleurs de marque (charte imposée) ── */
+  --marine:          #021A3D;   /* Fond sombre, texte principal, nav */
+  --marine-700:      #021A3D;   /* Hover marine (fond foncé interactif) — charte */
+  --marine-500:      #021A3D;   /* Teinte intermédiaire — charte (pas de bleu inventé) */
+  --marine-100:      #EEF1F6;   /* Fond marine clair neutre (gris bleuté très léger) */
+
+  --or:              #F2B10E;   /* Accent : FOND & boutons UNIQUEMENT */
+  --or-600:          #F2B10E;   /* Hover bouton accent — même or (opacité gérée en JS/CSS) */
+  --or-500:          #F2B10E;   /* Active bouton accent — même or */
+  --or-text:         #021A3D;   /* Texte sur fond clair = marine (jamais or-texte) */
+  --or-text-hover:   #021A3D;   /* Hover lien = marine */
+
+  --jaune-pale:      #E8E7A2;   /* Fond doux, bandeaux subtils */
+  --jaune-pale-dark: #d4d38a;   /* Bordure sur fond jaune pâle */
+
+  /* ── Surfaces & fonds application ── */
+  --bg:              #F8F9FB;   /* Fond global — gris fond neutre */
+  --bg-soft:         #F9FAFB;   /* Fond alternatif (lignes table paires) — gris fond charte */
+  --surface:         #FFFFFF;   /* Cartes, modales, inputs */
+  --surface-hover:   #F9FAFB;   /* Hover surface blanche — gris fond charte */
+
+  /* ── Texte (marine sur fond clair → 13–15:1, toujours ≥ 4.5:1) ── */
+  --ink:             #021A3D;   /* Texte principal */
+  --muted:           #5A6472;   /* Texte secondaire — ≥ 5.5:1 sur blanc */
+  --placeholder:     #9BA8B5;   /* Placeholder inputs — 4.5:1 sur blanc */
+
+  /* ── États sémantiques (tous conformes RGAA sur fond clair) ── */
+  --success:         #021A3D;   /* Texte succès = marine (charte) */
+  --success-soft:    #E8E7A2;   /* Fond succès = jaune pâle (charte) */
+  --success-border:  #d4d38a;   /* Bordure succès = jaune pâle foncé (charte) */
+
+  --danger:          #021A3D;   /* Texte danger = marine (PAS de rouge) */
+  --danger-soft:     #EEF1F6;   /* Fond danger = marine clair neutre */
+  --danger-border:   #C8D5E4;   /* Bordure danger = marine clair neutre */
+
+  --warning:         #021A3D;   /* Texte warning = marine (charte) */
+  --warning-soft:    #E8E7A2;   /* Fond warning = jaune pâle (charte) */
+  --warning-border:  #d4d38a;   /* Bordure warning = jaune pâle foncé (charte) */
+
+  --info:            #021A3D;   /* Texte info = marine */
+  --info-soft:       #EEF1F6;   /* Fond info = gris bleuté très léger neutre */
+  --info-border:     #C8D5E4;   /* Bordure info = marine clair neutre */
+
+  /* ── Bordures & séparateurs — plus fins, plus légers ── */
+  --line:            #E2E6EA;   /* Bordure standard neutre */
+  --line-strong:     #D9DCDB;   /* Bordure marquée — gris bordure charte */
+
+  /* ── Typographie (charte imposée : Palatino titres, Arial UI) ── */
+  --font-display: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --font-sans:    Arial, Helvetica, sans-serif;
+
+  /* Échelle typographique (charte imposée : texte courant 12 pt = 16 px, titres 24 pt = 32 px) */
+  --text-xs:    16px;  /* forcé à 12 pt (charte : texte 12 pt partout) */
+  --text-sm:    16px;  /* forcé à 12 pt (charte) */
+  --text-base:  16px;  /* 12 pt — TEXTE COURANT (charte) */
+  --text-lg:    20px;  /* 15 pt — h3 */
+  --text-xl:    24px;  /* 18 pt */
+  --text-2xl:   28px;  /* 21 pt — h2 */
+  --text-3xl:   32px;  /* 24 pt — h1 / titres (charte) */
+
+  --leading-tight:  1.25;
+  --leading-base:   1.60;   /* Légèrement plus aéré */
+  --leading-loose:  1.80;   /* Paragraphes plus respirants */
+
+  /* Graisses */
+  --weight-normal:  400;
+  --weight-medium:  500;
+  --weight-bold:    700;
+
+  /* ── Rayons — coins doux, premium ── */
+  --radius-sm:    4px;
+  --radius-btn:   10px;   /* Boutons & inputs légèrement plus arrondis */
+  --radius-input: 10px;
+  --radius-card:  14px;   /* Cartes plus douces */
+  --radius-lg:    18px;   /* Modales */
+  --radius-full:  9999px;
+
+  /* ── Ombres — très subtiles, minimalisme premium ── */
+  --shadow-xs:  0 1px 2px rgba(2,26,61,.04);
+  --shadow-sm:  0 1px 3px rgba(2,26,61,.05), 0 1px 2px rgba(2,26,61,.03);
+  --shadow-md:  0 3px 10px rgba(2,26,61,.07), 0 1px 3px rgba(2,26,61,.04);
+  --shadow-lg:  0 6px 20px rgba(2,26,61,.09), 0 2px 6px rgba(2,26,61,.05);
+  --shadow-xl:  0 12px 36px rgba(2,26,61,.11), 0 4px 10px rgba(2,26,61,.06);
+
+  /* Focus visible — anneau conforme RGAA */
+  --ring-focus:       0 0 0 3px rgba(2,26,61,.18);
+  --ring-focus-or:    0 0 0 3px rgba(242,177,14,.35);
+
+  /* ── Espacements — plus généreux pour l'aération ── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   28px;   /* Augmenté pour plus d'air */
+  --space-8:   36px;   /* Augmenté */
+  --space-10:  48px;   /* Augmenté */
+  --space-12:  56px;
+  --space-16:  72px;   /* Augmenté pour les empty states */
+
+  /* ── Transitions douces (minimalisme) ── */
+  --ease-out:   cubic-bezier(0.215, 0.610, 0.355, 1.000);
+  --ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1.000);
+  --duration-fast:   150ms;
+  --duration-base:   200ms;
+  --duration-slow:   300ms;
+
+  /* ── Sidebar ── */
+  --sidebar-width:           248px;
+  --sidebar-width-collapsed: 64px;
+  --navbar-height:           60px;
+
+  /* ── Z-index ── */
+  --z-sidebar:   100;
+  --z-navbar:    200;
+  --z-modal:     300;
+  --z-toast:     400;
+}
+
+/* ── Reset minimal ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base document ── */
+html {
+  font-size: var(--text-base);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Titres — Palatino (charte) ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--marine);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-bold);
+}
+
+h1 { font-size: var(--text-3xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-lg);  }
+h4 { font-size: var(--text-base); }
+
+/* ── Liens ── */
+a {
+  color: var(--marine);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+a:hover  { color: var(--or-text-hover); }
+a:focus-visible {
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--ring-focus);
+}
+
+/* ── Éléments de base ── */
+img, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font-family: var(--font-sans); }
+ul, ol { list-style: none; }
+p { line-height: var(--leading-loose); }

@@ -1,0 +1,154 @@
+{% extends "layouts/app.html" %}
+{% set active = 'contacts' %}
+{% block title %}Contacts — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">Carnet d'adresses</div>
+      <h1 class="page-title">Contacts</h1>
+      <p class="page-subtitle">Votre répertoire de personnes et d'entreprises ({{ contacts|length }})</p>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="{{ url_for('contacts.scan') }}" class="btn btn-secondary">
+        <i data-lucide="scan-line" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Scanner une carte
+      </a>
+      <a href="{{ url_for('contacts.new') }}" class="btn btn-accent">
+        <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Nouveau contact
+      </a>
+    </div>
+  </div>
+
+  {# ── Barre de recherche ── #}
+  <form method="get" action="{{ url_for('contacts.index') }}"
+        style="display:flex; gap:10px; align-items:center; margin-bottom:28px; max-width:540px;">
+    <label class="sr-only" for="q">Rechercher</label>
+    <input type="search" id="q" name="q" class="form-input"
+           value="{{ q }}" placeholder="Rechercher par nom ou entreprise…"
+           style="flex:1;">
+    <button type="submit" class="btn btn-primary">
+      <i data-lucide="search" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Rechercher
+    </button>
+    {% if q %}
+    <a href="{{ url_for('contacts.index') }}" class="btn btn-secondary">Réinitialiser</a>
+    {% endif %}
+  </form>
+
+  {% if contacts %}
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:56px;">Carte</th>
+            <th>Nom</th>
+            <th>Entreprise</th>
+            <th>Fonction</th>
+            <th>Coordonnées</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ct in contacts %}
+          <tr>
+            <td>
+              {% if ct.card_image %}
+              <a href="{{ url_for('static', filename=ct.card_image) }}" target="_blank"
+                 title="Voir la carte de visite">
+                <img src="{{ url_for('static', filename=ct.card_image) }}" alt="Carte"
+                     class="contact-card-thumb">
+              </a>
+              {% else %}
+              <span class="contact-card-thumb contact-card-thumb--empty" aria-hidden="true">
+                <i data-lucide="user" style="width:16px;height:16px;"></i>
+              </span>
+              {% endif %}
+            </td>
+            <td style="font-weight:600; color:var(--marine);">
+              {{ ct.first_name ~ ' ' if ct.first_name }}{{ ct.name }}
+              {% if ct.source == 'business_card_scan' %}
+              <span class="badge badge-pale" title="Ajouté par scan de carte"
+                    style="margin-left:6px;">IA</span>
+              {% endif %}
+            </td>
+            <td>{{ ct.company or '—' }}</td>
+            <td>{{ ct.role or '—' }}</td>
+            <td style="color:var(--muted); font-size:15px;">
+              {{ ct.email or '' }}{% if ct.email and ct.phone %}<br>{% endif %}{{ ct.phone or '' }}
+              {% if not ct.email and not ct.phone %}—{% endif %}
+            </td>
+            <td class="col-actions">
+              {# Passer du carnet au pipeline commercial #}
+              <form method="post" action="{{ url_for('contacts.promote', contact_id=ct.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Suivre « {{ ct.name }} » comme prospect ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-accent btn-sm"
+                        aria-label="Passer {{ ct.name }} en prospect">
+                  <i data-lucide="trending-up" style="width:15px;height:15px;vertical-align:-3px;"></i>
+                  Prospect
+                </button>
+              </form>
+              <a href="{{ url_for('contacts.edit', contact_id=ct.id) }}"
+                 class="btn btn-ghost btn-sm" aria-label="Modifier {{ ct.name }}">
+                <i data-lucide="pencil" style="width:15px;height:15px;"></i>
+              </a>
+              <form method="post" action="{{ url_for('contacts.delete', contact_id=ct.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Supprimer le contact « {{ ct.name }} » ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger btn-sm" aria-label="Supprimer {{ ct.name }}">
+                  <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon"><i data-lucide="contact"></i></div>
+    <h2 class="empty-state-title">
+      {% if q %}Aucun contact trouvé{% else %}Aucun contact pour le moment{% endif %}
+    </h2>
+    <p class="empty-state-desc">
+      {% if q %}
+        Aucun résultat pour « {{ q }} ». Essayez un autre terme.
+      {% else %}
+        Scannez une carte de visite ou ajoutez une personne à votre carnet.
+      {% endif %}
+    </p>
+    {% if q %}
+      <a href="{{ url_for('contacts.index') }}" class="btn btn-secondary">Voir tous les contacts</a>
+    {% else %}
+      <a href="{{ url_for('contacts.scan') }}" class="btn btn-accent">
+        <i data-lucide="scan-line" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Scanner une carte
+      </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <style>
+    .contact-card-thumb {
+      width: 44px; height: 30px; object-fit: cover;
+      border-radius: 6px; border: 1px solid var(--line);
+      display: inline-block; vertical-align: middle;
+      transition: transform var(--duration-fast);
+    }
+    a:hover > .contact-card-thumb { transform: scale(1.05); border-color: var(--or); }
+    .contact-card-thumb--empty {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--bg); color: var(--muted);
+    }
+  </style>
+
+{% endblock %}

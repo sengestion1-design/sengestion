@@ -1,0 +1,63 @@
+"""Configuration de l'application SenGestion.
+
+Deux bases de données :
+- MySQL (relationnel) : cœur métier — compétence CP5 + partie SQL de CP6.
+- MongoDB (NoSQL)    : logs d'activité & données IA — partie NoSQL de CP6.
+"""
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class Config:
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+
+    # --- MySQL (SQLAlchemy) ---
+    SQLALCHEMY_DATABASE_URI = (
+        f"mysql+pymysql://{os.getenv('DB_USER', 'root')}:"
+        f"{os.getenv('DB_PASSWORD', '')}@"
+        f"{os.getenv('DB_HOST', 'localhost')}:"
+        f"{os.getenv('DB_PORT', '3306')}/"
+        f"{os.getenv('DB_NAME', 'sengestion')}"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # --- MongoDB (PyMongo) ---
+    MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+    MONGO_DB = os.getenv("MONGO_DB", "sengestion_nosql")
+
+    # --- Sécurité / uploads ---
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 Mo
+    WTF_CSRF_ENABLED = True
+
+    # --- Email (Gmail SMTP) ---
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "true").lower() == "true"
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "sengestion1@gmail.com")
+
+    # --- IA (Claude Vision — scan de carte de visite / reçu) ---
+    ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+    # Modèle Vision utilisé pour l'extraction (surchargeable via .env)
+    ANTHROPIC_VISION_MODEL = os.getenv("ANTHROPIC_VISION_MODEL", "claude-sonnet-5")
+
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+
+class ProductionConfig(Config):
+    DEBUG = False
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+
+
+config = {
+    "development": DevelopmentConfig,
+    "production": ProductionConfig,
+    "default": DevelopmentConfig,
+}

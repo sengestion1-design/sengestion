@@ -1,0 +1,36 @@
+{% extends "layouts/base.html" %}
+{% block title %}Abonnement expiré — SenGestion{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card" style="text-align:center;">
+
+    <div class="auth-brand">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion" class="auth-logo">
+    </div>
+
+    <h1 class="auth-title">Accès expiré</h1>
+    <p class="auth-sub" style="margin-top:8px;">
+      {% if user.status == 'suspended' %}
+        Votre compte a été suspendu.
+      {% else %}
+        Votre période d'essai gratuit de 15 jours est terminée.
+      {% endif %}
+    </p>
+
+    <div class="banner-accent" style="margin:24px 0; text-align:left;">
+      Pour continuer à utiliser <strong>SenGestion</strong>, souscrivez à un
+      abonnement annuel. Contactez-nous pour activer votre compte.
+    </div>
+
+    <p style="font-size:16px; color:var(--muted);">
+      contact@sengestion.sn &nbsp;·&nbsp; +221 …
+    </p>
+
+    <p class="auth-alt" style="margin-top:24px;">
+      <a href="{{ url_for('auth.logout') }}">Se déconnecter</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

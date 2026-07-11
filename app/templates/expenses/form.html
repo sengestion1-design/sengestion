@@ -1,0 +1,86 @@
+{% extends "layouts/app.html" %}
+{% set active = 'expenses' %}
+{% set editing = expense is not none %}
+{% block title %}{{ 'Modifier' if editing else 'Nouvelle' }} dépense — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <a href="{{ url_for('expenses.index') }}" class="back-link">
+        <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Retour aux dépenses
+      </a>
+      <h1 class="page-title">{{ 'Modifier la dépense' if editing else 'Nouvelle dépense' }}</h1>
+      <p class="page-subtitle">
+        {{ 'Mettez à jour les informations de cette charge.' if editing
+           else 'Enregistrez une nouvelle charge de votre activité.' }}
+      </p>
+    </div>
+  </div>
+
+  {% set v_label = (form.label if form) or (expense.label if editing) or '' %}
+  {% set v_amount = (form.amount if form) or ('%0.0f'|format(expense.amount) if editing and expense.amount) or '' %}
+  {% set v_date = (form.expense_date if form)
+        or (expense.expense_date.isoformat() if editing and expense.expense_date)
+        or today %}
+  {% set v_cat = (form.category_id|int if form and form.category_id)
+        or (expense.category_id if editing) or 0 %}
+
+  <div class="card" style="max-width:640px;">
+    <form method="post"
+          action="{{ url_for('expenses.update', expense_id=expense.id) if editing
+                    else url_for('expenses.create') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label" for="label">
+          Libellé <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input class="form-input" type="text" id="label" name="label" required
+               maxlength="255" value="{{ v_label }}"
+               placeholder="Ex. Plein de carburant camionnette">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="amount">
+          Montant (FCFA) <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input class="form-input" type="number" id="amount" name="amount" required
+               min="1" step="1" inputmode="numeric" value="{{ v_amount }}"
+               placeholder="Ex. 25000"
+               aria-describedby="amount-help">
+        <p id="amount-help" class="form-hint">Montant en francs CFA, supérieur à 0.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="expense_date">Date</label>
+        <input class="form-input" type="date" id="expense_date" name="expense_date"
+               value="{{ v_date }}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="category_id">Catégorie</label>
+        <select class="form-input" id="category_id" name="category_id">
+          <option value="">— Sans catégorie —</option>
+          {% for cat in categories %}
+          <option value="{{ cat.id }}" {{ 'selected' if v_cat == cat.id }}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+        <p class="form-hint">
+          <a href="{{ url_for('expenses.categories') }}" style="color:var(--marine);">
+            Gérer les catégories
+          </a>
+        </p>
+      </div>
+
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+        <button type="submit" class="btn btn-accent">
+          <i data-lucide="check" style="width:16px;height:16px;vertical-align:-3px;"></i>
+          {{ 'Enregistrer les modifications' if editing else 'Enregistrer la dépense' }}
+        </button>
+        <a href="{{ url_for('expenses.index') }}" class="btn btn-ghost">Annuler</a>
+      </div>
+    </form>
+  </div>
+
+{% endblock %}

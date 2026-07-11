@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SenGestion — Maquette Éditoriale</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --marine:   #021A3D;
+    --or:       #F2B10E;
+    --jaune:    #E8E7A2;
+    --or-fonce: #8F6600;
+    --gris:     #4A554F;
+    --bordure:  #D9DCDB;
+    --blanc:    #ffffff;
+    --fond:     #F9FAFB;
+  }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #e9eaec;
+    color: var(--marine);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* ─── SÉPARATEUR D'ÉCRANS ─────────────────────────────────── */
+  .screen-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 28px 0;
+    background: #d4d6d9;
+  }
+  .screen-separator::before,
+  .screen-separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #b0b3b8;
+    max-width: 280px;
+  }
+  .screen-label {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #7a7d82;
+  }
+
+  /* ─── LAYOUT PRINCIPAL ────────────────────────────────────── */
+  .screen {
+    max-width: 1440px;
+    margin: 0 auto;
+    background: var(--fond);
+    box-shadow: 0 0 40px rgba(2,26,61,0.12);
+  }
+
+  /* ─── NAVBAR ──────────────────────────────────────────────── */
+  .navbar {
+    background: var(--marine);
+    height: 62px;
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    gap: 0;
+    border-bottom: 3px solid var(--or);
+    position: relative;
+    z-index: 10;
+  }
+  .navbar-logo {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-right: auto;
+  }
+  .logo-text {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: var(--blanc);
+    letter-spacing: 0.04em;
+  }
+  .logo-text span {
+    color: var(--or);
+  }
+  .logo-tagline {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .nav-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,0.65);
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    border-radius: 6px;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-icon-btn:hover { color: var(--or); }
+  .notif-dot {
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 7px; height: 7px;
+    background: var(--or);
+    border-radius: 50%;
+    border: 1.5px solid var(--marine);
+  }
+  .nav-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--or);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Palatino Linotype', Palatino, serif;
+    font-size: 14px;
+    color: var(--marine);
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── LAYOUT CORPS ────────────────────────────────────────── */
+  .app-body {
+    display: flex;
+    min-height: calc(100vh - 62px);
+  }
+
+  /* ─── SIDEBAR ─────────────────────────────────────────────── */
+  .sidebar {
+    width: 228px;
+    min-width: 228px;
+    background: var(--marine);
+    padding: 32px 0 24px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .sidebar-section-label {
+    font-size: 9px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+    padding: 0 24px 10px;
+    margin-top: 24px;
+  }
+  .sidebar-section-label:first-child { margin-top: 0; }
+  .sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 24px;
+    color: rgba(255,255,255,0.6);
+    font-size: 13.5px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.18s;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+  .sidebar-nav-item:hover {
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.05);
+  }
+  .sidebar-nav-item.active {
+    color: var(--blanc);
+    border-left-color: var(--or);
+    background: rgba(242,177,14,0.10);
+    font-weight: 600;
+  }
+  .sidebar-nav-item svg { flex-shrink: 0; opacity: 0.85; }
+  .sidebar-nav-item.active svg { opacity: 1; }
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 16px 24px 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  .sidebar-user-avatar {
+    width: 30px; height: 30px;
+    background: rgba(242,177,14,0.2);
+    border-radius: 50%;
+    border: 1px solid rgba(242,177,14,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-family: Palatino, serif;
+    font-size: 12px;
+    color: var(--or);
+  }
+  .sidebar-user-name {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.2;
+  }
+  .sidebar-user-role {
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── CONTENU PRINCIPAL ───────────────────────────────────── */
+  .main-content {
+    flex: 1;
+    padding: 44px 52px 52px;
+    background: var(--fond);
+    overflow-x: hidden;
+  }
+
+  /* ─── EN-TÊTE ÉDITORIAL ───────────────────────────────────── */
+  .editorial-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .editorial-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--or-fonce);
+    margin-bottom: 6px;
+    font-family: Arial, sans-serif;
+  }
+  .editorial-title {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 52px;
+    font-weight: normal;
+    color: var(--marine);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+  .editorial-title em {
+    color: var(--or-fonce);
+    font-style: italic;
+  }
+  .editorial-date {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--gris);
+    text-align: right;
+    font-family: Arial, sans-serif;
+    padding-bottom: 8px;
+  }
+  .editorial-rule {
+    border: none;
+    border-top: 2px solid var(--marine);
+    margin: 12px 0 4px;
+  }
+  .editorial-rule-thin {
+    border: none;
+    border-top: 1px solid var(--bordure);
+    margin: 0 0 36px;
+  }
+
+  /* ─── KPI ÉDITORIAUX ──────────────────────────────────────── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-bottom: 48px;
+    border: 1px solid var(--bordure);
+    background: var(--blanc);
+  }
+  .kpi-item {
+    padding: 28px 28px 24px;
+    border-right: 1px solid var(--bordure);
+    position: relative;
+  }
+  .kpi-item:last-child { border-right: none; }
+  .kpi-number-label {
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-bottom: 10px;
+    font-family: Arial, sans-serif;
+  }
+  .kpi-number {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 38px;
+    font-weight: normal;
+    color: var(--marine);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .kpi-number .unit {
+    font-size: 14px;
+    color: var(--gris);
+    font-family: Arial, sans-serif;
+    letter-spacing: 0;
+    margin-left: 2px;
+  }
+  .kpi-trend {
+    font-size: 11px;
+    color: var(--gris);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .kpi-trend.up { color: #1a7a4a; }
+  .kpi-trend.down { color: #c0392b; }
+  .kpi-accent-line {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--or);
+  }
+
+  /* ─── DOUBLE COLONNE ──────────────────────────────────────── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 40px;
+    margin-bottom: 48px;
+  }
+
+  /* ─── SECTION TRÉSORERIE ──────────────────────────────────── */
+  .tresorerie-block {
+    background: var(--marine);
+    padding: 36px 36px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .tresorerie-block::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; right: -20px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    border: 1px solid rgba(242,177,14,0.15);
+  }
+  .tresorerie-block::before {
+    content: '';
+    position: absolute;
+    bottom: 20px; right: 20px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    border: 1px solid rgba(242,177,14,0.1);
+  }
+  .tresorerie-eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 6px;
+  }
+  .tresorerie-title {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 17px;
+    font-weight: normal;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 18px;
+    letter-spacing: 0.02em;
+  }
+  .tresorerie-amount {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 54px;
+    font-weight: normal;
+    color: var(--or);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .tresorerie-currency {
+    font-size: 13px;
+    color: rgba(242,177,14,0.6);
+    letter-spacing: 0.18em;
+    margin-bottom: 28px;
+  }
+  .tresorerie-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .treso-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .treso-bar-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    width: 64px;
+    flex-shrink: 0;
+  }
+  .treso-bar-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .treso-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--or);
+  }
+  .treso-bar-fill.expense { background: rgba(255,255,255,0.35); }
+  .treso-bar-value {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  /* ─── ACTIVITÉ RÉCENTE ────────────────────────────────────── */
+  .activity-block {
+    background: var(--blanc);
+    border: 1px solid var(--bordure);
+    padding: 28px 28px 8px;
+  }
+  .block-eyebrow {
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-bottom: 6px;
+  }
+  .block-title {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 20px;
+    color: var(--marine);
+    font-weight: normal;
+    margin-bottom: 20px;
+    letter-spacing: 0.01em;
+  }
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-top: 1px solid var(--bordure);
+  }
+  .activity-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .activity-icon.invoice { background: rgba(242,177,14,0.12); }
+  .activity-icon.payment { background: rgba(26,122,74,0.1); }
+  .activity-icon.quote   { background: rgba(2,26,61,0.07); }
+  .activity-body { flex: 1; min-width: 0; }
+  .activity-desc {
+    font-size: 13.5px;
+    color: var(--marine);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .activity-desc strong { font-weight: 600; }
+  .activity-meta {
+    font-size: 11px;
+    color: var(--gris);
+    letter-spacing: 0.02em;
+  }
+  .activity-amount {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 15px;
+    color: var(--marine);
+    flex-shrink: 0;
+    text-align: right;
+    padding-top: 2px;
+  }
+
+  /* ─── RELANCES & ALERTES ──────────────────────────────────── */
+  .alert-strip {
+    background: var(--blanc);
+    border: 1px solid var(--bordure);
+    border-left: 4px solid var(--or);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 0;
+  }
+  .alert-strip + .alert-strip {
+    border-top: none;
+  }
+  .alert-label {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--or-fonce);
+    margin-bottom: 2px;
+  }
+  .alert-text {
+    font-size: 13px;
+    color: var(--marine);
+  }
+  .alert-text strong { font-weight: 600; }
+  .alert-amount {
+    margin-left: auto;
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 18px;
+    color: var(--marine);
+    flex-shrink: 0;
+  }
+  .alert-action {
+    background: none;
+    border: 1px solid var(--bordure);
+    color: var(--marine);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 2px;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .alert-action:hover {
+    background: var(--marine);
+    color: var(--blanc);
+    border-color: var(--marine);
+  }
+  .alerts-block { margin-top: 0; }
+  .alerts-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  /* ─── TAGS / BADGES ───────────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+  }
+  .badge-paid    { background: rgba(26,122,74,0.1);  color: #1a5c35; }
+  .badge-sent    { background: rgba(2,26,61,0.08);   color: var(--marine); }
+  .badge-pending { background: rgba(242,177,14,0.18); color: var(--or-fonce); }
+  .badge-draft   { background: rgba(74,85,79,0.1);   color: var(--gris); }
+  .badge-refused { background: rgba(192,57,43,0.1);  color: #8b1a10; }
+
+  /* ─── BOUTON PRIMAIRE ─────────────────────────────────────── */
+  .btn-primary {
+    background: var(--or);
+    color: var(--marine);
+    border: none;
+    padding: 12px 26px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.18s;
+    font-family: Arial, sans-serif;
+  }
+  .btn-primary:hover { background: #d9990c; }
+  .btn-outline {
+    background: none;
+    border: 1px solid var(--bordure);
+    color: var(--marine);
+    padding: 10px 20px;
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.18s;
+    font-family: Arial, sans-serif;
+  }
+  .btn-outline:hover {
+    background: var(--marine);
+    color: var(--blanc);
+    border-color: var(--marine);
+  }
+
+  /* ─── TABLEAU ÉDITORIAL ───────────────────────────────────── */
+  .editorial-table-wrap {
+    background: var(--blanc);
+    border: 1px solid var(--bordure);
+    overflow: hidden;
+  }
+  .editorial-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .editorial-table thead tr {
+    border-bottom: 2px solid var(--marine);
+  }
+  .editorial-table th {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gris);
+    padding: 14px 20px;
+    text-align: left;
+    font-weight: normal;
+    font-family: Arial, sans-serif;
+    white-space: nowrap;
+  }
+  .editorial-table th:first-child { padding-left: 28px; }
+  .editorial-table th:last-child { padding-right: 28px; text-align: right; }
+  .editorial-table tbody tr {
+    border-bottom: 1px solid var(--bordure);
+    transition: background 0.15s;
+  }
+  .editorial-table tbody tr:last-child { border-bottom: none; }
+  .editorial-table tbody tr:hover { background: rgba(2,26,61,0.025); }
+  .editorial-table td {
+    padding: 16px 20px;
+    color: var(--marine);
+    vertical-align: middle;
+  }
+  .editorial-table td:first-child { padding-left: 28px; }
+  .editorial-table td:last-child { padding-right: 28px; text-align: right; }
+  .td-num {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 14px;
+    color: var(--marine);
+    font-weight: normal;
+    white-space: nowrap;
+  }
+  .td-client {
+    font-weight: 600;
+    color: var(--marine);
+  }
+  .td-client-sub {
+    font-size: 11px;
+    color: var(--gris);
+    font-weight: normal;
+    margin-top: 2px;
+  }
+  .td-amount {
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    font-size: 17px;
+    white-space: nowrap;
+  }
+  .td-date {
+    font-size: 12px;
+    color: var(--gris);
+    white-space: nowrap;
+  }
+  .td-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--bordure);
+    padding: 5px 8px;
+    border-radius: 2px;
+    cursor: pointer;
+    color: var(--gris);
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover {
+    border-color: var(--marine);
+    color: var(--marine);
+    background: rgba(2,26,61,0.04);
+  }
+
+  /* ─── FILTRES DISCRETS ────────────────────────────────────── */
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-pill {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 7px 16px;
+    border: 1px solid var(--bordure);
+    background: var(--blanc);
+    color: var(--gris);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    font-family: Arial, sans-serif;
+  }
+  .filter-pill:hover { border-color: var(--marine); color: var(--marine); }
+  .filter-pill.active {
+    background: var(--marine);
+    color: var(--blanc);
+    border-color: var(--marine);
+  }
+  .filter-separator {
+    width: 1px;
+    height: 20px;
+    background: var(--bordure);
+    margin: 0 4px;
+  }
+  .filter-search {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--bordure);
+    background: var(--blanc);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .filter-search input {
+    border: none;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    color: var(--marine);
+    background: transparent;
+    outline: none;
+    width: 200px;
+    font-family: Arial, sans-serif;
+  }
+  .filter-search input::placeholder { color: var(--gris); opacity: 0.7; }
+  .filter-search-icon {
+    padding: 8px 12px;
+    color: var(--gris);
+    background: var(--fond);
+    border-left: 1px solid var(--bordure);
+    display: flex;
+    align-items: center;
+  }
+
+  /* ─── TABLE FOOTER ────────────────────────────────────────── */
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-top: 1px solid var(--bordure);
+    background: var(--blanc);
+  }
+  .table-footer-info {
+    font-size: 11.5px;
+    color: var(--gris);
+    letter-spacing: 0.04em;
+  }
+  .table-pagination {
+    display: flex;
+    gap: 4px;
+  }
+  .page-btn {
+    width: 30px; height: 30px;
+    border: 1px solid var(--bordure);
+    background: var(--blanc);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    color: var(--gris);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .page-btn.active {
+    background: var(--marine);
+    color: var(--blanc);
+    border-color: var(--marine);
+  }
+  .page-btn:hover:not(.active) {
+    border-color: var(--marine);
+    color: var(--marine);
+  }
+
+  /* ─── SECTION TITRE (Devis) ───────────────────────────────── */
+  .section-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    padding-bottom: 8px;
+  }
+
+  /* ─── KPI ROW DEVIS ───────────────────────────────────────── */
+  .kpi-row-devis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-bottom: 40px;
+    border: 1px solid var(--bordure);
+    background: var(--blanc);
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ÉCRAN A — TABLEAU DE BORD
+═══════════════════════════════════════════════════════════════ -->
+<div class="screen" id="ecran-a">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-logo">
+      <span class="logo-text">Sen<span>Gestion</span></span>
+      <span class="logo-tagline">Gestion & performance</span>
+    </div>
+    <div class="navbar-actions">
+      <button class="nav-icon-btn" title="Recherche">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="nav-icon-btn" title="Notifications" style="position:relative">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="nav-icon-btn" title="Paramètres">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <div class="nav-avatar" title="Mamadou Diallo">MD</div>
+    </div>
+  </nav>
+
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section-label">Navigation</div>
+
+      <a class="sidebar-nav-item active" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Tableau de bord
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Contacts &amp; Clients
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Devis &amp; Factures
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Charges &amp; Dépenses
+      </a>
+
+      <div class="sidebar-section-label" style="margin-top:20px">Analyse</div>
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Rapports
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.38 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.44 16z"/></svg>
+        Relances
+      </a>
+
+      <div class="sidebar-bottom">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar">MD</div>
+          <div>
+            <div class="sidebar-user-name">Mamadou Diallo</div>
+            <div class="sidebar-user-role">Administrateur</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENU -->
+    <main class="main-content">
+
+      <!-- EN-TÊTE ÉDITORIAL -->
+      <div class="editorial-header">
+        <div>
+          <div class="editorial-eyebrow">Vue d'ensemble — Juillet 2026</div>
+          <h1 class="editorial-title">Tableau de<br><em>bord</em></h1>
+        </div>
+        <div class="editorial-date">
+          Mercredi 9 juillet 2026<br>
+          <span style="opacity:.6">Dernière mise à jour : 08h42</span>
+        </div>
+      </div>
+      <hr class="editorial-rule">
+      <hr class="editorial-rule-thin">
+
+      <!-- KPI ROW -->
+      <div class="kpi-row">
+        <div class="kpi-item">
+          <div class="kpi-accent-line"></div>
+          <div class="kpi-number-label">Chiffre d'affaires — juillet</div>
+          <div class="kpi-number">18,4<span class="unit">M FCFA</span></div>
+          <div class="kpi-trend up">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            +12 % vs juin
+          </div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-number-label">Factures impayées</div>
+          <div class="kpi-number">7,2<span class="unit">M FCFA</span></div>
+          <div class="kpi-trend down">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+            14 factures en attente
+          </div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-number-label">Devis envoyés</div>
+          <div class="kpi-number">23<span class="unit" style="font-size:13px"> devis</span></div>
+          <div class="kpi-trend" style="color:var(--gris)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Taux d'acceptation 68 %
+          </div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-number-label">Nouveaux clients</div>
+          <div class="kpi-number">8<span class="unit" style="font-size:13px"> ce mois</span></div>
+          <div class="kpi-trend up">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            +3 vs juin
+          </div>
+        </div>
+      </div>
+
+      <!-- DEUX COLONNES -->
+      <div class="two-col">
+
+        <!-- TRÉSORERIE -->
+        <div class="tresorerie-block">
+          <div class="tresorerie-eyebrow">Solde courant</div>
+          <div class="tresorerie-title">Position de trésorerie</div>
+          <div class="tresorerie-amount">34 750 000</div>
+          <div class="tresorerie-currency">FRANCS CFA</div>
+          <div class="tresorerie-bars">
+            <div class="treso-bar-row">
+              <div class="treso-bar-label">Recettes</div>
+              <div class="treso-bar-track"><div class="treso-bar-fill" style="width:78%"></div></div>
+              <div class="treso-bar-value">18 400 000</div>
+            </div>
+            <div class="treso-bar-row">
+              <div class="treso-bar-label">Charges</div>
+              <div class="treso-bar-track"><div class="treso-bar-fill expense" style="width:42%"></div></div>
+              <div class="treso-bar-value">7 820 000</div>
+            </div>
+            <div class="treso-bar-row">
+              <div class="treso-bar-label">Résultat</div>
+              <div class="treso-bar-track"><div class="treso-bar-fill" style="width:55%; background: rgba(232,231,162,0.9)"></div></div>
+              <div class="treso-bar-value">10 580 000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIVITÉ RÉCENTE -->
+        <div class="activity-block">
+          <div class="block-eyebrow">Historique</div>
+          <div class="block-title">Activité récente</div>
+
+          <div class="activity-item">
+            <div class="activity-icon invoice">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8F6600" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="activity-body">
+              <div class="activity-desc"><strong>Facture FAC-2026-0089</strong> émise</div>
+              <div class="activity-meta">Groupe Teranga BTP · il y a 2 h</div>
+            </div>
+            <div class="activity-amount">2 450 000</div>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon payment">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a7a4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="activity-body">
+              <div class="activity-desc">Paiement reçu — <strong>FAC-2026-0081</strong></div>
+              <div class="activity-meta">Sénélec Distribution · 09:14</div>
+            </div>
+            <div class="activity-amount" style="color:#1a5c35">1 800 000</div>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon quote">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--marine)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="activity-body">
+              <div class="activity-desc">Devis <strong>DEV-2026-0043</strong> accepté</div>
+              <div class="activity-meta">Pharmacie Centrale Dakar · hier</div>
+            </div>
+            <div class="activity-amount">680 000</div>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon invoice">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8F6600" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="activity-body">
+              <div class="activity-desc">Relance envoyée — <strong>FAC-2026-0072</strong></div>
+              <div class="activity-meta">SOBOA Sénégal · hier, 15:30</div>
+            </div>
+            <div class="activity-amount">3 200 000</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ALERTES RELANCES -->
+      <div>
+        <div class="alerts-header">
+          <div>
+            <div class="block-eyebrow">Urgences</div>
+            <div class="block-title" style="margin-bottom:0">Factures à relancer</div>
+          </div>
+          <button class="btn-outline" style="margin-bottom:2px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.38 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.44 16z"/></svg>
+            Tout relancer
+          </button>
+        </div>
+        <div style="margin-top:12px">
+          <div class="alert-strip">
+            <div>
+              <div class="alert-label">En retard — 42 jours</div>
+              <div class="alert-text"><strong>Groupe Atlantic Sénégal</strong> · FAC-2026-0058</div>
+            </div>
+            <div class="alert-amount">4 750 000 FCFA</div>
+            <button class="alert-action">Relancer</button>
+          </div>
+          <div class="alert-strip">
+            <div>
+              <div class="alert-label">En retard — 28 jours</div>
+              <div class="alert-text"><strong>Compagnie Bancaire de l'Afrique de l'Ouest</strong> · FAC-2026-0063</div>
+            </div>
+            <div class="alert-amount">2 200 000 FCFA</div>
+            <button class="alert-action">Relancer</button>
+          </div>
+          <div class="alert-strip" style="border-left-color: var(--bordure); opacity:.7">
+            <div>
+              <div class="alert-label">Échéance demain</div>
+              <div class="alert-text"><strong>Orange Sénégal Business</strong> · FAC-2026-0086</div>
+            </div>
+            <div class="alert-amount">1 350 000 FCFA</div>
+            <button class="alert-action">Prévisualiser</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- SÉPARATEUR -->
+<div class="screen-separator">
+  <span class="screen-label">Écran A — Tableau de bord &nbsp;·&nbsp; Écran B — Devis &amp; Factures</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ÉCRAN B — DEVIS & FACTURES
+═══════════════════════════════════════════════════════════════ -->
+<div class="screen" id="ecran-b">
+
+  <!-- NAVBAR (identique) -->
+  <nav class="navbar">
+    <div class="navbar-logo">
+      <span class="logo-text">Sen<span>Gestion</span></span>
+      <span class="logo-tagline">Gestion & performance</span>
+    </div>
+    <div class="navbar-actions">
+      <button class="nav-icon-btn" title="Recherche">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="nav-icon-btn" style="position:relative" title="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="nav-icon-btn" title="Paramètres">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <div class="nav-avatar">MD</div>
+    </div>
+  </nav>
+
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section-label">Navigation</div>
+
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Tableau de bord
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Contacts &amp; Clients
+      </a>
+      <a class="sidebar-nav-item active" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Devis &amp; Factures
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Charges &amp; Dépenses
+      </a>
+
+      <div class="sidebar-section-label" style="margin-top:20px">Analyse</div>
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Rapports
+      </a>
+      <a class="sidebar-nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.38 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.44 16z"/></svg>
+        Relances
+      </a>
+
+      <div class="sidebar-bottom">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar">MD</div>
+          <div>
+            <div class="sidebar-user-name">Mamadou Diallo</div>
+            <div class="sidebar-user-role">Administrateur</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENU DEVIS -->
+    <main class="main-content">
+
+      <!-- EN-TÊTE ÉDITORIAL -->
+      <div class="editorial-header">
+        <div>
+          <div class="editorial-eyebrow">Documents commerciaux — Juillet 2026</div>
+          <h1 class="editorial-title">Devis &amp; <em>Factures</em></h1>
+        </div>
+        <div class="section-actions">
+          <button class="btn-outline">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
+            Exporter
+          </button>
+          <button class="btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nouveau devis
+          </button>
+        </div>
+      </div>
+      <hr class="editorial-rule">
+      <hr class="editorial-rule-thin">
+
+      <!-- KPI DEVIS -->
+      <div class="kpi-row-devis" style="border: 1px solid var(--bordure); background: var(--blanc); display: grid; grid-template-columns: repeat(4,1fr); margin-bottom: 40px;">
+        <div class="kpi-item">
+          <div class="kpi-accent-line" style="background: var(--marine)"></div>
+          <div class="kpi-number-label">Total devis en cours</div>
+          <div class="kpi-number">23<span class="unit" style="font-size:13px"> devis</span></div>
+          <div class="kpi-trend" style="color:var(--gris)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            En attente de réponse
+          </div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-accent-line"></div>
+          <div class="kpi-number-label">Valeur totale engagée</div>
+          <div class="kpi-number">31,6<span class="unit">M FCFA</span></div>
+          <div class="kpi-trend up">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            +18 % vs juin
+          </div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-number-label">Taux d'acceptation</div>
+          <div class="kpi-number">68<span class="unit">%</span></div>
+          <div class="kpi-trend up">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            +5 pts vs moy. annuelle
+          </div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-number-label">Délai moyen de réponse</div>
+          <div class="kpi-number">4,2<span class="unit" style="font-size:13px"> jours</span></div>
+          <div class="kpi-trend" style="color:var(--gris)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Stable vs mai
+          </div>
+        </div>
+      </div>
+
+      <!-- ONGLETS + FILTRES -->
+      <div style="display:flex; align-items:center; gap:0; margin-bottom:24px; border-bottom:2px solid var(--bordure);">
+        <button style="padding:10px 22px; background:none; border:none; border-bottom:2px solid var(--marine); margin-bottom:-2px; color:var(--marine); font-size:12.5px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700; cursor:pointer; font-family:Arial,sans-serif;">Devis</button>
+        <button style="padding:10px 22px; background:none; border:none; border-bottom:2px solid transparent; color:var(--gris); font-size:12.5px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:Arial,sans-serif;">Factures</button>
+        <button style="padding:10px 22px; background:none; border:none; border-bottom:2px solid transparent; color:var(--gris); font-size:12.5px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:Arial,sans-serif;">Avoirs</button>
+      </div>
+
+      <!-- FILTRES STATUT -->
+      <div class="filter-row">
+        <button class="filter-pill active">Tous (23)</button>
+        <button class="filter-pill">Envoyés (9)</button>
+        <button class="filter-pill">Acceptés (7)</button>
+        <button class="filter-pill">En attente (4)</button>
+        <button class="filter-pill">Brouillons (2)</button>
+        <button class="filter-pill">Refusés (1)</button>
+        <div class="filter-separator"></div>
+        <div class="filter-search">
+          <input type="text" placeholder="Rechercher un devis…">
+          <div class="filter-search-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLEAU DEVIS -->
+      <div class="editorial-table-wrap">
+        <table class="editorial-table">
+          <thead>
+            <tr>
+              <th>N° Devis</th>
+              <th>Client</th>
+              <th>Objet</th>
+              <th>Montant</th>
+              <th>Statut</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="td-num">DEV-2026-0051</span></td>
+              <td>
+                <div class="td-client">Groupe Teranga BTP</div>
+                <div class="td-client-sub">Dakar — BTP &amp; Travaux</div>
+              </td>
+              <td style="color:var(--gris); font-size:13px;">Fourniture matériaux construction</td>
+              <td><span class="td-amount">8 400 000</span> <span style="font-size:11px;color:var(--gris)">FCFA</span></td>
+              <td><span class="badge badge-pending">En attente</span></td>
+              <td><span class="td-date">05 juil. 2026</span></td>
+              <td>
+                <div class="td-actions">
+                  <button class="icon-btn" title="Voir">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  <button class="icon-btn" title="Modifier">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="icon-btn" title="Envoyer">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="td-num">DEV-2026-0050</span></td>
+              <td>
+                <div class="td-client">Pharmacie Centrale Dakar</div>
+                <div class="td-client-sub">Dakar — Santé</div>
+              </td>
+              <td style="color:var(--gris); font-size:13px;">Logiciels de gestion officine</td>
+              <td><span class="td-amount">1 200 000</span> <span style="font-size:11px;color:var(--gris)">FCFA</span></td>
+              <td><span class="badge badge-paid">Accepté</span></td>
+              <td><span class="td-date">03 juil. 2026</span></td>
+              <td>
+                <div class="td-actions">
+                  <button class="icon-btn" title="Voir">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  <button class="icon-btn" title="Convertir en facture">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="td-num">DEV-2026-0049</span></td>
+              <td>
+                <div class="td-client">SOBOA Sénégal</div>
+                <div class="td-client-sub">Thiès — Agroalimentaire</div>
+              </td>
+              <td style="color:var(--gris); font-size:13px;">Maintenance équipements industriels</td>
+              <td><span class="td-amount">5 800 000</span> <span style="font-size:11px;color:var(--gris)">FCFA</span></td>
+              <td><span class="badge badge-sent">Envoyé</span></td>
+              <td><span class="td-date">02 juil. 2026</span></td>
+              <td>
+                <div class="td-actions">
+                  <button class="icon-btn" title="Voir">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  <button class="icon-btn" title="Relancer">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="td-num">DEV-2026-0048</span></td>
+              <td>
+                <div class="td-client">Orange Sénégal Business</div>
+                <div class="td-client-sub">Dakar — Télécoms</div>
+              </td>
+              <td style="color:var(--gris); font-size:13px;">Prestations conseil digital</td>
+              <td><span class="td-amount">3 500 000</span> <span style="font-size:11px;color:var(--gris)">FCFA</span></td>
+              <td><span class="badge badge-paid">Accepté</span></td>
+              <td><span class="td-date">28 juin 2026</span></td>
+              <td>
+                <div class="td-actions">
+                  <button class="icon-btn" title="Voir">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  <button class="icon-btn" title="Convertir en facture">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="td-num">DEV-2026-0047</span></td>
+              <td>
+                <div class="td-client">Compagnie Bancaire AOF</div>
+                <div class="td-client-sub">Dakar — Finance</div>
+              </td>
+              <td style="color:var(--gris); font-size:13px;">Audit &amp; conformité SYSCOHADA</td>
+              <td><span class="td-amount">2 750 000</span> <span style="font-size:11px;color:var(--gris)">FCFA</span></td>
+              <td><span class="badge badge-draft">Brouillon</span></td>
+              <td><span class="td-date">26 juin 2026</span></td>
+              <td>
+                <div class="td-actions">
+                  <button class="icon-btn" title="Éditer">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="icon-btn" title="Envoyer">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="td-num">DEV-2026-0046</span></td>
+              <td>
+                <div class="td-client">Sénélec Distribution</div>
+                <div class="td-client-sub">Dakar — Énergie</div>
+              </td>
+              <td style="color:var(--gris); font-size:13px;">Fourniture matériels électriques</td>
+              <td><span class="td-amount">12 100 000</span> <span style="font-size:11px;color:var(--gris)">FCFA</span></td>
+              <td><span class="badge badge-sent">Envoyé</span></td>
+              <td><span class="td-date">24 juin 2026</span></td>
+              <td>
+                <div class="td-actions">
+                  <button class="icon-btn" title="Voir">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  <button class="icon-btn" title="Modifier">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="td-num">DEV-2026-0045</span></td>
+              <td>
+                <div class="td-client">SAGEB Transport</div>
+                <div class="td-client-sub">Saint-Louis — Logistique</div>
+              </td>
+              <td style="color:var(--gris); font-size:13px;">Gestion flotte véhicules</td>
+              <td><span class="td-amount">680 000</span> <span style="font-size:11px;color:var(--gris)">FCFA</span></td>
+              <td><span class="badge badge-refused">Refusé</span></td>
+              <td><span class="td-date">20 juin 2026</span></td>
+              <td>
+                <div class="td-actions">
+                  <button class="icon-btn" title="Voir">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  <button class="icon-btn" title="Dupliquer">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <div class="table-footer-info">Affichage 1–7 sur 23 devis</div>
+          <div class="table-pagination">
+            <button class="page-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

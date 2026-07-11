@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SenGestion — La solution de gestion complète pour les PME sénégalaises. Devis, factures, IA, relances automatiques." />
+  <title>SenGestion — La gestion de votre PME, simplifiée</title>
+  <style>
+    /* ===========================
+       DESIGN TOKENS
+    =========================== */
+    :root {
+      --marine:     #021A3D;
+      --marine-700: #04264f;
+      --or:         #F2B10E;
+      --or-600:     #d99e0b;
+      --or-text:    #8F6600;
+      --jaune-pale: #E8E7A2;
+      --bg:         #F9FAFB;
+      --surface:    #FFFFFF;
+      --ink:        #021A3D;
+      --muted:      #4A554F;
+      --line:       #D9DCDB;
+      --font-serif: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+      --font-sans:  Arial, Helvetica, sans-serif;
+      --radius-btn: 8px;
+      --radius-card:12px;
+      --shadow-sm:  0 1px 3px rgba(2,26,61,.08);
+      --shadow-md:  0 4px 12px rgba(2,26,61,.10);
+      --shadow-lg:  0 8px 32px rgba(2,26,61,.14);
+    }
+
+    /* ===========================
+       RESET & BASE
+    =========================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      font-size: 16px;
+      color: var(--ink);
+      background: var(--bg);
+      overflow-x: hidden;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+
+    /* ===========================
+       TYPOGRAPHY
+    =========================== */
+    h1, h2, h3, .serif {
+      font-family: var(--font-serif);
+      font-weight: normal;
+      line-height: 1.2;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+    h2 { font-size: clamp(1.6rem, 3.5vw, 2.4rem); }
+    h3 { font-size: 1.15rem; }
+    p  { line-height: 1.7; color: var(--muted); }
+    .text-marine { color: var(--marine); }
+    .text-or     { color: var(--or-text); }
+
+    /* ===========================
+       LAYOUT
+    =========================== */
+    .container {
+      width: 100%;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    section { padding: 96px 0; }
+    .section-label {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--or-text);
+      background: rgba(242,177,14,.12);
+      border: 1px solid rgba(242,177,14,.35);
+      border-radius: 100px;
+      padding: 4px 14px;
+      margin-bottom: 20px;
+    }
+    .section-header {
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto 64px;
+    }
+    .section-header p {
+      margin-top: 14px;
+      font-size: 1.05rem;
+    }
+
+    /* ===========================
+       BUTTONS
+    =========================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: var(--radius-btn);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: background .2s, transform .15s, box-shadow .2s;
+    }
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(2,26,61,.20);
+    }
+    .btn-primary {
+      background: var(--marine);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--marine-700);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-accent {
+      background: var(--or);
+      color: var(--marine);
+    }
+    .btn-accent:hover {
+      background: var(--or-600);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(242,177,14,.4);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--marine);
+      border: 1.5px solid var(--marine);
+    }
+    .btn-ghost:hover {
+      background: var(--marine);
+      color: #fff;
+    }
+
+    /* ===========================
+       HEADER / NAV
+    =========================== */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(2, 26, 61, .96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      transition: box-shadow .3s;
+    }
+    .header.scrolled {
+      box-shadow: 0 2px 20px rgba(2,26,61,.25);
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+    .logo {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      color: #fff;
+      letter-spacing: -.01em;
+    }
+    .logo span {
+      color: var(--or);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,.78);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-login {
+      color: rgba(255,255,255,.78);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-login:hover { color: #fff; }
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: .3s;
+    }
+
+    /* ===========================
+       HERO
+    =========================== */
+    .hero {
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      background: var(--marine);
+    }
+    /* Fond géométrique abstrait */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      right: -10%;
+      width: 70vw;
+      height: 70vw;
+      max-width: 900px;
+      max-height: 900px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(242,177,14,.10) 0%, transparent 70%);
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      bottom: -15%;
+      left: -8%;
+      width: 50vw;
+      height: 50vw;
+      max-width: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(242,177,14,.06) 0%, transparent 70%);
+    }
+    /* Grille de points subtile */
+    .hero-dots {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    /* Ligne décorative or */
+    .hero-line {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--or), transparent);
+      opacity: .7;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      padding: 120px 0 80px;
+    }
+    .hero-text { }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(242,177,14,.15);
+      border: 1px solid rgba(242,177,14,.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      margin-bottom: 28px;
+      color: var(--or);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+    .hero-badge .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--or);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .5; transform: scale(.7); }
+    }
+    .hero h1 {
+      color: #fff;
+      margin-bottom: 24px;
+      line-height: 1.15;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--or);
+    }
+    .hero-sub {
+      color: rgba(255,255,255,.68);
+      font-size: 1.1rem;
+      line-height: 1.75;
+      margin-bottom: 40px;
+      max-width: 480px;
+    }
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 48px;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 36px;
+      flex-wrap: wrap;
+    }
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .hero-stat strong {
+      font-family: var(--font-serif);
+      font-size: 1.7rem;
+      color: #fff;
+    }
+    .hero-stat span {
+      font-size: 12px;
+      color: rgba(255,255,255,.5);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .hero-divider {
+      width: 1px;
+      background: rgba(255,255,255,.12);
+      align-self: stretch;
+    }
+
+    /* Dashboard mockup CSS */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .mockup-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+    }
+    .mockup-glow {
+      position: absolute;
+      inset: -30px;
+      border-radius: 24px;
+      background: radial-gradient(ellipse, rgba(242,177,14,.18) 0%, transparent 70%);
+      filter: blur(20px);
+    }
+    .mockup-card {
+      position: relative;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 24px 64px rgba(0,0,0,.35);
+      animation: float 5s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+    .mockup-topbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .mockup-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .mockup-dot:nth-child(1) { background: #ff5f57; }
+    .mockup-dot:nth-child(2) { background: #ffbd2e; }
+    .mockup-dot:nth-child(3) { background: #28ca41; }
+    .mockup-topbar-title {
+      margin-left: 8px;
+      font-size: 12px;
+      color: rgba(255,255,255,.4);
+      letter-spacing: .04em;
+    }
+    .mockup-body {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .mkpi {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px;
+      padding: 12px 10px;
+    }
+    .mkpi-label {
+      font-size: 10px;
+      color: rgba(255,255,255,.4);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .mkpi-value {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      color: #fff;
+    }
+    .mkpi-value.or { color: var(--or); }
+    .mkpi-trend {
+      font-size: 10px;
+      margin-top: 4px;
+      color: #4ade80;
+    }
+    .mockup-chart {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .chart-label {
+      font-size: 10px;
+      color: rgba(255,255,255,.4);
+      margin-bottom: 10px;
+    }
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 56px;
+    }
+    .bar {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+      opacity: .85;
+    }
+    .bar.b1 { height: 40%; background: rgba(242,177,14,.5); }
+    .bar.b2 { height: 65%; background: rgba(242,177,14,.6); }
+    .bar.b3 { height: 50%; background: rgba(242,177,14,.5); }
+    .bar.b4 { height: 80%; background: var(--or); }
+    .bar.b5 { height: 70%; background: rgba(242,177,14,.6); }
+    .bar.b6 { height: 90%; background: var(--or); }
+    .bar.b7 { height: 75%; background: rgba(242,177,14,.65); }
+    .mockup-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .mrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.04);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .mrow-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .mrow-text {
+      flex: 1;
+      font-size: 11px;
+      color: rgba(255,255,255,.55);
+    }
+    .mrow-tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+    .tag-green { background: rgba(74,222,128,.15); color: #4ade80; }
+    .tag-or    { background: rgba(242,177,14,.15); color: var(--or); }
+    .tag-blue  { background: rgba(96,165,250,.15); color: #60a5fa; }
+    /* Badge flottant */
+    .mockup-badge-float {
+      position: absolute;
+      bottom: -18px;
+      left: -24px;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(2,26,61,.22);
+      animation: float-badge 5s ease-in-out infinite;
+      animation-delay: .5s;
+    }
+    @keyframes float-badge {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+    .badge-icon {
+      width: 34px; height: 34px;
+      background: var(--jaune-pale);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .badge-text strong {
+      display: block;
+      font-size: 13px;
+      color: var(--marine);
+      font-weight: 700;
+    }
+    .badge-text span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .mockup-badge-float2 {
+      position: absolute;
+      top: -18px;
+      right: -16px;
+      background: var(--marine);
+      border: 1px solid rgba(242,177,14,.25);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
+      animation: float-badge 5s ease-in-out infinite;
+      animation-delay: 1.2s;
+    }
+    .badge2-icon {
+      color: var(--or);
+    }
+    .badge2-text strong {
+      display: block;
+      font-size: 12px;
+      color: #fff;
+    }
+    .badge2-text span {
+      font-size: 10px;
+      color: rgba(255,255,255,.5);
+    }
+
+    /* ===========================
+       SOCIAL PROOF BAND
+    =========================== */
+    .proof-band {
+      background: var(--jaune-pale);
+      padding: 20px 0;
+      border-top: 1px solid rgba(143,102,0,.12);
+      border-bottom: 1px solid rgba(143,102,0,.12);
+    }
+    .proof-band-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 32px 48px;
+    }
+    .proof-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .proof-item svg { color: var(--or-text); }
+
+    /* ===========================
+       FEATURES
+    =========================== */
+    .features { background: var(--surface); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    .feature-card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-card);
+      padding: 32px 28px;
+      transition: transform .25s, box-shadow .25s, border-color .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--or), transparent);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(242,177,14,.3);
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: rgba(2,26,61,.06);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      transition: background .3s;
+    }
+    .feature-card:hover .feature-icon {
+      background: rgba(242,177,14,.15);
+    }
+    .feature-card h3 {
+      color: var(--marine);
+      margin-bottom: 10px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .feature-tag {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      color: var(--or-text);
+      text-transform: uppercase;
+    }
+
+    /* ===========================
+       HOW IT WORKS
+    =========================== */
+    .how { background: var(--bg); }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 48px;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: calc(16.67% + 16px);
+      right: calc(16.67% + 16px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--or), rgba(242,177,14,.3));
+    }
+    .step {
+      text-align: center;
+    }
+    .step-num {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--marine);
+      color: #fff;
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 0 0 6px var(--bg), 0 0 0 8px rgba(242,177,14,.25);
+    }
+    .step h3 {
+      color: var(--marine);
+      margin-bottom: 10px;
+    }
+    .step p {
+      font-size: 14px;
+    }
+
+    /* ===========================
+       PRICING
+    =========================== */
+    .pricing { background: var(--surface); }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .pricing-card {
+      border-radius: var(--radius-card);
+      padding: 40px 36px;
+      border: 1.5px solid var(--line);
+      background: var(--bg);
+      position: relative;
+      transition: transform .25s, box-shadow .25s;
+    }
+    .pricing-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .pricing-card.featured {
+      background: var(--marine);
+      border-color: rgba(242,177,14,.3);
+      color: #fff;
+    }
+    .pricing-card.featured p { color: rgba(255,255,255,.65); }
+    .pricing-badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--or);
+      color: var(--marine);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 100px;
+    }
+    .pricing-name {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+    .pricing-card.featured .pricing-name { color: #fff; }
+    .pricing-price {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin: 20px 0 8px;
+    }
+    .pricing-price strong {
+      font-family: var(--font-serif);
+      font-size: 2.8rem;
+      color: var(--marine);
+    }
+    .pricing-card.featured .pricing-price strong { color: var(--or); }
+    .pricing-price span {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .pricing-card.featured .pricing-price span { color: rgba(255,255,255,.5); }
+    .pricing-period {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .pricing-card.featured .pricing-period { color: rgba(255,255,255,.5); }
+    .pricing-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 24px 0;
+    }
+    .pricing-card.featured .pricing-divider { background: rgba(255,255,255,.12); }
+    .pricing-features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .pf-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .pricing-card.featured .pf-item { color: rgba(255,255,255,.75); }
+    .pf-check {
+      flex-shrink: 0;
+      margin-top: 2px;
+      color: var(--or-text);
+    }
+    .pricing-card.featured .pf-check { color: var(--or); }
+
+    /* ===========================
+       TESTIMONIAL / CTA FINAL
+    =========================== */
+    .cta-final {
+      background: var(--marine);
+      position: relative;
+      overflow: hidden;
+      padding: 96px 0;
+    }
+    .cta-final::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -10%;
+      width: 80%;
+      height: 200%;
+      background: radial-gradient(ellipse, rgba(242,177,14,.08) 0%, transparent 60%);
+    }
+    .cta-final-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .cta-final h2 {
+      color: #fff;
+      margin-bottom: 18px;
+    }
+    .cta-final p {
+      color: rgba(255,255,255,.65);
+      font-size: 1.05rem;
+      margin-bottom: 40px;
+    }
+    .cta-final-btns {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .btn-white {
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      border: 1.5px solid rgba(255,255,255,.25);
+    }
+    .btn-white:hover {
+      background: rgba(255,255,255,.18);
+    }
+    .cta-note {
+      margin-top: 24px;
+      font-size: 13px;
+      color: rgba(255,255,255,.4);
+    }
+
+    /* ===========================
+       FOOTER
+    =========================== */
+    .footer {
+      background: #010f24;
+      padding: 60px 0 32px;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+    .footer-brand p {
+      font-size: 14px;
+      color: rgba(255,255,255,.45);
+      margin-top: 14px;
+      line-height: 1.7;
+      max-width: 260px;
+    }
+    .footer-col h4 {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.35);
+      margin-bottom: 18px;
+    }
+    .footer-col a {
+      display: block;
+      font-size: 14px;
+      color: rgba(255,255,255,.58);
+      margin-bottom: 10px;
+      transition: color .2s;
+    }
+    .footer-col a:hover { color: #fff; }
+    .footer-divider {
+      height: 1px;
+      background: rgba(255,255,255,.07);
+      margin-bottom: 28px;
+    }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-bottom span, .footer-bottom a {
+      font-size: 13px;
+      color: rgba(255,255,255,.3);
+    }
+    .footer-bottom a:hover { color: rgba(255,255,255,.6); }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    /* ===========================
+       ANIMATIONS
+    =========================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-d1 { transition-delay: .1s; }
+    .reveal-d2 { transition-delay: .2s; }
+    .reveal-d3 { transition-delay: .3s; }
+    .reveal-d4 { transition-delay: .4s; }
+    .reveal-d5 { transition-delay: .5s; }
+    .reveal-d6 { transition-delay: .6s; }
+
+    /* ===========================
+       RESPONSIVE
+    =========================== */
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      section { padding: 64px 0; }
+      .nav-links { display: none; }
+      .nav-login { display: none; }
+      .hamburger { display: flex; }
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: 48px;
+        padding: 100px 0 64px;
+      }
+      .hero-visual { order: -1; }
+      .mockup-badge-float, .mockup-badge-float2 { display: none; }
+      .steps { grid-template-columns: 1fr; gap: 40px; }
+      .steps::before { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 440px; }
+      .footer-top { grid-template-columns: 1fr; gap: 36px; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 1.9rem; }
+      .hero-cta { flex-direction: column; }
+      .hero-stats { gap: 20px; }
+      .hero-divider { display: none; }
+    }
+
+    /* Mobile nav overlay */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      inset: 68px 0 0;
+      background: rgba(2,26,61,.98);
+      z-index: 99;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      color: rgba(255,255,255,.85);
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+    .mobile-nav a:hover { color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- ===========================
+     HEADER
+=========================== -->
+<header class="header" id="header">
+  <div class="container">
+    <nav class="nav">
+      <a href="#" class="logo">Sen<span>Gestion</span></a>
+      <ul class="nav-links">
+        <li><a href="#fonctionnalites">Fonctionnalités</a></li>
+        <li><a href="#comment">Comment ça marche</a></li>
+        <li><a href="#tarifs">Tarifs</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="/login" class="nav-login">Connexion</a>
+        <a href="#tarifs" class="btn btn-accent" style="padding:10px 20px;font-size:14px;">Essai gratuit</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- Mobile nav -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#fonctionnalites" onclick="closeMobileNav()">Fonctionnalités</a>
+  <a href="#comment" onclick="closeMobileNav()">Comment ça marche</a>
+  <a href="#tarifs" onclick="closeMobileNav()">Tarifs</a>
+  <a href="/login" onclick="closeMobileNav()">Connexion</a>
+  <a href="#tarifs" class="btn btn-accent" onclick="closeMobileNav()">Essai gratuit</a>
+</div>
+
+<!-- ===========================
+     HERO
+=========================== -->
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <div class="hero-dots"></div>
+    <div class="hero-line"></div>
+  </div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <div class="dot"></div>
+          Conçu pour les PME sénégalaises
+        </div>
+        <h1>La gestion de votre <em>PME,</em><br>simplifiée</h1>
+        <p class="hero-sub">
+          Devis, factures, relances automatiques, scan par IA — tout ce dont votre entreprise a besoin, dans un seul outil accessible et élégant.
+        </p>
+        <div class="hero-cta">
+          <a href="#tarifs" class="btn btn-accent">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Démarrer gratuitement
+          </a>
+          <a href="#fonctionnalites" class="btn btn-ghost" style="border-color:rgba(255,255,255,.3);color:#fff;">
+            Voir les fonctionnalités
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <strong>15 jours</strong>
+            <span>Essai gratuit</span>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <strong>6+</strong>
+            <span>Modules métier</span>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <strong>100%</strong>
+            <span>Sécurisé</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard mockup -->
+      <div class="hero-visual">
+        <div class="mockup-wrap">
+          <div class="mockup-glow"></div>
+          <div class="mockup-card">
+            <div class="mockup-topbar">
+              <div class="mockup-dot"></div>
+              <div class="mockup-dot"></div>
+              <div class="mockup-dot"></div>
+              <span class="mockup-topbar-title">SenGestion — Tableau de bord</span>
+            </div>
+            <!-- KPIs -->
+            <div class="mockup-body">
+              <div class="mkpi">
+                <div class="mkpi-label">Chiffre d'affaires</div>
+                <div class="mkpi-value or">4,2M</div>
+                <div class="mkpi-trend">▲ +18% ce mois</div>
+              </div>
+              <div class="mkpi">
+                <div class="mkpi-label">Factures émises</div>
+                <div class="mkpi-value">34</div>
+                <div class="mkpi-trend" style="color:#60a5fa;">12 en attente</div>
+              </div>
+              <div class="mkpi">
+                <div class="mkpi-label">Devis signés</div>
+                <div class="mkpi-value">8</div>
+                <div class="mkpi-trend">▲ +3 cette sem.</div>
+              </div>
+            </div>
+            <!-- Chart -->
+            <div class="mockup-chart">
+              <div class="chart-label">Évolution mensuelle (FCFA)</div>
+              <div class="chart-bars">
+                <div class="bar b1"></div>
+                <div class="bar b2"></div>
+                <div class="bar b3"></div>
+                <div class="bar b4"></div>
+                <div class="bar b5"></div>
+                <div class="bar b6"></div>
+                <div class="bar b7"></div>
+              </div>
+            </div>
+            <!-- Rows -->
+            <div class="mockup-list">
+              <div class="mrow">
+                <div class="mrow-dot" style="background:#4ade80;"></div>
+                <div class="mrow-text">Facture #INV-2024-047 — Diallo & Frères</div>
+                <div class="mrow-tag tag-green">Payée</div>
+              </div>
+              <div class="mrow">
+                <div class="mrow-dot" style="background:var(--or);"></div>
+                <div class="mrow-text">Devis #DEV-2024-023 — Tech Solutions SN</div>
+                <div class="mrow-tag tag-or">En attente</div>
+              </div>
+              <div class="mrow">
+                <div class="mrow-dot" style="background:#60a5fa;"></div>
+                <div class="mrow-text">Relance automatique envoyée — 3 clients</div>
+                <div class="mrow-tag tag-blue">Auto</div>
+              </div>
+            </div>
+          </div>
+          <!-- Badges flottants -->
+          <div class="mockup-badge-float">
+            <div class="badge-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8F6600" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            </div>
+            <div class="badge-text">
+              <strong>Facture générée</strong>
+              <span>PDF envoyé automatiquement</span>
+            </div>
+          </div>
+          <div class="mockup-badge-float2">
+            <div class="badge2-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            </div>
+            <div class="badge2-text">
+              <strong>IA activée</strong>
+              <span>Scan de reçu détecté</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     SOCIAL PROOF BAND
+=========================== -->
+<div class="proof-band">
+  <div class="container">
+    <div class="proof-band-inner">
+      <div class="proof-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8F6600" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Aucune carte requise pour l'essai
+      </div>
+      <div class="proof-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8F6600" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Données hébergées en sécurité
+      </div>
+      <div class="proof-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8F6600" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Mise en place en moins de 10 minutes
+      </div>
+      <div class="proof-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8F6600" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+        Support en français &amp; wolof
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===========================
+     FEATURES
+=========================== -->
+<section class="features" id="fonctionnalites">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Fonctionnalités</div>
+      <h2>Tout ce dont votre PME a besoin</h2>
+      <p>Des outils intelligents pensés pour les entrepreneurs sénégalais, sans complexité inutile.</p>
+    </div>
+
+    <div class="features-grid">
+
+      <!-- 1 -->
+      <div class="feature-card reveal reveal-d1">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#021A3D" stroke-width="1.8">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10,9 9,9 8,9"/>
+          </svg>
+        </div>
+        <h3>Devis &amp; Factures PDF</h3>
+        <p>Créez des devis professionnels et transformez-les en factures en un clic. Export PDF automatique avec votre logo et vos coordonnées.</p>
+        <span class="feature-tag">Professionnel</span>
+      </div>
+
+      <!-- 2 -->
+      <div class="feature-card reveal reveal-d2">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#021A3D" stroke-width="1.8">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <path d="M8 21h8M12 17v4"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <h3>Scan carte de visite par IA</h3>
+        <p>Photographiez une carte de visite et notre IA extrait automatiquement nom, téléphone, email et entreprise. Votre carnet d'adresses se construit seul.</p>
+        <span class="feature-tag">Intelligence Artificielle</span>
+      </div>
+
+      <!-- 3 -->
+      <div class="feature-card reveal reveal-d3">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#021A3D" stroke-width="1.8">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            <line x1="9" y1="10" x2="9" y2="10" stroke-width="3" stroke-linecap="round"/>
+            <line x1="12" y1="10" x2="12" y2="10" stroke-width="3" stroke-linecap="round"/>
+            <line x1="15" y1="10" x2="15" y2="10" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Création vocale de devis</h3>
+        <p>Dictez votre devis à voix haute. L'IA transcrit, structure et génère le document en quelques secondes. Idéal en déplacement ou sur chantier.</p>
+        <span class="feature-tag">Innovation</span>
+      </div>
+
+      <!-- 4 -->
+      <div class="feature-card reveal reveal-d4">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#021A3D" stroke-width="1.8">
+            <path d="M23 7l-7 5 7 5V7z"/>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            <path d="M6 10l2 2 4-4" stroke-width="1.8"/>
+          </svg>
+        </div>
+        <h3>Scan de reçus par IA</h3>
+        <p>Prenez une photo de vos reçus et tickets de caisse. L'IA capture montant, date, fournisseur et catégorie pour votre comptabilité en temps réel.</p>
+        <span class="feature-tag">Gain de temps</span>
+      </div>
+
+      <!-- 5 -->
+      <div class="feature-card reveal reveal-d5">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#021A3D" stroke-width="1.8">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+            <path d="M9 17l-2 2-2-2"/>
+          </svg>
+        </div>
+        <h3>Relances email automatiques</h3>
+        <p>Programmez des rappels automatiques pour les factures impayées. Vos clients reçoivent des relances polies et personnalisées sans que vous n'ayez à intervenir.</p>
+        <span class="feature-tag">Automatisation</span>
+      </div>
+
+      <!-- 6 -->
+      <div class="feature-card reveal reveal-d6">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#021A3D" stroke-width="1.8">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+            <path d="M2 20h20"/>
+          </svg>
+        </div>
+        <h3>Rapports &amp; tableaux de bord</h3>
+        <p>Visualisez votre chiffre d'affaires, vos dépenses et vos marges en temps réel. Des graphiques clairs pour des décisions éclairées.</p>
+        <span class="feature-tag">Analytique</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     HOW IT WORKS
+=========================== -->
+<section class="how" id="comment">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Démarrage</div>
+      <h2>Opérationnel en trois étapes</h2>
+      <p>Pas de formation complexe, pas d'installation. Commencez à gérer votre entreprise dès aujourd'hui.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step reveal reveal-d1">
+        <div class="step-num">1</div>
+        <h3>Créez votre compte</h3>
+        <p>Inscrivez-vous en 2 minutes. Renseignez vos informations d'entreprise — NINEA, adresse, logo — et votre espace est prêt.</p>
+      </div>
+      <div class="step reveal reveal-d2">
+        <div class="step-num">2</div>
+        <h3>Importez vos données</h3>
+        <p>Ajoutez vos clients, produits et services. Notre assistant vous guide à chaque étape pour un paramétrage sans friction.</p>
+      </div>
+      <div class="step reveal reveal-d3">
+        <div class="step-num">3</div>
+        <h3>Gérez &amp; développez</h3>
+        <p>Émettez vos premiers devis et factures, activez les relances automatiques et suivez vos performances depuis votre tableau de bord.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     PRICING
+=========================== -->
+<section class="pricing" id="tarifs">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Tarifs</div>
+      <h2>Un prix simple, transparent</h2>
+      <p>Commencez gratuitement, évoluez à votre rythme. Sans engagement caché.</p>
+    </div>
+
+    <div class="pricing-grid">
+
+      <!-- Gratuit -->
+      <div class="pricing-card reveal reveal-d1">
+        <div class="pricing-name">Essai gratuit</div>
+        <p style="font-size:14px;margin-top:6px;">Toutes les fonctionnalités, sans restriction.</p>
+        <div class="pricing-price">
+          <strong style="color:var(--marine);">0</strong>
+          <span>FCFA</span>
+        </div>
+        <div class="pricing-period">Pendant 15 jours — aucune carte requise</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Devis &amp; factures illimités
+          </li>
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Scan IA (cartes de visite &amp; reçus)
+          </li>
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Création vocale de devis
+          </li>
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Relances automatiques
+          </li>
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Tableau de bord &amp; rapports
+          </li>
+        </ul>
+        <a href="/register" class="btn btn-primary" style="width:100%;justify-content:center;">
+          Démarrer l'essai gratuit
+        </a>
+      </div>
+
+      <!-- Pro -->
+      <div class="pricing-card featured reveal reveal-d2">
+        <div class="pricing-badge">Recommandé</div>
+        <div class="pricing-name">Abonnement Pro</div>
+        <p style="font-size:14px;margin-top:6px;">Pour les PME qui veulent croître sans limite.</p>
+        <div class="pricing-price">
+          <strong>29 900</strong>
+          <span>FCFA</span>
+        </div>
+        <div class="pricing-period">Par mois — facturé annuellement (soit 358 800 FCFA/an)</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Tout l'essai gratuit, en illimité
+          </li>
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Multi-utilisateurs (jusqu'à 5)
+          </li>
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Personnalisation avancée des PDF
+          </li>
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Export comptable (CSV, Excel)
+          </li>
+          <li class="pf-item">
+            <svg class="pf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Support prioritaire dédié
+          </li>
+        </ul>
+        <a href="/register" class="btn btn-accent" style="width:100%;justify-content:center;">
+          Choisir Pro
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     CTA FINAL
+=========================== -->
+<section class="cta-final">
+  <div class="container">
+    <div class="cta-final-inner reveal">
+      <div class="section-label" style="background:rgba(242,177,14,.15);border-color:rgba(242,177,14,.3);">Commencez aujourd'hui</div>
+      <h2>Votre PME mérite un outil à sa hauteur</h2>
+      <p>Rejoignez des centaines d'entrepreneurs sénégalais qui gèrent leur activité avec SenGestion. Essai gratuit 15 jours, sans engagement.</p>
+      <div class="cta-final-btns">
+        <a href="/register" class="btn btn-accent">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Essayer gratuitement
+        </a>
+        <a href="mailto:contact@sengestion.sn" class="btn btn-white">
+          Nous contacter
+        </a>
+      </div>
+      <p class="cta-note">Aucune carte bancaire requise &bull; Installation en 10 minutes &bull; Annulation libre</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     FOOTER
+=========================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="logo" style="font-size:1.4rem;">Sen<span>Gestion</span></a>
+        <p>La solution de gestion complète pour les PME sénégalaises. Simple, puissante, accessible.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Produit</h4>
+        <a href="#fonctionnalites">Fonctionnalités</a>
+        <a href="#tarifs">Tarifs</a>
+        <a href="#">Feuille de route</a>
+        <a href="#">Mises à jour</a>
+      </div>
+      <div class="footer-col">
+        <h4>Entreprise</h4>
+        <a href="#">À propos</a>
+        <a href="#">Blog</a>
+        <a href="mailto:contact@sengestion.sn">Contact</a>
+        <a href="#">Partenaires</a>
+      </div>
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <a href="#">Mentions légales</a>
+        <a href="#">Confidentialité</a>
+        <a href="#">CGU</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+    <div class="footer-divider"></div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 SenGestion. Tous droits réservés.</span>
+      <div class="footer-links">
+        <a href="mailto:contact@sengestion.sn">contact@sengestion.sn</a>
+        <a href="#">+221 77 000 00 00</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ===========================
+     JAVASCRIPT
+=========================== -->
+<script>
+  /* Header scroll */
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  /* Hamburger */
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+  hamburger.addEventListener('click', () => {
+    mobileNav.classList.toggle('open');
+  });
+  function closeMobileNav() {
+    mobileNav.classList.remove('open');
+  }
+
+  /* Scroll reveal */
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

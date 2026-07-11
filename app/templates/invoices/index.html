@@ -1,0 +1,141 @@
+{% extends "layouts/app.html" %}
+{% set active = 'invoices' %}
+{% block title %}Factures — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Factures</h1>
+      <p class="page-subtitle">Suivez vos encaissements et le solde de chaque facture</p>
+    </div>
+    <a href="{{ url_for('quotes.index') }}" class="btn btn-primary">
+      <i data-lucide="file-text" style="width:16px;height:16px;vertical-align:-3px;"></i> Devis
+    </a>
+  </div>
+
+  {# ── KPI tiles ── #}
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; margin-bottom:32px;">
+
+    <div class="stat-card stat-card--accent">
+      <div class="stat-card__header">
+        <span class="stat-card__label">Facturé (TTC)</span>
+        <span class="stat-card__icon">
+          <i data-lucide="receipt" style="width:16px;height:16px;color:#F2B10E;"></i>
+        </span>
+      </div>
+      <p class="stat-card__value">{{ fmt(total_ttc) }}</p>
+      <p class="stat-card__sub">FCFA</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <span class="stat-card__label">Encaissé</span>
+        <span class="stat-card__icon" style="background:var(--jaune-pale);">
+          <i data-lucide="banknote" style="width:16px;height:16px;color:var(--marine);"></i>
+        </span>
+      </div>
+      <p class="stat-card__value stat-card__value--success">{{ fmt(total_paid) }}</p>
+      <p class="stat-card__sub">FCFA reçus</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <span class="stat-card__label">Reste à encaisser</span>
+        <span class="stat-card__icon" style="background:var(--info-soft);">
+          <i data-lucide="alert-circle" style="width:16px;height:16px;color:var(--marine);"></i>
+        </span>
+      </div>
+      <p class="stat-card__value stat-card__value--danger">{{ fmt(total_due) }}</p>
+      <p class="stat-card__sub">FCFA impayés</p>
+    </div>
+
+  </div>
+
+  {# ── Filtre par statut ── #}
+  <div class="card" style="padding:14px 20px; margin-bottom:24px;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <span style="font-size:16px; color:var(--muted); font-weight:600; margin-right:4px;">Statut :</span>
+      <a href="{{ url_for('invoices.index') }}"
+         class="filter-pill {{ 'filter-pill--active' if not selected_status }}">
+        Toutes
+      </a>
+      {% for key, meta in statuses.items() %}
+      <a href="{{ url_for('invoices.index', status=key) }}"
+         class="filter-pill {{ 'filter-pill--active' if selected_status == key }}">
+        {{ meta[0] }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ── Tableau des factures ── #}
+  <div class="card" style="padding:0; overflow:hidden;">
+    {% if invoices %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Numéro</th>
+            <th>Client</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th style="text-align:right;">TTC (FCFA)</th>
+            <th style="text-align:right;">Payé (FCFA)</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in invoices %}
+          <tr>
+            <td style="white-space:nowrap;">
+              <a href="{{ url_for('invoices.show', invoice_id=inv.id) }}"
+                 style="color:var(--marine); font-weight:700; text-decoration:none;">
+                {{ inv.number }}
+              </a>
+            </td>
+            <td>{{ inv.customer.name if inv.customer else '—' }}</td>
+            <td>
+              {% set meta = statuses.get(inv.status, ('—', '#F9FAFB', '#5A6472')) %}
+              <span class="badge"
+                    style="background:{{ meta[1] }}; color:{{ meta[2] }}; padding:4px 12px;
+                           border-radius:999px; display:inline-block; font-weight:600;">{{ meta[0] }}</span>
+            </td>
+            <td style="color:var(--muted); white-space:nowrap;">
+              {{ inv.invoice_date.strftime('%d/%m/%Y') if inv.invoice_date else '—' }}
+            </td>
+            <td style="font-weight:700; text-align:right; white-space:nowrap;">{{ fmt(inv.amount_incl_tax) }}</td>
+            <td style="color:var(--marine); font-weight:600; text-align:right; white-space:nowrap;">
+              {{ fmt(paid_map.get(inv.id, 0)) }}
+            </td>
+            <td class="col-actions">
+              <a href="{{ url_for('invoices.show', invoice_id=inv.id) }}"
+                 class="btn btn-ghost btn-sm" aria-label="Voir la facture {{ inv.number }}">
+                <i data-lucide="eye" style="width:16px;height:16px;"></i>
+              </a>
+              <a href="{{ url_for('invoices.pdf', invoice_id=inv.id) }}" target="_blank"
+                 class="btn btn-ghost btn-sm" aria-label="PDF de la facture {{ inv.number }}">
+                <i data-lucide="file-down" style="width:16px;height:16px;"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon"><i data-lucide="receipt"></i></div>
+      <h2 class="empty-state-title">Aucune facture pour le moment</h2>
+      <p class="empty-state-desc">
+        {% if selected_status %}Aucune facture avec ce statut.
+        {% else %}Convertissez un devis accepté pour générer votre première facture.{% endif %}
+      </p>
+      <a href="{{ url_for('quotes.index') }}" class="btn btn-accent">
+        <i data-lucide="file-text" style="width:16px;height:16px;vertical-align:-3px;"></i> Voir les devis
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+{% endblock %}

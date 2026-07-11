@@ -1,0 +1,278 @@
+{% extends "layouts/app.html" %}
+{% set active = 'admin' %}
+{% block title %}Espace Admin — SenGestion{% endblock %}
+
+{% block page %}
+
+  {# ── En-tête de page ── #}
+  <div style="margin-bottom:32px;">
+    <h1 style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
+               font-size:32px; font-weight:600; color:var(--marine); margin:0 0 6px;">
+      Gestion des abonnements
+    </h1>
+    <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px; color:var(--muted); margin:0;">
+      Supervision et activation des comptes gérants
+    </p>
+  </div>
+
+  {# ── KPI tiles abonnements ── #}
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+              gap:16px; margin-bottom:36px;">
+
+    <!-- Total -->
+    <div style="background:var(--marine); border-radius:12px; padding:22px 18px;
+                box-shadow:0 4px 12px rgba(2,26,61,.18); display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:500;
+                     color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.06em;">
+          Total
+        </span>
+        <i data-lucide="users" style="width:15px;height:15px;color:rgba(255,255,255,.4);"></i>
+      </div>
+      <p style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
+                font-size:34px; font-weight:700; color:#F2B10E; margin:0; line-height:1;">
+        {{ stats.total }}
+      </p>
+      <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px;
+                color:rgba(255,255,255,.45); margin:0;">Gérants inscrits</p>
+    </div>
+
+    <!-- Essai -->
+    <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px;
+                padding:22px 18px; box-shadow:0 1px 3px rgba(2,26,61,.07);
+                display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:500;
+                     color:var(--muted); text-transform:uppercase; letter-spacing:.06em;">
+          Essai
+        </span>
+        <i data-lucide="clock" style="width:15px;height:15px;color:#021A3D;"></i>
+      </div>
+      <p style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
+                font-size:34px; font-weight:700; color:var(--marine); margin:0; line-height:1;">
+        {{ stats.trial }}
+      </p>
+      <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px;
+                color:var(--muted); margin:0;">En période d'essai</p>
+    </div>
+
+    <!-- Actifs -->
+    <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px;
+                padding:22px 18px; box-shadow:0 1px 3px rgba(2,26,61,.07);
+                display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:500;
+                     color:var(--muted); text-transform:uppercase; letter-spacing:.06em;">
+          Actifs
+        </span>
+        <i data-lucide="check-circle" style="width:15px;height:15px;color:#021A3D;"></i>
+      </div>
+      <p style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
+                font-size:34px; font-weight:700; color:#021A3D; margin:0; line-height:1;">
+        {{ stats.active }}
+      </p>
+      <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px;
+                color:var(--muted); margin:0;">Abonnements actifs</p>
+    </div>
+
+    <!-- Expirés -->
+    <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px;
+                padding:22px 18px; box-shadow:0 1px 3px rgba(2,26,61,.07);
+                display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:500;
+                     color:var(--muted); text-transform:uppercase; letter-spacing:.06em;">
+          Expirés
+        </span>
+        <i data-lucide="alert-circle" style="width:15px;height:15px;color:#021A3D;"></i>
+      </div>
+      <p style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
+                font-size:34px; font-weight:700; color:#021A3D; margin:0; line-height:1;">
+        {{ stats.expired }}
+      </p>
+      <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px;
+                color:var(--muted); margin:0;">À renouveler</p>
+    </div>
+
+    <!-- Suspendus -->
+    <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px;
+                padding:22px 18px; box-shadow:0 1px 3px rgba(2,26,61,.07);
+                display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:500;
+                     color:var(--muted); text-transform:uppercase; letter-spacing:.06em;">
+          Suspendus
+        </span>
+        <i data-lucide="slash" style="width:15px;height:15px;color:var(--muted);"></i>
+      </div>
+      <p style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
+                font-size:34px; font-weight:700; color:var(--muted); margin:0; line-height:1;">
+        {{ stats.suspended }}
+      </p>
+      <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px;
+                color:var(--muted); margin:0;">Accès bloqué</p>
+    </div>
+
+  </div>
+
+  {# ── Table des gérants ── #}
+  <div class="card" style="border-radius:12px; padding:28px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;">
+      <div>
+        <h2 style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
+                   font-size:18px; font-weight:600; color:var(--marine); margin:0 0 4px;">
+          Liste des gérants
+        </h2>
+        <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px; color:var(--muted); margin:0;">
+          Validation et gestion des accès
+        </p>
+      </div>
+      <span style="background:#E8E7A2; border-radius:8px; padding:8px;
+                   display:flex; align-items:center; justify-content:center;">
+        <i data-lucide="shield" style="width:16px;height:16px;color:#021A3D;"></i>
+      </span>
+    </div>
+
+    <div style="overflow-x:auto; margin:0 -28px -28px; padding:0 28px 28px;">
+      <table class="table" style="width:100%; min-width:760px; border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--line);">
+            <th style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                       color:var(--muted); text-transform:uppercase; letter-spacing:.06em;
+                       padding:10px 14px; text-align:left;">Nom</th>
+            <th style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                       color:var(--muted); text-transform:uppercase; letter-spacing:.06em;
+                       padding:10px 14px; text-align:left;">Entreprise</th>
+            <th style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                       color:var(--muted); text-transform:uppercase; letter-spacing:.06em;
+                       padding:10px 14px; text-align:left;">Email</th>
+            <th style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                       color:var(--muted); text-transform:uppercase; letter-spacing:.06em;
+                       padding:10px 14px; text-align:left;">Statut</th>
+            <th style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                       color:var(--muted); text-transform:uppercase; letter-spacing:.06em;
+                       padding:10px 14px; text-align:center;">Jours restants</th>
+            <th style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                       color:var(--muted); text-transform:uppercase; letter-spacing:.06em;
+                       padding:10px 14px; text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in managers %}
+          <tr style="border-bottom:1px solid var(--line);">
+
+            <td style="font-family:Arial,Helvetica,sans-serif; font-size:16px; color:var(--marine);
+                       font-weight:600; padding:14px 14px; white-space:nowrap;">
+              {{ m.name }}
+            </td>
+
+            <td style="font-family:Arial,Helvetica,sans-serif; font-size:16px; color:var(--muted);
+                       padding:14px 14px;">
+              {{ m.company or '—' }}
+            </td>
+
+            <td style="font-family:Arial,Helvetica,sans-serif; font-size:16px; color:var(--muted);
+                       padding:14px 14px;">
+              {{ m.email }}
+            </td>
+
+            <td style="padding:14px 14px;">
+              {% if m.status == 'trial' %}
+                <span style="display:inline-flex; align-items:center; gap:5px;
+                             background:#E8E7A2; color:#021A3D; border-radius:20px;
+                             padding:4px 12px; font-size:16px; font-weight:700;
+                             font-family:Arial,Helvetica,sans-serif;">
+                  <i data-lucide="clock" style="width:11px;height:11px;"></i> Essai
+                </span>
+              {% elif m.status == 'active' %}
+                <span style="display:inline-flex; align-items:center; gap:5px;
+                             background:#E8E7A2; color:#021A3D; border-radius:20px;
+                             padding:4px 12px; font-size:16px; font-weight:700;
+                             font-family:Arial,Helvetica,sans-serif;">
+                  <i data-lucide="check-circle" style="width:11px;height:11px;"></i> Actif
+                </span>
+              {% elif m.status == 'expired' %}
+                <span style="display:inline-flex; align-items:center; gap:5px;
+                             background:#EEF1F6; color:#021A3D; border-radius:20px;
+                             padding:4px 12px; font-size:16px; font-weight:700;
+                             font-family:Arial,Helvetica,sans-serif;">
+                  <i data-lucide="alert-circle" style="width:11px;height:11px;"></i> Expiré
+                </span>
+              {% elif m.status == 'suspended' %}
+                <span style="display:inline-flex; align-items:center; gap:5px;
+                             background:#E2E6EA; color:#4A554F; border-radius:20px;
+                             padding:4px 12px; font-size:16px; font-weight:700;
+                             font-family:Arial,Helvetica,sans-serif;">
+                  <i data-lucide="slash" style="width:11px;height:11px;"></i> Suspendu
+                </span>
+              {% else %}
+                <span style="font-family:Arial,Helvetica,sans-serif; font-size:16px;
+                             color:var(--muted);">{{ m.status }}</span>
+              {% endif %}
+            </td>
+
+            <td style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
+                       font-size:16px; font-weight:600; color:var(--marine);
+                       padding:14px 14px; text-align:center;">
+              {{ m.days_left }}<span style="font-family:Arial,Helvetica,sans-serif; font-size:16px;
+                                           font-weight:400; color:var(--muted);"> j</span>
+            </td>
+
+            <td style="padding:14px 14px; text-align:right; white-space:nowrap;">
+              <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px;">
+
+                {% if m.status != 'active' %}
+                <form method="POST" action="{{ url_for('admin.validate', user_id=m.id) }}"
+                      style="display:inline; margin:0;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit"
+                          style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                                 background:#F2B10E; color:#021A3D; border:none; border-radius:8px;
+                                 padding:7px 14px; cursor:pointer; display:inline-flex;
+                                 align-items:center; gap:6px; transition:background .15s;"
+                          onmouseover="this.style.background='#F2B10E'"
+                          onmouseout="this.style.background='#F2B10E'">
+                    <i data-lucide="check" style="width:12px;height:12px;"></i> Valider 1 an
+                  </button>
+                </form>
+                {% endif %}
+
+                {% if m.status != 'suspended' %}
+                <form method="POST" action="{{ url_for('admin.suspend', user_id=m.id) }}"
+                      style="display:inline; margin:0;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit"
+                          style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                                 background:transparent; color:#021A3D; border:1.5px solid #021A3D;
+                                 border-radius:8px; padding:6px 14px; cursor:pointer;
+                                 display:inline-flex; align-items:center; gap:6px; transition:background .15s, color .15s;"
+                          onmouseover="this.style.background='#021A3D';this.style.color='#fff'"
+                          onmouseout="this.style.background='transparent';this.style.color='#021A3D'">
+                    <i data-lucide="slash" style="width:12px;height:12px;"></i> Suspendre
+                  </button>
+                </form>
+                {% endif %}
+
+              </div>
+            </td>
+
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" style="padding:48px 14px; text-align:center;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                <i data-lucide="user-x" style="width:32px;height:32px;color:var(--line);"></i>
+                <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px;
+                           color:var(--muted); margin:0;">
+                  Aucun gérant inscrit pour le moment.
+                </p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% endblock %}

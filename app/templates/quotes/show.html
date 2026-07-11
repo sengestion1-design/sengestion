@@ -1,0 +1,127 @@
+{% extends "layouts/app.html" %}
+{% set active = 'quotes' %}
+{% block title %}Devis {{ quote.number }} — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <a href="{{ url_for('quotes.index') }}" class="back-link">
+        <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Retour aux devis
+      </a>
+      <h1 class="page-title">Devis {{ quote.number }}</h1>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="{{ url_for('quotes.pdf', quote_id=quote.id) }}" target="_blank"
+         class="btn btn-primary">
+        <i data-lucide="file-down" style="width:16px;height:16px;vertical-align:-3px;"></i> PDF
+      </a>
+      {% if not quote.invoice_id %}
+      <a href="{{ url_for('quotes.edit', quote_id=quote.id) }}" class="btn btn-secondary">
+        <i data-lucide="pencil" style="width:16px;height:16px;vertical-align:-3px;"></i> Éditer
+      </a>
+      <form method="post" action="{{ url_for('quotes.to_invoice', quote_id=quote.id) }}"
+            style="display:inline;"
+            onsubmit="return confirm('Convertir ce devis en facture ?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-accent">
+          <i data-lucide="receipt" style="width:16px;height:16px;vertical-align:-3px;"></i> Convertir en facture
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if quote.invoice_id and linked_invoice %}
+  <div class="alert alert-success" role="alert">
+    <i data-lucide="circle-check" style="width:16px;height:16px;vertical-align:-3px;"></i>
+    Ce devis a été converti en facture
+    <a href="{{ url_for('invoices.show', invoice_id=linked_invoice.id) }}"
+       style="color:var(--marine); font-weight:700;">{{ linked_invoice.number }}</a>.
+  </div>
+  {% endif %}
+
+  {# ── Récap client + statut ── #}
+  <div class="card" style="margin-bottom:20px;">
+    <dl class="detail-grid">
+      <div>
+        <dt class="detail-label">Client</dt>
+        <dd class="detail-value" style="font-weight:600;">{{ quote.customer.name if quote.customer else '—' }}</dd>
+        {% if quote.customer and quote.customer.company %}
+        <dd class="detail-value" style="color:var(--muted); margin-top:2px;">{{ quote.customer.company }}</dd>
+        {% endif %}
+      </div>
+      <div>
+        <dt class="detail-label">Date</dt>
+        <dd class="detail-value" style="font-weight:600;">
+          {{ quote.quote_date.strftime('%d/%m/%Y') if quote.quote_date else '—' }}
+        </dd>
+      </div>
+      <div>
+        <dt class="detail-label">Statut</dt>
+        <dd class="detail-value">
+          {% set meta = statuses.get(quote.status, ('—', '#F9FAFB', '#5A6472')) %}
+          <span class="badge"
+                style="background:{{ meta[1] }}; color:{{ meta[2] }}; padding:4px 12px;
+                       border-radius:999px; display:inline-block; font-weight:600;">{{ meta[0] }}</span>
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  {# ── Lignes ── #}
+  <div class="card" style="padding:0; overflow:hidden; margin-bottom:20px;">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Désignation</th>
+            <th style="text-align:right;">Qté</th>
+            <th style="text-align:right;">P.U. (FCFA)</th>
+            <th style="text-align:right;">Montant (FCFA)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for it in quote.items %}
+          <tr>
+            <td>{{ it.description }}</td>
+            <td style="color:var(--muted); text-align:right;">{{ fmt(it.quantity) }}</td>
+            <td style="color:var(--muted); text-align:right;">{{ fmt(it.unit_price) }}</td>
+            <td style="font-weight:700; text-align:right;">{{ fmt(it.amount) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {# ── Totaux ── #}
+  <div class="card" style="margin-bottom:20px;">
+    <div style="max-width:340px; margin-left:auto;">
+      <div class="total-row">
+        <span>Total HT</span><span style="font-weight:600;">{{ fmt(quote.amount_excl_tax) }} FCFA</span>
+      </div>
+      <div class="total-row total-row--muted">
+        <span>TVA ({{ (tax_rate * 100)|int }} %)</span>
+        <span>{{ fmt(quote.amount_incl_tax - quote.amount_excl_tax) }} FCFA</span>
+      </div>
+      <div class="total-row total-row--final">
+        <span>Total TTC</span><span>{{ fmt(quote.amount_incl_tax) }} FCFA</span>
+      </div>
+    </div>
+  </div>
+
+  {% if not quote.invoice_id %}
+  <div style="margin-top:20px; text-align:right;">
+    <form method="post" action="{{ url_for('quotes.delete', quote_id=quote.id) }}"
+          style="display:inline;"
+          onsubmit="return confirm('Supprimer définitivement le devis {{ quote.number }} ?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-danger">
+        <i data-lucide="trash-2" style="width:16px;height:16px;vertical-align:-3px;"></i> Supprimer ce devis
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+{% endblock %}
