@@ -935,20 +935,20 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         # Bloc numéro à droite
         canvas.setFillColor(INK_FAINT)
         canvas.setFont("Helvetica-Bold", 9)
-        canvas.drawRightString(PAGE_W - MR, PAGE_H - 17 * mm,
+        canvas.drawRightString(PAGE_W - MR, PAGE_H - 15 * mm,
                                ("NUMÉRO DE DEVIS" if is_devis else "NUMÉRO DE FACTURE"))
         canvas.setFillColor(MARINE)
         canvas.setFont("Helvetica-Bold", 26)
-        canvas.drawRightString(PAGE_W - MR, PAGE_H - 25 * mm, number)
+        canvas.drawRightString(PAGE_W - MR, PAGE_H - 23 * mm, number)
         # petit point or décoratif
         canvas.setFillColor(OR)
-        canvas.circle(PAGE_W - MR - 2, PAGE_H - 28.5 * mm, 1.6, fill=1, stroke=0)
+        canvas.circle(PAGE_W - MR - 2, PAGE_H - 26.5 * mm, 1.6, fill=1, stroke=0)
         # Dates
         canvas.setFillColor(INK_SOFT)
         canvas.setFont("Helvetica", 10)
-        canvas.drawRightString(PAGE_W - MR, PAGE_H - 34 * mm, f"Émis le {d_emis}")
+        canvas.drawRightString(PAGE_W - MR, PAGE_H - 31.5 * mm, f"Émis le {d_emis}")
         if is_devis and d_valid:
-            canvas.drawRightString(PAGE_W - MR, PAGE_H - 39 * mm, f"Valide jusqu'au {d_valid}")
+            canvas.drawRightString(PAGE_W - MR, PAGE_H - 36 * mm, f"Valide jusqu'au {d_valid}")
 
         # ── Pied de page ──
         canvas.setFillColor(HAIRLINE)
