@@ -897,31 +897,41 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     cust_html = "<br/>".join(cust_html_lines)
 
     card_label = "FACTURÉ À" if title.strip().upper().startswith("FAC") else "DESTINATAIRE"
-    # Carte destinataire (moitié droite : convention — le client s'aligne à droite,
-    # face à l'émetteur de l'en-tête qui est à gauche).
-    client_card = Table(
-        [[Paragraph(card_label, st_label)],
-         [Paragraph(cust_html, st_body)]],
-        colWidths=[CONTENT_W / 2],
-    )
-    client_card.setStyle(TableStyle([
-        ("LEFTPADDING", (0, 0), (-1, -1), 12),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-        ("TOPPADDING", (0, 0), (0, 0), 10),
-        ("BOTTOMPADDING", (0, 0), (0, 0), 3),
-        ("TOPPADDING", (0, 1), (0, 1), 2),
-        ("BOTTOMPADDING", (0, 1), (0, 1), 12),
-        ("BACKGROUND", (0, 0), (-1, -1), CARD_BG),
-        ("LINEBELOW", (0, 0), (-1, 0), 2, OR),
-    ]))
+    HALF = CONTENT_W / 2 - 4 * mm
 
-    # Placée à droite ; la moitié gauche reste vide (aération).
-    holder = Table([["", client_card]], colWidths=[CONTENT_W / 2, CONTENT_W / 2])
+    def _card(label, body_html):
+        c = Table([[Paragraph(label, st_label)], [Paragraph(body_html, st_body)]],
+                  colWidths=[HALF])
+        c.setStyle(TableStyle([
+            ("LEFTPADDING", (0, 0), (-1, -1), 12),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+            ("TOPPADDING", (0, 0), (0, 0), 10),
+            ("BOTTOMPADDING", (0, 0), (0, 0), 3),
+            ("TOPPADDING", (0, 1), (0, 1), 2),
+            ("BOTTOMPADDING", (0, 1), (0, 1), 12),
+            ("BACKGROUND", (0, 0), (-1, -1), CARD_BG),
+            ("LINEBELOW", (0, 0), (-1, 0), 2, OR),
+        ]))
+        return c
+
+    # Carte "Détails du document" à gauche (comble le vide + rappelle N°/date/objet).
+    details_html = (
+        f"<b>N° :</b> {number}<br/>"
+        f"<b>Date :</b> {d}<br/>"
+        f"<b>Objet :</b> {title.capitalize()} de prestation"
+    )
+    details_card = _card("DÉTAILS DU DOCUMENT", details_html)
+
+    # Carte destinataire à droite.
+    client_card = _card(card_label, cust_html)
+
+    holder = Table([[details_card, client_card]], colWidths=[CONTENT_W / 2, CONTENT_W / 2])
     holder.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("LEFTPADDING", (0, 0), (0, 0), 0),
+        ("RIGHTPADDING", (0, 0), (0, 0), 4 * mm),
         ("LEFTPADDING", (1, 0), (1, 0), 4 * mm),
+        ("RIGHTPADDING", (1, 0), (1, 0), 0),
     ]))
     story.append(holder)
     story.append(Spacer(1, 9 * mm))
