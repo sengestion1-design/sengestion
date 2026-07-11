@@ -764,7 +764,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     PAGE_W, PAGE_H = A4
     ML = MR = 16 * mm
     CONTENT_W = PAGE_W - ML - MR
-    HEADER_H = 52 * mm                        # hauteur de la zone d'en-tête (jusqu'au liseré or)
+    HEADER_H = 56 * mm                        # hauteur de la zone d'en-tête (jusqu'au liseré or)
 
     def _abs(rel):
         if not rel:
@@ -825,8 +825,8 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             try:
                 img = RLImage(logo_path, width=44 * mm, height=LOGO_MAX_H, kind="proportional")
                 iw, ih = img.wrap(0, 0)
-                img.drawOn(canvas, ML, PAGE_H - 13 * mm - ih)
-                coord_y = PAGE_H - 13 * mm - ih - 4 * mm
+                img.drawOn(canvas, ML, PAGE_H - 12 * mm - ih)
+                coord_y = PAGE_H - 12 * mm - ih - 7 * mm   # marge nette sous le logo
             except Exception:
                 canvas.setFillColor(MARINE)
                 canvas.setFont("Times-Bold", 24)
@@ -1022,40 +1022,52 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(totals)
     story.append(Spacer(1, 10 * mm))
 
-    # ── Zone basse : mentions à gauche | cachet signé à droite ──
-    stamp_path = _abs(settings.stamp) if settings else None
-    note_html = ""
-    if settings and settings.footer_note:
-        note_html = ("<font size=7.5 color='#F2B10E'><b>CONDITIONS</b></font><br/>"
-                     + str(settings.footer_note).replace("\n", "<br/>"))
-    note_cell = Paragraph(note_html, st_muted) if note_html else Paragraph("", st_muted)
+    story.append(Spacer(1, 4 * mm))
 
+    # ── Encadré "Conditions & validité" (pleine largeur, équilibre la page) ──
+    is_devis = title.strip().upper().startswith("DEV")
+    cond_lines = []
+    if is_devis:
+        cond_lines.append("Devis valable 30 jours à compter de la date d'émission.")
+        cond_lines.append("Le règlement vaut acceptation des conditions ci-dessus.")
+    else:
+        cond_lines.append("Règlement à réception de facture.")
+    if settings and settings.footer_note:
+        # les conditions personnalisées passent en premier
+        cond_lines = [str(settings.footer_note).replace("\n", "<br/>")] + (
+            cond_lines if not is_devis else cond_lines[:1])
+
+    cond_html = ("<font size=9 color='#F2B10E'><b>CONDITIONS &amp; VALIDITÉ</b></font><br/>"
+                 + "<br/>".join(cond_lines))
+    cond_box = Table([[Paragraph(cond_html, st_muted)]], colWidths=[CONTENT_W])
+    cond_box.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), CARD_BG),
+        ("LINEABOVE", (0, 0), (-1, 0), 2, OR),
+        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+        ("TOPPADDING", (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+    ]))
+    story.append(cond_box)
+    story.append(Spacer(1, 8 * mm))
+
+    # ── Cachet signé (aligné à droite) ──
+    stamp_path = _abs(settings.stamp) if settings else None
     if stamp_path:
         try:
             stamp_cell = Table(
-                [[Paragraph("<font size=7.5 color='#F2B10E'><b>CACHET &amp; SIGNATURE</b></font>", st_muted)],
-                 [RLImage(stamp_path, width=42 * mm, height=28 * mm, kind="proportional")]],
-                colWidths=[46 * mm],
+                [[Paragraph("<font size=9 color='#F2B10E'><b>CACHET &amp; SIGNATURE</b></font>", st_muted)],
+                 [RLImage(stamp_path, width=45 * mm, height=30 * mm, kind="proportional")]],
+                colWidths=[50 * mm], hAlign="RIGHT",
             )
             stamp_cell.setStyle(TableStyle([
                 ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (0, 0), (0, 0), 0),
                 ("BOTTOMPADDING", (0, 0), (0, 0), 4),
             ]))
+            story.append(stamp_cell)
         except Exception:
-            stamp_cell = Paragraph("", st_muted)
-    else:
-        stamp_cell = Paragraph("", st_muted)
-
-    bottom = Table([[note_cell, stamp_cell]],
-                   colWidths=[CONTENT_W - 50 * mm, 50 * mm])
-    bottom.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (0, 0), "TOP"),
-        ("VALIGN", (1, 0), (1, 0), "BOTTOM"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-    ]))
-    story.append(bottom)
+            pass
 
     doc.build(story, onFirstPage=_decorate, onLaterPages=_decorate)
     buffer.seek(0)
