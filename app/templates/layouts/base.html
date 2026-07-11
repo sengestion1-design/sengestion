@@ -8,9 +8,9 @@
   <!-- Favicon emoji -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
 
-  <!-- Feuilles de style -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <!-- Feuilles de style (versionnées : rechargement auto à chaque modif) -->
+  <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ static_v('css/app.css') }}">
 
   <!-- Lucide Icons v1.23.0 — version épinglée + hash SRI vérifié (sécurité) -->
   <script

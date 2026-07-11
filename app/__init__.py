@@ -51,4 +51,20 @@ def create_app(env="default"):
     app.register_blueprint(messages_bp)
     app.register_blueprint(settings_bp)
 
+    # Cache-busting : ajoute la date de modif du fichier à l'URL statique.
+    # Ainsi tout changement CSS/JS force le navigateur à recharger (fini le cache).
+    import os
+    from flask import url_for
+
+    @app.context_processor
+    def _static_versioning():
+        def static_v(filename):
+            path = os.path.join(app.static_folder, filename)
+            try:
+                ver = int(os.path.getmtime(path))
+            except OSError:
+                ver = 0
+            return url_for("static", filename=filename, v=ver)
+        return {"static_v": static_v}
+
     return app
