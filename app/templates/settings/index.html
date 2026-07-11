@@ -58,12 +58,12 @@
       </div>
     </section>
 
-    {# ─── Section 2 : Logo, signature, cachet ─── #}
+    {# ─── Section 2 : Logo + cachet signé ─── #}
     <section class="card settings-section">
-      <h2 class="settings-title"><i data-lucide="image"></i> Logo, signature & cachet</h2>
-      <p class="settings-hint">Images utilisées sur vos devis et factures. PNG recommandé (fond transparent).</p>
-      <div class="settings-images">
-        {% for field, label in [('logo','Logo'), ('signature','Signature'), ('stamp','Cachet')] %}
+      <h2 class="settings-title"><i data-lucide="image"></i> Logo & cachet signé</h2>
+      <p class="settings-hint">Signez sur votre cachet, photographiez le tout, puis importez cette image unique. PNG recommandé (fond transparent).</p>
+      <div class="settings-images settings-images--2">
+        {% for field, label in [('logo','Logo'), ('stamp','Cachet signé')] %}
         {% set current = s[field] %}
         <div class="settings-image-box">
           <div class="settings-image-label">{{ label }}</div>
@@ -134,6 +134,7 @@
     .settings-hint { font-size: var(--text-sm); color: rgba(2,26,61,0.62); margin: -8px 0 16px; }
 
     .settings-images { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+    .settings-images--2 { grid-template-columns: repeat(2, minmax(0, 280px)); }
     .settings-image-box { text-align: center; }
     .settings-image-label { font-weight: var(--weight-bold); color: var(--marine); font-size: var(--text-sm); margin-bottom: 10px; }
     .settings-image-preview {

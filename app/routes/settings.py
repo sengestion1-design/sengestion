@@ -22,8 +22,8 @@ from app.utils.access import subscription_required
 
 settings_bp = Blueprint("settings", __name__, url_prefix="/settings")
 
-# Champs image gérés : (nom du champ form/colonne, formats)
-_IMAGE_FIELDS = ("logo", "signature", "stamp")
+# Champs image gérés (colonnes) : logo + cachet signé.
+_IMAGE_FIELDS = ("logo", "stamp")
 
 
 def _clean(value, maxlen):

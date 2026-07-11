@@ -30,8 +30,8 @@ class CompanySettings(db.Model):
 
     # --- Images (chemins relatifs à /static) ---
     logo = db.Column(db.String(255))
-    signature = db.Column(db.String(255))
-    stamp = db.Column(db.String(255))                         # cachet
+    # Cachet portant la signature (un seul geste : on signe sur le cachet).
+    stamp = db.Column(db.String(255))
 
     # --- Mentions & pied de page PDF ---
     footer_note = db.Column(db.Text)                          # ex. conditions de paiement
