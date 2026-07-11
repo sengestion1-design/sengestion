@@ -1026,9 +1026,11 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     # ── Eyebrow DESTINATAIRE ──
     def _eyebrow(text):
-        p = Paragraph(f"<font color='#021A3D'><b>{'  '.join(list(text))}</b></font>",
+        # Interlettrage typographique propre (charSpace) : espace les lettres SANS
+        # confondre les espaces entre mots. Un espace normal sépare bien les mots.
+        p = Paragraph(f"<font color='#021A3D'><b>{text}</b></font>",
                       ParagraphStyle("ey", fontName=FONT_BODY_BOLD, fontSize=9,
-                                     textColor=INK_SOFT, leading=12))
+                                     textColor=INK_SOFT, leading=12, charSpace=3))
         bar = Table([[""]], colWidths=[26 * mm], rowHeights=[2])
         bar.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), OR)]))
         wrap = Table([[p], [bar]], colWidths=[CONTENT_W])
