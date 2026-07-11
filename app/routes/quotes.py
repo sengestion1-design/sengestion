@@ -744,210 +744,316 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     from reportlab.lib import colors
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.platypus import (
-        SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer,
+        SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Frame, KeepInFrame,
     )
-    from reportlab.lib.enums import TA_RIGHT, TA_LEFT
-
-    MARINE = colors.HexColor("#021A3D")
-    OR = colors.HexColor("#F2B10E")
-    LIGHT = colors.HexColor("#F4F5F7")
-
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(
-        buffer, pagesize=A4,
-        leftMargin=18 * mm, rightMargin=18 * mm,
-        topMargin=18 * mm, bottomMargin=18 * mm,
-        title=f"{title} {number}",
-    )
-    styles = getSampleStyleSheet()
-    h_brand = ParagraphStyle(
-        "brand", parent=styles["Title"], fontName="Times-Bold",
-        fontSize=24, textColor=MARINE, spaceAfter=2, alignment=TA_LEFT,
-    )
-    normal = ParagraphStyle(
-        "n", parent=styles["Normal"], fontName="Helvetica",
-        fontSize=10, textColor=MARINE,
-    )
-    muted = ParagraphStyle(
-        "m", parent=normal, textColor=colors.HexColor("#5b6472"),
-    )
-    doc_title = ParagraphStyle(
-        "dt", parent=styles["Title"], fontName="Times-Bold",
-        fontSize=20, textColor=MARINE, alignment=TA_RIGHT,
-    )
-    right = ParagraphStyle("r", parent=normal, alignment=TA_RIGHT)
-
-    story = []
+    from reportlab.lib.enums import TA_RIGHT, TA_LEFT, TA_CENTER
     import os
     from flask import current_app
     from reportlab.platypus import Image as RLImage
 
+    # ── Palette (charte stricte 3 couleurs + neutres dérivés) ──
+    MARINE = colors.HexColor("#021A3D")
+    OR = colors.HexColor("#F2B10E")
+    JAUNE_PALE = colors.HexColor("#E8E7A2")
+    # Neutres à légère teinte marine (choisis, pas des gris purs).
+    INK_SOFT = colors.HexColor("#4A5568")     # texte secondaire
+    ROW_ALT = colors.HexColor("#F5F7FA")      # zébrure de tableau
+    HAIRLINE = colors.HexColor("#E3E7ED")     # filets fins
+    CARD_BG = colors.HexColor("#F8F9FB")      # fond des cartes info
+
+    PAGE_W, PAGE_H = A4
+    ML = MR = 16 * mm
+    CONTENT_W = PAGE_W - ML - MR
+    HEADER_H = 42 * mm                        # hauteur du bandeau marine
+
     def _abs(rel):
-        """Chemin absolu d'une image de /static (ou None si absente sur disque)."""
         if not rel:
             return None
         path = os.path.join(current_app.static_folder, rel)
         return path if os.path.exists(path) else None
 
-    # Nom/coordonnées émetteur : paramètres entreprise si définis, sinon SenGestion.
+    # ── Données émetteur ──
     brand_name = (settings.company_name if settings and settings.company_name else "SenGestion")
-    sub_lines = []
+    issuer_lines = []
     if settings:
         if settings.address:
-            sub_lines.append(str(settings.address).replace("\n", " · "))
-        contact_bits = [b for b in (settings.phone, settings.email, settings.website) if b]
-        if contact_bits:
-            sub_lines.append(" · ".join(contact_bits))
-        id_bits = []
+            issuer_lines.append(str(settings.address).replace("\n", ", "))
+        for b in (settings.phone, settings.email, settings.website):
+            if b:
+                issuer_lines.append(b)
+        ids = []
         if settings.ninea:
-            id_bits.append(f"NINEA : {settings.ninea}")
+            ids.append(f"NINEA {settings.ninea}")
         if settings.rccm:
-            id_bits.append(f"RCCM : {settings.rccm}")
-        if id_bits:
-            sub_lines.append(" · ".join(id_bits))
-    if not sub_lines:
-        sub_lines = ["Gestion commerciale pour PME &amp; entrepreneurs"]
-
-    # Colonne marque : logo si dispo, sinon nom en gros.
+            ids.append(f"RCCM {settings.rccm}")
+        if ids:
+            issuer_lines.append(" · ".join(ids))
     logo_path = _abs(settings.logo) if settings else None
-    if logo_path:
-        try:
-            brand_cell = RLImage(logo_path, width=48 * mm, height=20 * mm, kind="proportional")
-        except Exception:
-            brand_cell = Paragraph(brand_name, h_brand)
-    else:
-        brand_cell = Paragraph(brand_name, h_brand)
-
-    # En-tête : marque à gauche, titre + numéro à droite
     d = doc_date.strftime("%d/%m/%Y") if doc_date else ""
-    header = Table(
-        [[
-            brand_cell,
-            Paragraph(f"{title}<br/><font size=11 color='#8F6600'>{number}</font>",
-                      doc_title),
-        ]],
-        colWidths=[95 * mm, 79 * mm],
-    )
-    header.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-    ]))
-    story.append(header)
-    for line in sub_lines:
-        story.append(Paragraph(line, muted))
-    story.append(Spacer(1, 4 * mm))
-    # filet or
-    rule = Table([[""]], colWidths=[174 * mm], rowHeights=[2])
-    rule.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), OR)]))
-    story.append(rule)
-    story.append(Spacer(1, 6 * mm))
 
-    # Bloc client + date
+    # ── Styles typographiques (échelle marquée) ──
+    styles = getSampleStyleSheet()
+    st_brand = ParagraphStyle("brand", fontName="Times-Bold", fontSize=22,
+                              textColor=colors.white, leading=24)
+    st_issuer = ParagraphStyle("issuer", fontName="Helvetica", fontSize=8.2,
+                               textColor=colors.HexColor("#C7D0DE"), leading=12)
+    st_doctype = ParagraphStyle("doctype", fontName="Times-Bold", fontSize=30,
+                                textColor=OR, alignment=TA_RIGHT, leading=32)
+    st_docnum = ParagraphStyle("docnum", fontName="Helvetica-Bold", fontSize=11,
+                               textColor=colors.white, alignment=TA_RIGHT, leading=16)
+    st_label = ParagraphStyle("label", fontName="Helvetica-Bold", fontSize=7.5,
+                              textColor=OR, leading=11)   # eyebrow
+    st_body = ParagraphStyle("body", fontName="Helvetica", fontSize=9.5,
+                             textColor=MARINE, leading=14)
+    st_body_b = ParagraphStyle("bodyb", parent=st_body, fontName="Helvetica-Bold")
+    st_muted = ParagraphStyle("muted", fontName="Helvetica", fontSize=8.5,
+                              textColor=INK_SOFT, leading=13)
+    st_cell = ParagraphStyle("cell", fontName="Helvetica", fontSize=9.5,
+                             textColor=MARINE, leading=13)
+
+    buffer = BytesIO()
+
+    # ── Bandeau marine (en-tête) + pied de page dessinés sur chaque page ──
+    def _decorate(canvas, doc_):
+        canvas.saveState()
+        # Bandeau marine plein en haut
+        canvas.setFillColor(MARINE)
+        canvas.rect(0, PAGE_H - HEADER_H, PAGE_W, HEADER_H, fill=1, stroke=0)
+        # Fin liseré or sous le bandeau
+        canvas.setFillColor(OR)
+        canvas.rect(0, PAGE_H - HEADER_H - 3, PAGE_W, 3, fill=1, stroke=0)
+
+        # Marque : logo si dispo, sinon nom
+        top = PAGE_H - 15 * mm
+        if logo_path:
+            try:
+                img = RLImage(logo_path, width=44 * mm, height=16 * mm, kind="proportional")
+                img.drawOn(canvas, ML, PAGE_H - 26 * mm)
+            except Exception:
+                canvas.setFillColor(colors.white)
+                canvas.setFont("Times-Bold", 22)
+                canvas.drawString(ML, top - 6, brand_name)
+        else:
+            canvas.setFillColor(colors.white)
+            canvas.setFont("Times-Bold", 22)
+            canvas.drawString(ML, top - 6, brand_name)
+
+        # Coordonnées émetteur (petit, sous la marque)
+        canvas.setFillColor(colors.HexColor("#C7D0DE"))
+        canvas.setFont("Helvetica", 7.6)
+        y = PAGE_H - 29 * mm
+        for line in issuer_lines[:3]:
+            canvas.drawString(ML, y, line[:95])
+            y -= 4.2 * mm
+
+        # Titre document (DEVIS / FACTURE) + numéro à droite
+        canvas.setFillColor(OR)
+        canvas.setFont("Times-Bold", 30)
+        canvas.drawRightString(PAGE_W - MR, top - 4, title)
+        canvas.setFillColor(colors.white)
+        canvas.setFont("Helvetica-Bold", 10.5)
+        canvas.drawRightString(PAGE_W - MR, top - 11 * mm, f"N° {number}")
+        canvas.setFillColor(colors.HexColor("#C7D0DE"))
+        canvas.setFont("Helvetica", 8.5)
+        canvas.drawRightString(PAGE_W - MR, top - 15 * mm, f"Date : {d}")
+
+        # ── Pied de page ──
+        footer_brand = brand_name
+        canvas.setFillColor(HAIRLINE)
+        canvas.rect(ML, 15 * mm, CONTENT_W, 0.6, fill=1, stroke=0)
+        canvas.setFillColor(INK_SOFT)
+        canvas.setFont("Helvetica", 7.6)
+        canvas.drawString(ML, 11 * mm,
+                          f"{footer_brand} — Montants exprimés en francs CFA (FCFA).")
+        canvas.drawRightString(PAGE_W - MR, 11 * mm, f"Page {doc_.page}")
+        canvas.restoreState()
+
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4,
+        leftMargin=ML, rightMargin=MR,
+        topMargin=HEADER_H + 8 * mm,          # contenu commence sous le bandeau
+        bottomMargin=20 * mm,
+        title=f"{title} {number}",
+    )
+
+    story = []
+
+    # ── Deux cartes : Émetteur | Destinataire ──
+    issuer_card_lines = [f"<b>{brand_name}</b>"]
+    issuer_card_lines += issuer_lines
+    issuer_html = "<br/>".join(issuer_card_lines[:5])
+
     cust_name = customer.name if customer else "—"
-    cust_lines = [f"<b>{cust_name}</b>"]
+    cust_html_lines = [f"<b>{cust_name}</b>"]
     if customer:
         if customer.company:
-            cust_lines.append(customer.company)
+            cust_html_lines.append(customer.company)
         if customer.email:
-            cust_lines.append(customer.email)
+            cust_html_lines.append(customer.email)
         if customer.phone:
-            cust_lines.append(customer.phone)
+            cust_html_lines.append(customer.phone)
         if customer.address:
-            cust_lines.append(str(customer.address).replace("\n", "<br/>"))
-    client_para = Paragraph(
-        "<font color='#5b6472' size=9>CLIENT</font><br/>" + "<br/>".join(cust_lines),
-        normal,
-    )
-    date_para = Paragraph(
-        f"<font color='#5b6472' size=9>DATE</font><br/>{d}", right)
-    info = Table([[client_para, date_para]], colWidths=[120 * mm, 54 * mm])
-    info.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP")]))
-    story.append(info)
-    story.append(Spacer(1, 8 * mm))
+            cust_html_lines.append(str(customer.address).replace("\n", ", "))
+    cust_html = "<br/>".join(cust_html_lines)
 
-    # Tableau des lignes
-    data = [["Désignation", "Qté", "P.U. (FCFA)", "Montant (FCFA)"]]
+    def _info_card(label, body_html):
+        inner = Table(
+            [[Paragraph(label, st_label)],
+             [Paragraph(body_html, st_body)]],
+            colWidths=[CONTENT_W / 2 - 4 * mm],
+        )
+        inner.setStyle(TableStyle([
+            ("LEFTPADDING", (0, 0), (-1, -1), 10),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+            ("TOPPADDING", (0, 0), (0, 0), 9),
+            ("BOTTOMPADDING", (0, 0), (0, 0), 3),
+            ("TOPPADDING", (0, 1), (0, 1), 2),
+            ("BOTTOMPADDING", (0, 1), (0, 1), 10),
+            ("BACKGROUND", (0, 0), (-1, -1), CARD_BG),
+            ("LINEBELOW", (0, 0), (-1, 0), 2, OR),
+            ("LINEABOVE", (0, 0), (-1, 0), 0, CARD_BG),
+        ]))
+        return inner
+
+    cards = Table(
+        [[_info_card("ÉMETTEUR", issuer_html), _info_card("CLIENT", cust_html)]],
+        colWidths=[CONTENT_W / 2, CONTENT_W / 2],
+    )
+    cards.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (0, 0), 0),
+        ("RIGHTPADDING", (0, 0), (0, 0), 4 * mm),
+        ("LEFTPADDING", (1, 0), (1, 0), 4 * mm),
+        ("RIGHTPADDING", (1, 0), (1, 0), 0),
+    ]))
+    story.append(cards)
+    story.append(Spacer(1, 9 * mm))
+
+    # ── Tableau des lignes ──
+    col_desc = CONTENT_W - (16 * mm + 30 * mm + 34 * mm)
+    data = [[
+        Paragraph("DÉSIGNATION", ParagraphStyle("th", fontName="Helvetica-Bold",
+                  fontSize=8.5, textColor=colors.white, leading=11)),
+        Paragraph("QTÉ", ParagraphStyle("thr", fontName="Helvetica-Bold", fontSize=8.5,
+                  textColor=colors.white, alignment=TA_CENTER, leading=11)),
+        Paragraph("P.U.", ParagraphStyle("thr2", fontName="Helvetica-Bold", fontSize=8.5,
+                  textColor=colors.white, alignment=TA_RIGHT, leading=11)),
+        Paragraph("MONTANT", ParagraphStyle("thr3", fontName="Helvetica-Bold", fontSize=8.5,
+                  textColor=colors.white, alignment=TA_RIGHT, leading=11)),
+    ]]
+    st_num = ParagraphStyle("num", fontName="Helvetica", fontSize=9.5,
+                            textColor=MARINE, alignment=TA_RIGHT, leading=13)
+    st_num_c = ParagraphStyle("numc", parent=st_num, alignment=TA_CENTER)
     for it in items:
         data.append([
-            Paragraph(str(it.description), normal),
-            _fmt(it.quantity),
-            _fmt(it.unit_price),
-            _fmt(it.amount),
+            Paragraph(str(it.description), st_cell),
+            Paragraph(_fmt(it.quantity), st_num_c),
+            Paragraph(_fmt(it.unit_price), st_num),
+            Paragraph(_fmt(it.amount), st_num),
         ])
-    table = Table(data, colWidths=[92 * mm, 18 * mm, 30 * mm, 34 * mm])
+    table = Table(data, colWidths=[col_desc, 16 * mm, 30 * mm, 34 * mm], repeatRows=1)
     table.setStyle(TableStyle([
+        # En-tête marine
         ("BACKGROUND", (0, 0), (-1, 0), MARINE),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("ALIGN", (1, 0), (-1, -1), "RIGHT"),
+        ("TOPPADDING", (0, 0), (-1, 0), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+        # Corps
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 7),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-        ("LEFTPADDING", (0, 0), (-1, -1), 8),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, LIGHT]),
-        ("LINEBELOW", (0, 0), (-1, -1), 0.4, colors.HexColor("#dfe3e8")),
-        ("TEXTCOLOR", (0, 1), (-1, -1), MARINE),
+        ("TOPPADDING", (0, 1), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 1), (-1, -1), 8),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, ROW_ALT]),
+        ("LINEBELOW", (0, 1), (-1, -1), 0.5, HAIRLINE),
+        ("LINEBELOW", (0, -1), (-1, -1), 1.2, MARINE),
     ]))
     story.append(table)
-    story.append(Spacer(1, 6 * mm))
+    story.append(Spacer(1, 7 * mm))
 
-    # Totaux
+    # ── Bloc totaux (encadré marine, TTC en or) ──
     tva = (Decimal(str(amount_incl or 0)) - Decimal(str(amount_excl or 0)))
-    totals_rows = [
-        ["Total HT", f"{_fmt(amount_excl)} FCFA"],
-        [f"TVA ({int(TAX_RATE * 100)} %)", f"{_fmt(tva)} FCFA"],
-        ["Total TTC", f"{_fmt(amount_incl)} FCFA"],
-    ]
-    if paid is not None:
-        totals_rows.append(["Déjà réglé", f"{_fmt(paid)} FCFA"])
-        totals_rows.append(["Reste à payer", f"{_fmt(due)} FCFA"])
+    st_tot_lbl = ParagraphStyle("tl", fontName="Helvetica", fontSize=9.5,
+                                textColor=INK_SOFT, leading=14)
+    st_tot_val = ParagraphStyle("tv", fontName="Helvetica-Bold", fontSize=9.5,
+                                textColor=MARINE, alignment=TA_RIGHT, leading=14)
+    st_ttc_lbl = ParagraphStyle("ttcl", fontName="Helvetica-Bold", fontSize=11.5,
+                                textColor=MARINE, leading=16)
+    st_ttc_val = ParagraphStyle("ttcv", fontName="Helvetica-Bold", fontSize=12,
+                                textColor=MARINE, alignment=TA_RIGHT, leading=15)
 
-    totals = Table(totals_rows, colWidths=[44 * mm, 40 * mm], hAlign="RIGHT")
-    style = [
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("ALIGN", (1, 0), (1, -1), "RIGHT"),
-        ("TEXTCOLOR", (0, 0), (-1, -1), MARINE),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-        ("LINEABOVE", (0, 2), (-1, 2), 0.6, MARINE),
-        ("FONTNAME", (0, 2), (-1, 2), "Helvetica-Bold"),
-        ("BACKGROUND", (0, 2), (-1, 2), colors.HexColor("#E8E7A2")),
+    rows = [
+        [Paragraph("Total HT", st_tot_lbl), Paragraph(f"{_fmt(amount_excl)} FCFA", st_tot_val)],
+        [Paragraph(f"TVA ({int(TAX_RATE * 100)} %)", st_tot_lbl),
+         Paragraph(f"{_fmt(tva)} FCFA", st_tot_val)],
     ]
-    totals.setStyle(TableStyle(style))
+    ttc_row_idx = len(rows)
+    rows.append([Paragraph("TOTAL TTC", st_ttc_lbl),
+                 Paragraph(f"{_fmt(amount_incl)} FCFA", st_ttc_val)])
+    extra_start = None
+    if paid is not None:
+        extra_start = len(rows)
+        rows.append([Paragraph("Déjà réglé", st_tot_lbl),
+                     Paragraph(f"{_fmt(paid)} FCFA", st_tot_val)])
+        rows.append([Paragraph("Reste à payer", st_ttc_lbl),
+                     Paragraph(f"{_fmt(due)} FCFA", st_ttc_val)])
+
+    totals = Table(rows, colWidths=[38 * mm, 46 * mm], hAlign="RIGHT")
+    ts = [
+        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("LINEBELOW", (0, 0), (-1, ttc_row_idx - 1), 0.5, HAIRLINE),
+        # Ligne TTC en jaune pâle, encadrée
+        ("BACKGROUND", (0, ttc_row_idx), (-1, ttc_row_idx), JAUNE_PALE),
+        ("TOPPADDING", (0, ttc_row_idx), (-1, ttc_row_idx), 9),
+        ("BOTTOMPADDING", (0, ttc_row_idx), (-1, ttc_row_idx), 9),
+        ("LINEABOVE", (0, ttc_row_idx), (-1, ttc_row_idx), 1.5, OR),
+    ]
+    if extra_start is not None:
+        ts.append(("BACKGROUND", (0, extra_start + 1), (-1, extra_start + 1), JAUNE_PALE))
+        ts.append(("LINEABOVE", (0, extra_start + 1), (-1, extra_start + 1), 1.5, OR))
+        ts.append(("TOPPADDING", (0, extra_start + 1), (-1, extra_start + 1), 9))
+        ts.append(("BOTTOMPADDING", (0, extra_start + 1), (-1, extra_start + 1), 9))
+    totals.setStyle(TableStyle(ts))
     story.append(totals)
     story.append(Spacer(1, 10 * mm))
 
-    # Cachet signé (une seule image : signature apposée sur le cachet), à droite.
+    # ── Zone basse : mentions à gauche | cachet signé à droite ──
     stamp_path = _abs(settings.stamp) if settings else None
+    note_html = ""
+    if settings and settings.footer_note:
+        note_html = ("<font size=7.5 color='#F2B10E'><b>CONDITIONS</b></font><br/>"
+                     + str(settings.footer_note).replace("\n", "<br/>"))
+    note_cell = Paragraph(note_html, st_muted) if note_html else Paragraph("", st_muted)
+
     if stamp_path:
         try:
-            mark = Table(
-                [[Paragraph("<font color='#5b6472' size=8>Cachet &amp; signature</font>", muted)],
-                 [RLImage(stamp_path, width=45 * mm, height=30 * mm, kind="proportional")]],
-                colWidths=[50 * mm], hAlign="RIGHT",
+            stamp_cell = Table(
+                [[Paragraph("<font size=7.5 color='#F2B10E'><b>CACHET &amp; SIGNATURE</b></font>", st_muted)],
+                 [RLImage(stamp_path, width=42 * mm, height=28 * mm, kind="proportional")]],
+                colWidths=[46 * mm],
             )
-            mark.setStyle(TableStyle([
+            stamp_cell.setStyle(TableStyle([
                 ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (0, 0), 4),
             ]))
-            story.append(mark)
-            story.append(Spacer(1, 6 * mm))
         except Exception:
-            pass
+            stamp_cell = Paragraph("", st_muted)
+    else:
+        stamp_cell = Paragraph("", st_muted)
 
-    # Mentions personnalisées (conditions de paiement…).
-    if settings and settings.footer_note:
-        story.append(Paragraph(str(settings.footer_note).replace("\n", "<br/>"), muted))
-        story.append(Spacer(1, 4 * mm))
+    bottom = Table([[note_cell, stamp_cell]],
+                   colWidths=[CONTENT_W - 50 * mm, 50 * mm])
+    bottom.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (0, 0), "TOP"),
+        ("VALIGN", (1, 0), (1, 0), "BOTTOM"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(bottom)
 
-    footer_brand = (settings.company_name if settings and settings.company_name
-                    else "SenGestion")
-    story.append(Paragraph(
-        f"<font color='#5b6472' size=8>Document généré par {footer_brand} — "
-        "Montants exprimés en francs CFA (FCFA).</font>", muted))
-
-    doc.build(story)
+    doc.build(story, onFirstPage=_decorate, onLaterPages=_decorate)
     buffer.seek(0)
     return buffer
