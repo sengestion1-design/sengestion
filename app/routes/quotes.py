@@ -812,16 +812,19 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     from flask import current_app
     from reportlab.platypus import Image as RLImage
 
-    # ── Palette (charte 3 couleurs + neutres dérivés) ──
+    # ── Palette — CHARTE STRICTE 3 couleurs (marine / or / jaune pâle) ──
+    # Les neutres sont des teintes DÉRIVÉES du marine (pas des gris purs), pour
+    # rester dans l'esprit charte comme le reste de l'app (rgba(2,26,61,...)).
     MARINE = colors.HexColor("#021A3D")
     OR = colors.HexColor("#F2B10E")
     JAUNE_PALE = colors.HexColor("#E8E7A2")
-    INK_SOFT = colors.HexColor("#5A6472")     # texte secondaire
-    ROW_ALT = colors.HexColor("#F7F8FA")      # zébrure
-    HAIRLINE = colors.HexColor("#E3E7ED")     # filets
-    CREAM = colors.HexColor("#FCF9F2")        # fond crème en-tête
-    OBJ_BG = colors.HexColor("#E8F1FB")       # fond bleu clair carte Objet
-    CARD_BG = colors.HexColor("#F8F9FB")
+    INK_SOFT = colors.Color(2/255, 26/255, 61/255, 0.62)   # marine 62 % (texte secondaire)
+    INK_FAINT = colors.Color(2/255, 26/255, 61/255, 0.42)  # marine 42 % (labels discrets)
+    ROW_ALT = colors.HexColor("#F6F7F5")      # zébrure très légère (teinte jaune pâle diluée)
+    HAIRLINE = colors.Color(2/255, 26/255, 61/255, 0.14)   # filets marine 14 %
+    CREAM = colors.HexColor("#FBFAF3")        # fond en-tête = jaune pâle très dilué (charte)
+    OBJ_BG = JAUNE_PALE                        # carte Objet = jaune pâle (charte)
+    CARD_BG = colors.HexColor("#FAF9F1")       # fond cartes = jaune pâle très dilué
 
     PAGE_W, PAGE_H = A4
     ML = MR = 15 * mm
@@ -925,11 +928,11 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         # Ligne légale (plus petite, tout en bas de l'en-tête)
         if legal_line:
             canvas.setFont("Helvetica", 8)
-            canvas.setFillColor(colors.HexColor("#8A93A0"))
+            canvas.setFillColor(INK_FAINT)
             canvas.drawString(ML, PAGE_H - HEADER_H + 3 * mm, legal_line[:130])
 
         # Bloc numéro à droite
-        canvas.setFillColor(colors.HexColor("#8A93A0"))
+        canvas.setFillColor(INK_FAINT)
         canvas.setFont("Helvetica-Bold", 9)
         canvas.drawRightString(PAGE_W - MR, PAGE_H - 17 * mm,
                                ("NUMÉRO DE DEVIS" if is_devis else "NUMÉRO DE FACTURE"))
@@ -966,7 +969,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     # ── Eyebrow DESTINATAIRE ──
     def _eyebrow(text):
-        p = Paragraph(f"<font color='#5A6472'><b>{'  '.join(list(text))}</b></font>",
+        p = Paragraph(f"<font color='#3E4A5C'><b>{'  '.join(list(text))}</b></font>",
                       ParagraphStyle("ey", fontName="Helvetica-Bold", fontSize=9,
                                      textColor=INK_SOFT, leading=12))
         bar = Table([[""]], colWidths=[26 * mm], rowHeights=[2])
@@ -992,7 +995,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             cust_extra.append(customer.email)
         if customer.phone:
             cust_extra.append(customer.phone)
-    client_body = f"<font size=8.5 color='#5A6472'><b>C L I E N T</b></font><br/><b>{cust_name}</b>"
+    client_body = f"<font size=8.5 color='#3E4A5C'><b>C L I E N T</b></font><br/><b>{cust_name}</b>"
     if cust_extra:
         client_body += "<br/>" + "<br/>".join(cust_extra)
     client_card = Table([[Paragraph(client_body, st_body)]], colWidths=[CONTENT_W * 0.60 - 3 * mm])
@@ -1006,7 +1009,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
     ]))
 
-    obj_text = (f"<font size=8.5 color='#5A6472'><b>O B J E T</b></font><br/>"
+    obj_text = (f"<font size=8.5 color='#3E4A5C'><b>O B J E T</b></font><br/>"
                 f"{('Devis de prestation' if is_devis else 'Facture')}")
     if settings and getattr(settings, "footer_note", None):
         pass
@@ -1149,7 +1152,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("TOPPADDING", (0, 1), (0, 1), 0), ("BOTTOMPADDING", (0, 2), (0, 2), 4),
     ]))
 
-    stamp_inner = [[Paragraph(f"<font size=8.5 color='#5A6472'><b>CACHET &amp; SIGNATURE — "
+    stamp_inner = [[Paragraph(f"<font size=8.5 color='#3E4A5C'><b>CACHET &amp; SIGNATURE — "
                               f"{brand_name.upper()}</b></font>", st_label)]]
     if stamp_path:
         try:
@@ -1183,7 +1186,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     qr_txt = Paragraph(
         "<font size=11 color='#021A3D'><b>✍ Signature électronique</b></font><br/>"
         "Scannez ce QR code pour <b>consulter et signer ce devis en ligne</b>. "
-        "<font size=9 color='#5A6472'><i>Signature sécurisée — valeur juridique.</i></font>",
+        "<font size=9 color='#3E4A5C'><i>Signature sécurisée — valeur juridique.</i></font>",
         st_muted)
     qr_row = Table([[qr_cell, qr_txt]], colWidths=[22 * mm, CONTENT_W - 22 * mm])
     qr_row.setStyle(TableStyle([
