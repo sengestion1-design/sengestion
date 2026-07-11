@@ -1162,7 +1162,8 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     inner.setStyle(TableStyle(inner_style))
 
     words_p = Paragraph(_amount_words(amount_incl), st_words)
-    box = Table([[inner], [words_p]], colWidths=[98 * mm])
+    # Box collée à droite (hAlign RIGHT), largeur = celle des totaux internes.
+    box = Table([[inner], [words_p]], colWidths=[98 * mm], hAlign="RIGHT")
     box.setStyle(TableStyle([
         ("BOX", (0, 0), (-1, -1), 1, HAIRLINE),
         ("ROUNDEDCORNERS", [8, 8, 8, 8]),
@@ -1171,12 +1172,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("TOPPADDING", (0, 1), (0, 1), 6), ("BOTTOMPADDING", (0, 1), (0, 1), 8),
         ("LEFTPADDING", (0, 1), (0, 1), 14), ("RIGHTPADDING", (0, 1), (0, 1), 14),
     ]))
-    totals_holder = Table([["", box]], colWidths=[CONTENT_W - 104 * mm, 104 * mm])
-    totals_holder.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-    ]))
-    story.append(totals_holder)
+    story.append(box)
     story.append(Spacer(1, 2.5 * mm))
 
     # ── CONDITIONS (barre latérale) ──
