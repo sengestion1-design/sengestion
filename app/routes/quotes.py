@@ -820,11 +820,12 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     JAUNE_PALE = colors.HexColor("#E8E7A2")
     INK_SOFT = colors.Color(2/255, 26/255, 61/255, 0.62)   # marine 62 % (texte secondaire)
     INK_FAINT = colors.Color(2/255, 26/255, 61/255, 0.42)  # marine 42 % (labels discrets)
-    ROW_ALT = colors.HexColor("#F6F7F5")      # zébrure très légère (teinte jaune pâle diluée)
+    # Neutres = blanc + marine dilué (surfaces neutres, pas des couleurs de marque)
+    ROW_ALT = colors.Color(2/255, 26/255, 61/255, 0.04)    # zébrure : marine 4 %
     HAIRLINE = colors.Color(2/255, 26/255, 61/255, 0.14)   # filets marine 14 %
-    CREAM = colors.HexColor("#FBFAF3")        # fond en-tête = jaune pâle très dilué (charte)
+    CREAM = colors.white                       # fond en-tête = BLANC (surface neutre)
     OBJ_BG = JAUNE_PALE                        # carte Objet = jaune pâle (charte)
-    CARD_BG = colors.HexColor("#FAF9F1")       # fond cartes = jaune pâle très dilué
+    CARD_BG = colors.Color(2/255, 26/255, 61/255, 0.035)   # fond cartes : marine 3.5 %
 
     PAGE_W, PAGE_H = A4
     ML = MR = 15 * mm
