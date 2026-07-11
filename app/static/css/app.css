@@ -662,7 +662,8 @@
   font-size: var(--text-base);
   color: var(--ink);
   background: var(--surface);
-  border: 1px solid var(--line);
+  /* Bordure nettement visible (l'ancienne --line était trop pâle) */
+  border: 1px solid #C3CAD4;
   border-radius: var(--radius-input);
   padding: 11px 14px;
   line-height: var(--leading-base);
