@@ -881,11 +881,8 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     story = []
 
-    # ── Deux cartes : Émetteur | Destinataire ──
-    issuer_card_lines = [f"<b>{brand_name}</b>"]
-    issuer_card_lines += issuer_lines
-    issuer_html = "<br/>".join(issuer_card_lines[:5])
-
+    # ── Carte CLIENT à gauche | récapitulatif à droite ──
+    # (L'émetteur figure déjà dans l'en-tête : pas de carte Émetteur pour éviter la répétition.)
     cust_name = customer.name if customer else "—"
     cust_html_lines = [f"<b>{cust_name}</b>"]
     if customer:
@@ -899,37 +896,34 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             cust_html_lines.append(str(customer.address).replace("\n", ", "))
     cust_html = "<br/>".join(cust_html_lines)
 
-    def _info_card(label, body_html):
-        inner = Table(
-            [[Paragraph(label, st_label)],
-             [Paragraph(body_html, st_body)]],
-            colWidths=[CONTENT_W / 2 - 4 * mm],
-        )
-        inner.setStyle(TableStyle([
-            ("LEFTPADDING", (0, 0), (-1, -1), 10),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 10),
-            ("TOPPADDING", (0, 0), (0, 0), 9),
-            ("BOTTOMPADDING", (0, 0), (0, 0), 3),
-            ("TOPPADDING", (0, 1), (0, 1), 2),
-            ("BOTTOMPADDING", (0, 1), (0, 1), 10),
-            ("BACKGROUND", (0, 0), (-1, -1), CARD_BG),
-            ("LINEBELOW", (0, 0), (-1, 0), 2, OR),
-            ("LINEABOVE", (0, 0), (-1, 0), 0, CARD_BG),
-        ]))
-        return inner
-
-    cards = Table(
-        [[_info_card("ÉMETTEUR", issuer_html), _info_card("CLIENT", cust_html)]],
-        colWidths=[CONTENT_W / 2, CONTENT_W / 2],
+    card_label = "FACTURÉ À" if title.strip().upper().startswith("FAC") else "DESTINATAIRE"
+    # Carte destinataire (moitié droite : convention — le client s'aligne à droite,
+    # face à l'émetteur de l'en-tête qui est à gauche).
+    client_card = Table(
+        [[Paragraph(card_label, st_label)],
+         [Paragraph(cust_html, st_body)]],
+        colWidths=[CONTENT_W / 2],
     )
-    cards.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("LEFTPADDING", (0, 0), (0, 0), 0),
-        ("RIGHTPADDING", (0, 0), (0, 0), 4 * mm),
-        ("LEFTPADDING", (1, 0), (1, 0), 4 * mm),
-        ("RIGHTPADDING", (1, 0), (1, 0), 0),
+    client_card.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+        ("TOPPADDING", (0, 0), (0, 0), 10),
+        ("BOTTOMPADDING", (0, 0), (0, 0), 3),
+        ("TOPPADDING", (0, 1), (0, 1), 2),
+        ("BOTTOMPADDING", (0, 1), (0, 1), 12),
+        ("BACKGROUND", (0, 0), (-1, -1), CARD_BG),
+        ("LINEBELOW", (0, 0), (-1, 0), 2, OR),
     ]))
-    story.append(cards)
+
+    # Placée à droite ; la moitié gauche reste vide (aération).
+    holder = Table([["", client_card]], colWidths=[CONTENT_W / 2, CONTENT_W / 2])
+    holder.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("LEFTPADDING", (1, 0), (1, 0), 4 * mm),
+    ]))
+    story.append(holder)
     story.append(Spacer(1, 9 * mm))
 
     # ── Tableau des lignes ──
