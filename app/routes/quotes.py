@@ -934,9 +934,9 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                 img.drawOn(canvas, ML, PAGE_H - 20 * mm)
             except Exception:
                 pass
-        # Nom entreprise (gros, gras)
+        # Nom entreprise (titre de marque — Palatino, charte)
         canvas.setFillColor(MARINE)
-        canvas.setFont("Helvetica-Bold", 18)
+        canvas.setFont(FONT_TITLE_BOLD, 20)          # Palatino 20 pt
         canvas.drawString(ML + 34 * mm, PAGE_H - 15 * mm, brand_name)
         # Coordonnées
         canvas.setFillColor(INK_SOFT)
