@@ -28,3 +28,7 @@ app/static/uploads/cartes/*
 
 app/static/uploads/settings/*
 !app/static/uploads/settings/.gitkeep
+
+# Polices système embarquées (non versionnées — droits)
+app/static/fonts/*.ttc
+app/static/fonts/*.ttf

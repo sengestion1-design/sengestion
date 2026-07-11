@@ -811,6 +811,29 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     import os
     from flask import current_app
     from reportlab.platypus import Image as RLImage
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    # ── Police de titre : Palatino (charte). Fallback Times si indisponible. ──
+    # On tente d'abord la police embarquée dans le projet, puis celle du système.
+    def _register_palatino():
+        candidates = [
+            os.path.join(current_app.static_folder, "fonts", "Palatino.ttc"),
+            "/System/Library/Fonts/Palatino.ttc",
+        ]
+        for path in candidates:
+            if os.path.exists(path):
+                try:
+                    if "Palatino" not in pdfmetrics.getRegisteredFontNames():
+                        pdfmetrics.registerFont(TTFont("Palatino", path, subfontIndex=0))
+                        pdfmetrics.registerFont(TTFont("Palatino-Bold", path, subfontIndex=2))
+                    return "Palatino", "Palatino-Bold"
+                except Exception:
+                    continue
+        # Fallback : Times (serif intégré, proche de Palatino — cf. CSS fallback)
+        return "Times-Roman", "Times-Bold"
+
+    FONT_TITLE, FONT_TITLE_BOLD = _register_palatino()
 
     # ── Palette — CHARTE STRICTE 3 couleurs (marine / or / jaune pâle) ──
     # Les neutres sont des teintes DÉRIVÉES du marine (pas des gris purs), pour
@@ -938,7 +961,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         canvas.drawRightString(PAGE_W - MR, PAGE_H - 15 * mm,
                                ("NUMÉRO DE DEVIS" if is_devis else "NUMÉRO DE FACTURE"))
         canvas.setFillColor(MARINE)
-        canvas.setFont("Helvetica-Bold", 26)
+        canvas.setFont(FONT_TITLE_BOLD, 24)          # Palatino 24 pt (charte titres)
         canvas.drawRightString(PAGE_W - MR, PAGE_H - 23 * mm, number)
         # petit point or décoratif
         canvas.setFillColor(OR)
