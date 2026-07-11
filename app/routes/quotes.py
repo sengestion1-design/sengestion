@@ -995,7 +995,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     client_body = f"<font size=8.5 color='#5A6472'><b>C L I E N T</b></font><br/><b>{cust_name}</b>"
     if cust_extra:
         client_body += "<br/>" + "<br/>".join(cust_extra)
-    client_card = Table([[Paragraph(client_body, st_big)]], colWidths=[CONTENT_W * 0.60 - 3 * mm])
+    client_card = Table([[Paragraph(client_body, st_body)]], colWidths=[CONTENT_W * 0.60 - 3 * mm])
     client_card.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), colors.white),
         ("BOX", (0, 0), (-1, -1), 1.2, MARINE),
