@@ -1,0 +1,87 @@
+{% extends "layouts/app.html" %}
+{% set active = 'messages' %}
+{% block title %}Relances — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">Communication</div>
+      <h1 class="page-title">Relances</h1>
+      <p class="page-subtitle">Historique des messages envoyés à vos contacts ({{ messages|length }}).</p>
+    </div>
+    <a href="{{ url_for('messages.new') }}" class="btn btn-accent">
+      <i data-lucide="send" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Nouveau message
+    </a>
+  </div>
+
+  {% if messages %}
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Destinataire</th>
+            <th>Objet</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in messages %}
+          {% set ct = contact_map.get(m.contact_id) %}
+          <tr>
+            <td style="font-weight:600; color:var(--marine);">
+              {% if ct %}{{ ct.first_name ~ ' ' if ct.first_name }}{{ ct.name }}{% else %}—{% endif %}
+            </td>
+            <td>{{ m.subject or '—' }}</td>
+            <td>
+              {% if m.status == 'sent' %}
+                <span class="badge badge-pale" title="Envoyé">
+                  <i data-lucide="check" style="width:13px;height:13px;vertical-align:-2px;"></i> Envoyé
+                </span>
+              {% elif m.status == 'failed' %}
+                <span class="badge badge-accent" title="Échec d'envoi">
+                  <i data-lucide="x" style="width:13px;height:13px;vertical-align:-2px;"></i> Échec
+                </span>
+              {% else %}
+                <span class="badge badge-pale">Brouillon</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--muted); font-size:15px;">
+              {{ (m.sent_at or m.created_at).strftime('%d/%m/%Y %H:%M') if (m.sent_at or m.created_at) else '—' }}
+            </td>
+            <td class="col-actions">
+              {% if ct %}
+              <form method="post" action="{{ url_for('messages.resend', message_id=m.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Renvoyer ce message à {{ ct.name }} ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-secondary btn-sm" aria-label="Renvoyer">
+                  <i data-lucide="rotate-cw" style="width:15px;height:15px;vertical-align:-3px;"></i>
+                  Renvoyer
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon"><i data-lucide="send"></i></div>
+    <p class="empty-state-title">Aucun message envoyé</p>
+    <p class="empty-state-sub">Envoyez votre premier email à un contact pour le retrouver ici.</p>
+    <a href="{{ url_for('messages.new') }}" class="btn btn-accent">
+      <i data-lucide="send" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Nouveau message
+    </a>
+  </div>
+  {% endif %}
+
+{% endblock %}

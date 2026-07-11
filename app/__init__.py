@@ -36,6 +36,8 @@ def create_app(env="default"):
     from app.routes.customers import customers_bp, contacts_bp
     from app.routes.quotes import quotes_bp, invoices_bp
     from app.routes.expenses import expenses_bp
+    from app.routes.messages import messages_bp
+    from app.routes.settings import settings_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(admin_bp)
@@ -46,5 +48,7 @@ def create_app(env="default"):
     app.register_blueprint(quotes_bp)
     app.register_blueprint(invoices_bp)
     app.register_blueprint(expenses_bp)
+    app.register_blueprint(messages_bp)
+    app.register_blueprint(settings_bp)
 
     return app

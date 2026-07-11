@@ -25,3 +25,6 @@ env/
 # Images de cartes de visite uploadées (ne pas versionner)
 app/static/uploads/cartes/*
 !app/static/uploads/cartes/.gitkeep
+
+app/static/uploads/settings/*
+!app/static/uploads/settings/.gitkeep

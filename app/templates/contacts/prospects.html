@@ -76,6 +76,11 @@
               <a href="{{ url_for('customers.show', customer_id=ct.customer_id) }}"
                  class="btn btn-ghost btn-sm">Voir le client</a>
               {% endif %}
+              <a href="{{ url_for('contacts.show', contact_id=ct.id) }}"
+                 class="btn btn-secondary btn-sm" aria-label="Voir {{ ct.name }}">
+                <i data-lucide="eye" style="width:15px;height:15px;vertical-align:-3px;"></i>
+                Voir
+              </a>
               <a href="{{ url_for('contacts.edit', contact_id=ct.id) }}"
                  class="btn btn-ghost btn-sm" aria-label="Modifier {{ ct.name }}">
                 <i data-lucide="pencil" style="width:15px;height:15px;"></i>

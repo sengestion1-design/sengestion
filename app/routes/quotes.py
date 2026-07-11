@@ -28,6 +28,7 @@ from sqlalchemy import func
 from app.extensions import db
 from app.models.customer import Customer
 from app.models.quote import Quote, QuoteItem, Invoice, InvoiceItem, Payment
+from app.models.settings import CompanySettings
 from app.services.activity_log_service import log_action
 from app.utils.access import subscription_required
 
@@ -452,6 +453,7 @@ def delete(quote_id):
 def pdf(quote_id):
     """PDF du devis (reportlab)."""
     quote = _owned_quote_or_404(quote_id)
+    settings = CompanySettings.query.filter_by(user_id=current_user.id).first()
     buffer = _build_document_pdf(
         title="DEVIS",
         number=quote.number,
@@ -460,6 +462,7 @@ def pdf(quote_id):
         items=quote.items,
         amount_excl=quote.amount_excl_tax,
         amount_incl=quote.amount_incl_tax,
+        settings=settings,
     )
     return Response(
         buffer.getvalue(),
@@ -590,6 +593,7 @@ def pdf(invoice_id):
     invoice = _owned_invoice_or_404(invoice_id)
     paid = _paid_amount(invoice)
     due = Decimal(str(invoice.amount_incl_tax or 0)) - paid
+    settings = CompanySettings.query.filter_by(user_id=current_user.id).first()
     buffer = _build_document_pdf(
         title="FACTURE",
         number=invoice.number,
@@ -600,6 +604,7 @@ def pdf(invoice_id):
         amount_incl=invoice.amount_incl_tax,
         paid=paid,
         due=due if due > 0 else Decimal("0"),
+        settings=settings,
     )
     return Response(
         buffer.getvalue(),
@@ -726,10 +731,12 @@ def delete(invoice_id):
 #  Génération PDF (reportlab)
 # ─────────────────────────────────────────────────────────────────────────────
 def _build_document_pdf(title, number, doc_date, customer, items,
-                        amount_excl, amount_incl, paid=None, due=None):
+                        amount_excl, amount_incl, paid=None, due=None,
+                        settings=None):
     """Construit un PDF (devis ou facture) et renvoie un BytesIO.
 
-    En-tête SenGestion, coordonnées client, tableau des lignes, totaux HT/TVA/TTC.
+    En-tête entreprise (logo + nom + coordonnées des paramètres, sinon SenGestion),
+    coordonnées client, tableau des lignes, totaux HT/TVA/TTC, cachet/signature.
     Charte : marine #021A3D, or #F2B10E.
     """
     from reportlab.lib.pagesizes import A4
@@ -771,12 +778,51 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     right = ParagraphStyle("r", parent=normal, alignment=TA_RIGHT)
 
     story = []
+    import os
+    from flask import current_app
+    from reportlab.platypus import Image as RLImage
+
+    def _abs(rel):
+        """Chemin absolu d'une image de /static (ou None si absente sur disque)."""
+        if not rel:
+            return None
+        path = os.path.join(current_app.static_folder, rel)
+        return path if os.path.exists(path) else None
+
+    # Nom/coordonnées émetteur : paramètres entreprise si définis, sinon SenGestion.
+    brand_name = (settings.company_name if settings and settings.company_name else "SenGestion")
+    sub_lines = []
+    if settings:
+        if settings.address:
+            sub_lines.append(str(settings.address).replace("\n", " · "))
+        contact_bits = [b for b in (settings.phone, settings.email, settings.website) if b]
+        if contact_bits:
+            sub_lines.append(" · ".join(contact_bits))
+        id_bits = []
+        if settings.ninea:
+            id_bits.append(f"NINEA : {settings.ninea}")
+        if settings.rccm:
+            id_bits.append(f"RCCM : {settings.rccm}")
+        if id_bits:
+            sub_lines.append(" · ".join(id_bits))
+    if not sub_lines:
+        sub_lines = ["Gestion commerciale pour PME &amp; entrepreneurs"]
+
+    # Colonne marque : logo si dispo, sinon nom en gros.
+    logo_path = _abs(settings.logo) if settings else None
+    if logo_path:
+        try:
+            brand_cell = RLImage(logo_path, width=48 * mm, height=20 * mm, kind="proportional")
+        except Exception:
+            brand_cell = Paragraph(brand_name, h_brand)
+    else:
+        brand_cell = Paragraph(brand_name, h_brand)
 
     # En-tête : marque à gauche, titre + numéro à droite
     d = doc_date.strftime("%d/%m/%Y") if doc_date else ""
     header = Table(
         [[
-            Paragraph("SenGestion", h_brand),
+            brand_cell,
             Paragraph(f"{title}<br/><font size=11 color='#8F6600'>{number}</font>",
                       doc_title),
         ]],
@@ -787,8 +833,8 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
     ]))
     story.append(header)
-    story.append(Paragraph(
-        "Gestion commerciale pour PME &amp; entrepreneurs", muted))
+    for line in sub_lines:
+        story.append(Paragraph(line, muted))
     story.append(Spacer(1, 4 * mm))
     # filet or
     rule = Table([[""]], colWidths=[174 * mm], rowHeights=[2])
@@ -871,10 +917,37 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     ]
     totals.setStyle(TableStyle(style))
     story.append(totals)
-    story.append(Spacer(1, 12 * mm))
+    story.append(Spacer(1, 10 * mm))
 
+    # Cachet + signature (images des paramètres), côte à côte à droite.
+    stamp_path = _abs(settings.stamp) if settings else None
+    sig_path = _abs(settings.signature) if settings else None
+    if stamp_path or sig_path:
+        cells = []
+        for path, label in ((sig_path, "Signature"), (stamp_path, "Cachet")):
+            if path:
+                try:
+                    cells.append([
+                        RLImage(path, width=40 * mm, height=24 * mm, kind="proportional"),
+                    ])
+                except Exception:
+                    pass
+        if cells:
+            marks = Table([[c[0] for c in cells]],
+                          colWidths=[45 * mm] * len(cells), hAlign="RIGHT")
+            marks.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "BOTTOM")]))
+            story.append(marks)
+            story.append(Spacer(1, 6 * mm))
+
+    # Mentions personnalisées (conditions de paiement…).
+    if settings and settings.footer_note:
+        story.append(Paragraph(str(settings.footer_note).replace("\n", "<br/>"), muted))
+        story.append(Spacer(1, 4 * mm))
+
+    footer_brand = (settings.company_name if settings and settings.company_name
+                    else "SenGestion")
     story.append(Paragraph(
-        "<font color='#5b6472' size=8>Document généré par SenGestion — "
+        f"<font color='#5b6472' size=8>Document généré par {footer_brand} — "
         "Montants exprimés en francs CFA (FCFA).</font>", muted))
 
     doc.build(story)

@@ -426,6 +426,16 @@ def _list_endpoint_for(contact) -> str:
     return "contacts.prospects" if contact.kind == "prospect" else "contacts.index"
 
 
+@contacts_bp.route("/<int:contact_id>")
+@login_required
+@subscription_required
+def show(contact_id):
+    """Display a read-only detail page for a contact/prospect."""
+    contact = _get_owned_contact(contact_id)
+    return render_template("contacts/show.html", contact=contact,
+                           statuses=CONTACT_STATUSES)
+
+
 @contacts_bp.route("/<int:contact_id>/edit")
 @login_required
 @subscription_required

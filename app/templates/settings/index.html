@@ -1,0 +1,155 @@
+{% extends "layouts/app.html" %}
+{% set active = 'settings' %}
+{% block title %}Paramètres — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">Configuration</div>
+      <h1 class="page-title">Paramètres de l'entreprise</h1>
+      <p class="page-subtitle">Ces informations apparaissent sur vos devis, factures et emails.</p>
+    </div>
+  </div>
+
+  <form method="post" action="{{ url_for('settings.update') }}"
+        enctype="multipart/form-data" class="settings-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {# ─── Section 1 : Identité entreprise ─── #}
+    <section class="card settings-section">
+      <h2 class="settings-title"><i data-lucide="building-2"></i> Identité de l'entreprise</h2>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="company_name">Nom de l'entreprise</label>
+          <input type="text" id="company_name" name="company_name" class="form-input"
+                 maxlength="150" value="{{ s.company_name or '' }}" placeholder="Ex. SENTECH SARL">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">Téléphone</label>
+          <input type="text" id="phone" name="phone" class="form-input"
+                 maxlength="40" value="{{ s.phone or '' }}" placeholder="+221 …">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-input"
+                 maxlength="150" value="{{ s.email or '' }}" placeholder="contact@entreprise.sn">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="website">Site web</label>
+          <input type="text" id="website" name="website" class="form-input"
+                 maxlength="150" value="{{ s.website or '' }}" placeholder="www.entreprise.sn">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ninea">NINEA</label>
+          <input type="text" id="ninea" name="ninea" class="form-input"
+                 maxlength="50" value="{{ s.ninea or '' }}" placeholder="Identifiant fiscal">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="rccm">RCCM</label>
+          <input type="text" id="rccm" name="rccm" class="form-input"
+                 maxlength="50" value="{{ s.rccm or '' }}" placeholder="Registre du commerce">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="address">Adresse</label>
+        <textarea id="address" name="address" class="form-input" rows="3"
+                  placeholder="Rue, ville, pays">{{ s.address or '' }}</textarea>
+      </div>
+    </section>
+
+    {# ─── Section 2 : Logo, signature, cachet ─── #}
+    <section class="card settings-section">
+      <h2 class="settings-title"><i data-lucide="image"></i> Logo, signature & cachet</h2>
+      <p class="settings-hint">Images utilisées sur vos devis et factures. PNG recommandé (fond transparent).</p>
+      <div class="settings-images">
+        {% for field, label in [('logo','Logo'), ('signature','Signature'), ('stamp','Cachet')] %}
+        {% set current = s[field] %}
+        <div class="settings-image-box">
+          <div class="settings-image-label">{{ label }}</div>
+          <div class="settings-image-preview">
+            {% if current %}
+              <img src="{{ url_for('static', filename=current) }}" alt="{{ label }}">
+            {% else %}
+              <span class="settings-image-empty"><i data-lucide="image-plus"></i></span>
+            {% endif %}
+          </div>
+          <input type="file" name="{{ field }}" accept="image/*" class="settings-file">
+          {% if current %}
+          <label class="settings-remove">
+            <input type="checkbox" name="remove_{{ field }}" value="1"> Retirer
+          </label>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {# ─── Section 3 : Mentions bas de page ─── #}
+    <section class="card settings-section">
+      <h2 class="settings-title"><i data-lucide="file-text"></i> Mentions (bas de page des documents)</h2>
+      <div class="form-group">
+        <label class="form-label" for="footer_note">Note / conditions</label>
+        <textarea id="footer_note" name="footer_note" class="form-input" rows="3"
+                  placeholder="Ex. Paiement à 30 jours. Merci de votre confiance.">{{ s.footer_note or '' }}</textarea>
+      </div>
+    </section>
+
+    {# ─── Section 4 : Réglages email ─── #}
+    <section class="card settings-section">
+      <h2 class="settings-title"><i data-lucide="mail"></i> Réglages email</h2>
+      <p class="settings-hint">Les emails partent via le serveur SenGestion. Personnalisez le nom affiché et votre signature.</p>
+      <div class="form-group">
+        <label class="form-label" for="email_sender_name">Nom d'expéditeur</label>
+        <input type="text" id="email_sender_name" name="email_sender_name" class="form-input"
+               maxlength="120" value="{{ s.email_sender_name or '' }}"
+               placeholder="Ex. Fatou Ndiaye — SENTECH">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email_signature">Signature email</label>
+        <textarea id="email_signature" name="email_signature" class="form-input" rows="4"
+                  placeholder="Cordialement,&#10;Fatou Ndiaye&#10;SENTECH SARL — +221 …">{{ s.email_signature or '' }}</textarea>
+        <p class="form-hint">Ajoutée automatiquement en bas de vos messages aux contacts.</p>
+      </div>
+    </section>
+
+    <div style="display:flex; gap:12px; margin-top:var(--space-2);">
+      <button type="submit" class="btn btn-accent">
+        <i data-lucide="check" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Enregistrer les paramètres
+      </button>
+    </div>
+  </form>
+
+  <style>
+    .settings-form { max-width: 960px; }
+    .settings-section { margin-bottom: var(--space-6); }
+    .settings-title {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--font-display); font-size: var(--text-lg);
+      color: var(--marine); font-weight: var(--weight-bold);
+      margin-bottom: var(--space-5);
+    }
+    .settings-title i { width: 20px; height: 20px; color: var(--or); }
+    .settings-hint { font-size: var(--text-sm); color: rgba(2,26,61,0.62); margin: -8px 0 16px; }
+
+    .settings-images { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+    .settings-image-box { text-align: center; }
+    .settings-image-label { font-weight: var(--weight-bold); color: var(--marine); font-size: var(--text-sm); margin-bottom: 10px; }
+    .settings-image-preview {
+      display: flex; align-items: center; justify-content: center;
+      height: 120px; padding: 8px; margin-bottom: 10px;
+      background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-btn);
+    }
+    .settings-image-preview img { max-height: 100%; max-width: 100%; object-fit: contain; }
+    .settings-image-empty { color: rgba(2,26,61,0.3); }
+    .settings-image-empty i { width: 32px; height: 32px; }
+    .settings-file { font-size: var(--text-sm); width: 100%; }
+    .settings-remove { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-sm); color: rgba(2,26,61,0.62); margin-top: 8px; cursor: pointer; }
+
+    @media (max-width: 768px) {
+      .settings-images { grid-template-columns: 1fr; }
+    }
+  </style>
+
+{% endblock %}

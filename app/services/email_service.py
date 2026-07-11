@@ -1,8 +1,30 @@
-"""Email service (Gmail SMTP) — sends the verification code on sign-up."""
+"""Email service (Gmail SMTP) — codes de vérification + messages aux contacts."""
 from flask import current_app
-from flask_mail import Message
+from flask_mail import Message as MailMessage
 
 from app.extensions import mail
+
+
+def send_email(to_email: str, subject: str, body: str) -> bool:
+    """Envoi email générique (message à un contact, relance…).
+
+    Retourne True si l'envoi réussit. En développement sans mot de passe SMTP,
+    le message est affiché en console et considéré comme envoyé (test offline).
+    """
+    if not current_app.config.get("MAIL_PASSWORD"):
+        current_app.logger.warning(
+            "[DEV] SMTP non configuré — email simulé pour %s : %s", to_email, subject
+        )
+        print(f"\n[DEV] Email à {to_email}\nObjet : {subject}\n{body}\n")
+        return True
+
+    try:
+        msg = MailMessage(subject=subject, recipients=[to_email], body=body)
+        mail.send(msg)
+        return True
+    except Exception as exc:  # noqa: BLE001
+        current_app.logger.error("Échec envoi email à %s : %s", to_email, exc)
+        return False
 
 
 def send_verification_code(to_email: str, name: str, code: str) -> bool:
@@ -30,7 +52,7 @@ def send_verification_code(to_email: str, name: str, code: str) -> bool:
         return True
 
     try:
-        msg = Message(subject=subject, recipients=[to_email], body=body)
+        msg = MailMessage(subject=subject, recipients=[to_email], body=body)
         mail.send(msg)
         return True
     except Exception as exc:  # noqa: BLE001

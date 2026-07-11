@@ -1,0 +1,118 @@
+{% extends "layouts/app.html" %}
+{% set active = 'messages' %}
+{% block title %}Nouveau message — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Envoyer un message</h1>
+      <p class="page-subtitle">Rédigez un email à un contact. Un modèle peut vous faire gagner du temps.</p>
+    </div>
+    <a href="{{ url_for('messages.index') }}" class="btn btn-secondary">
+      <i data-lucide="arrow-left" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Retour
+    </a>
+  </div>
+
+  <div class="card" style="max-width:760px;">
+    <form method="post" action="{{ url_for('messages.send') }}" id="msg-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      {# Destinataire #}
+      <div class="form-group">
+        <label class="form-label" for="contact_id">Destinataire <span class="required">*</span></label>
+        <select id="contact_id" name="contact_id" class="form-input" required>
+          <option value="">— Choisir un contact —</option>
+          {% for c in contacts %}
+          <option value="{{ c.id }}"
+                  data-name="{{ c.first_name or c.name }}"
+                  {{ 'selected' if contact and contact.id == c.id }}>
+            {{ c.first_name ~ ' ' if c.first_name }}{{ c.name }}{% if c.company %} — {{ c.company }}{% endif %} ({{ c.email }})
+          </option>
+          {% endfor %}
+        </select>
+        {% if not contacts %}
+        <p class="form-hint">Aucun contact avec adresse email. Ajoutez un email à vos contacts d'abord.</p>
+        {% endif %}
+      </div>
+
+      {# Modèles pré-écrits #}
+      <div class="form-group">
+        <label class="form-label">Modèle (optionnel)</label>
+        <div class="msg-templates">
+          {% for key, tpl in templates.items() %}
+          <button type="button" class="msg-template-btn"
+                  data-subject="{{ tpl.subject }}"
+                  data-body="{{ tpl.body }}">
+            {{ tpl.label }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      {# Objet #}
+      <div class="form-group">
+        <label class="form-label" for="subject">Objet <span class="required">*</span></label>
+        <input type="text" id="subject" name="subject" class="form-input" required
+               maxlength="255" placeholder="Objet du message">
+      </div>
+
+      {# Message #}
+      <div class="form-group">
+        <label class="form-label" for="body">Message <span class="required">*</span></label>
+        <textarea id="body" name="body" class="form-input" rows="10" required
+                  placeholder="Votre message…"></textarea>
+        <p class="form-hint">Astuce : <code>{name}</code> sera remplacé par le prénom du contact.</p>
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:var(--space-5);">
+        <button type="submit" class="btn btn-accent">
+          <i data-lucide="send" style="width:16px;height:16px;vertical-align:-3px;"></i>
+          Envoyer le message
+        </button>
+        <a href="{{ url_for('messages.index') }}" class="btn btn-ghost">Annuler</a>
+      </div>
+    </form>
+  </div>
+
+  <style>
+    .msg-templates { display: flex; gap: 10px; flex-wrap: wrap; }
+    .msg-template-btn {
+      background: var(--jaune-pale); border: none; cursor: pointer;
+      padding: 8px 14px; border-radius: 999px;
+      color: var(--marine); font-size: var(--text-sm); font-weight: var(--weight-bold);
+      transition: opacity var(--duration-fast);
+    }
+    .msg-template-btn:hover { opacity: 0.8; }
+    #body { font-family: var(--font-sans); line-height: 1.6; resize: vertical; }
+    .form-hint code {
+      background: var(--jaune-pale); padding: 1px 5px; border-radius: 4px;
+      font-size: 0.9em; color: var(--marine);
+    }
+  </style>
+
+  <script defer>
+    (function () {
+      var select  = document.getElementById('contact_id');
+      var subject = document.getElementById('subject');
+      var body    = document.getElementById('body');
+
+      function currentName() {
+        var opt = select.options[select.selectedIndex];
+        return (opt && opt.getAttribute('data-name')) || '';
+      }
+
+      // Appliquer un modèle (en remplaçant {name} par le destinataire choisi)
+      document.querySelectorAll('.msg-template-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var name = currentName() || '{name}';
+          subject.value = btn.getAttribute('data-subject').replace(/\{name\}/g, name);
+          body.value    = btn.getAttribute('data-body').replace(/\{name\}/g, name);
+          body.focus();
+        });
+      });
+    })();
+  </script>
+
+{% endblock %}

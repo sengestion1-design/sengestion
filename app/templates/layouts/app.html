@@ -99,9 +99,15 @@
       Rapports
     </a>
 
-    <a class="sidebar-item {{ 'active' if active == 'messages' }}" href="#">
+    <a class="sidebar-item {{ 'active' if active == 'messages' }}" href="{{ url_for('messages.index') }}">
       <span class="sidebar-icon"><i data-lucide="send"></i></span>
       Relances
+    </a>
+
+    <div class="sidebar-section-label">Configuration</div>
+    <a class="sidebar-item {{ 'active' if active == 'settings' }}" href="{{ url_for('settings.index') }}">
+      <span class="sidebar-icon"><i data-lucide="settings"></i></span>
+      Paramètres
     </a>
     {% endif %}
 
