@@ -818,8 +818,8 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     MARINE = colors.HexColor("#021A3D")
     OR = colors.HexColor("#F2B10E")
     JAUNE_PALE = colors.HexColor("#E8E7A2")
-    INK_SOFT = colors.Color(2/255, 26/255, 61/255, 0.62)   # marine 62 % (texte secondaire)
-    INK_FAINT = colors.Color(2/255, 26/255, 61/255, 0.42)  # marine 42 % (labels discrets)
+    INK_SOFT = MARINE                          # texte secondaire = MARINE (charte, sans ambiguïté)
+    INK_FAINT = MARINE                         # labels = MARINE (charte)
     # Neutres = blanc + marine dilué (surfaces neutres, pas des couleurs de marque)
     ROW_ALT = colors.Color(2/255, 26/255, 61/255, 0.04)    # zébrure : marine 4 %
     HAIRLINE = colors.Color(2/255, 26/255, 61/255, 0.14)   # filets marine 14 %
@@ -970,7 +970,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     # ── Eyebrow DESTINATAIRE ──
     def _eyebrow(text):
-        p = Paragraph(f"<font color='#3E4A5C'><b>{'  '.join(list(text))}</b></font>",
+        p = Paragraph(f"<font color='#021A3D'><b>{'  '.join(list(text))}</b></font>",
                       ParagraphStyle("ey", fontName="Helvetica-Bold", fontSize=9,
                                      textColor=INK_SOFT, leading=12))
         bar = Table([[""]], colWidths=[26 * mm], rowHeights=[2])
@@ -996,7 +996,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             cust_extra.append(customer.email)
         if customer.phone:
             cust_extra.append(customer.phone)
-    client_body = f"<font size=8.5 color='#3E4A5C'><b>C L I E N T</b></font><br/><b>{cust_name}</b>"
+    client_body = f"<font size=8.5 color='#021A3D'><b>C L I E N T</b></font><br/><b>{cust_name}</b>"
     if cust_extra:
         client_body += "<br/>" + "<br/>".join(cust_extra)
     client_card = Table([[Paragraph(client_body, st_body)]], colWidths=[CONTENT_W * 0.60 - 3 * mm])
@@ -1010,7 +1010,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
     ]))
 
-    obj_text = (f"<font size=8.5 color='#3E4A5C'><b>O B J E T</b></font><br/>"
+    obj_text = (f"<font size=8.5 color='#021A3D'><b>O B J E T</b></font><br/>"
                 f"{('Devis de prestation' if is_devis else 'Facture')}")
     if settings and getattr(settings, "footer_note", None):
         pass
@@ -1153,7 +1153,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("TOPPADDING", (0, 1), (0, 1), 0), ("BOTTOMPADDING", (0, 2), (0, 2), 4),
     ]))
 
-    stamp_inner = [[Paragraph(f"<font size=8.5 color='#3E4A5C'><b>CACHET &amp; SIGNATURE — "
+    stamp_inner = [[Paragraph(f"<font size=8.5 color='#021A3D'><b>CACHET &amp; SIGNATURE — "
                               f"{brand_name.upper()}</b></font>", st_label)]]
     if stamp_path:
         try:
@@ -1187,7 +1187,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     qr_txt = Paragraph(
         "<font size=11 color='#021A3D'><b>✍ Signature électronique</b></font><br/>"
         "Scannez ce QR code pour <b>consulter et signer ce devis en ligne</b>. "
-        "<font size=9 color='#3E4A5C'><i>Signature sécurisée — valeur juridique.</i></font>",
+        "<font size=9 color='#021A3D'><i>Signature sécurisée — valeur juridique.</i></font>",
         st_muted)
     qr_row = Table([[qr_cell, qr_txt]], colWidths=[22 * mm, CONTENT_W - 22 * mm])
     qr_row.setStyle(TableStyle([
