@@ -1134,8 +1134,8 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                              textColor=colors.white, leading=16)
     st_ttcv = ParagraphStyle("ttv", fontName=FONT_BODY_BOLD, fontSize=12,
                              textColor=colors.white, alignment=TA_RIGHT, leading=16)
-    st_words = ParagraphStyle("wd", fontName=FONT_BODY_ITALIC, fontSize=9,
-                              textColor=INK_SOFT, leading=13)
+    st_words = ParagraphStyle("wd", fontName=FONT_BODY_ITALIC, fontSize=12,
+                              textColor=INK_SOFT, leading=16)
 
     inner_rows = [
         [Paragraph("Sous-total HT", st_tl), Paragraph(f"{_fmt(amount_excl)} FCFA", st_tv)],
