@@ -835,6 +835,39 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     FONT_TITLE, FONT_TITLE_BOLD = _register_palatino()
 
+    # ── Police de texte : Arial (charte UI). Fallback Helvetica si indisponible. ──
+    def _register_arial():
+        fdir = os.path.join(current_app.static_folder, "fonts")
+        files = {
+            "Arial": [os.path.join(fdir, "Arial.ttf"),
+                      "/System/Library/Fonts/Supplemental/Arial.ttf"],
+            "Arial-Bold": [os.path.join(fdir, "Arial-Bold.ttf"),
+                           "/System/Library/Fonts/Supplemental/Arial Bold.ttf"],
+            "Arial-Italic": [os.path.join(fdir, "Arial-Italic.ttf"),
+                             "/System/Library/Fonts/Supplemental/Arial Italic.ttf"],
+        }
+        ok = True
+        for name, paths in files.items():
+            if name in pdfmetrics.getRegisteredFontNames():
+                continue
+            registered = False
+            for p in paths:
+                if os.path.exists(p):
+                    try:
+                        pdfmetrics.registerFont(TTFont(name, p))
+                        registered = True
+                        break
+                    except Exception:
+                        continue
+            if not registered:
+                ok = False
+        if ok:
+            return "Arial", "Arial-Bold", "Arial-Italic"
+        # Fallback : Helvetica (clone d'Arial, fallback officiel de la charte)
+        return "Helvetica", "Helvetica-Bold", "Helvetica-Oblique"
+
+    FONT_BODY, FONT_BODY_BOLD, FONT_BODY_ITALIC = _register_arial()
+
     # ── Palette — CHARTE STRICTE 3 couleurs (marine / or / jaune pâle) ──
     # Les neutres sont des teintes DÉRIVÉES du marine (pas des gris purs), pour
     # rester dans l'esprit charte comme le reste de l'app (rgba(2,26,61,...)).
@@ -893,23 +926,23 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     is_devis = title.strip().upper().startswith("DEV")
 
     # ── Styles (12 pt texte courant) ──
-    st_eyebrow = ParagraphStyle("eb", fontName="Helvetica-Bold", fontSize=9,
+    st_eyebrow = ParagraphStyle("eb", fontName=FONT_BODY_BOLD, fontSize=9,
                                 textColor=INK_SOFT, leading=12)  # letter-spaced simulé
-    st_label = ParagraphStyle("lbl", fontName="Helvetica-Bold", fontSize=8.5,
+    st_label = ParagraphStyle("lbl", fontName=FONT_BODY_BOLD, fontSize=8.5,
                               textColor=INK_SOFT, leading=12)
-    st_body = ParagraphStyle("body", fontName="Helvetica", fontSize=12,
+    st_body = ParagraphStyle("body", fontName=FONT_BODY, fontSize=12,
                              textColor=MARINE, leading=16)
-    st_body_b = ParagraphStyle("bodyb", parent=st_body, fontName="Helvetica-Bold")
-    st_big = ParagraphStyle("big", fontName="Helvetica-Bold", fontSize=15,
+    st_body_b = ParagraphStyle("bodyb", parent=st_body, fontName=FONT_BODY_BOLD)
+    st_big = ParagraphStyle("big", fontName=FONT_BODY_BOLD, fontSize=15,
                             textColor=MARINE, leading=18)
-    st_muted = ParagraphStyle("muted", fontName="Helvetica", fontSize=10.5,
+    st_muted = ParagraphStyle("muted", fontName=FONT_BODY, fontSize=10.5,
                               textColor=INK_SOFT, leading=15)
-    st_cell = ParagraphStyle("cell", fontName="Helvetica", fontSize=11,
+    st_cell = ParagraphStyle("cell", fontName=FONT_BODY, fontSize=11,
                              textColor=MARINE, leading=15)
-    st_num = ParagraphStyle("num", fontName="Helvetica", fontSize=11,
+    st_num = ParagraphStyle("num", fontName=FONT_BODY, fontSize=11,
                             textColor=INK_SOFT, alignment=TA_RIGHT, leading=15)
     st_num_c = ParagraphStyle("numc", parent=st_num, alignment=TA_CENTER)
-    st_num_b = ParagraphStyle("numb", fontName="Helvetica-Bold", fontSize=11,
+    st_num_b = ParagraphStyle("numb", fontName=FONT_BODY_BOLD, fontSize=11,
                               textColor=MARINE, alignment=TA_RIGHT, leading=15)
 
     buffer = BytesIO()
@@ -940,7 +973,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         canvas.drawString(ML + 34 * mm, PAGE_H - 15 * mm, brand_name)
         # Coordonnées
         canvas.setFillColor(INK_SOFT)
-        canvas.setFont("Helvetica", 10)
+        canvas.setFont(FONT_BODY, 10)
         y = PAGE_H - 24 * mm
         if addr:
             canvas.drawString(ML, y, addr[:90]); y -= 4.6 * mm
@@ -951,13 +984,13 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             canvas.drawString(ML, y, email); y -= 4.6 * mm
         # Ligne légale (plus petite, tout en bas de l'en-tête)
         if legal_line:
-            canvas.setFont("Helvetica", 8)
+            canvas.setFont(FONT_BODY, 8)
             canvas.setFillColor(INK_FAINT)
             canvas.drawString(ML, PAGE_H - HEADER_H + 3 * mm, legal_line[:130])
 
         # Bloc numéro à droite
         canvas.setFillColor(INK_FAINT)
-        canvas.setFont("Helvetica-Bold", 9)
+        canvas.setFont(FONT_BODY_BOLD, 9)
         canvas.drawRightString(PAGE_W - MR, PAGE_H - 15 * mm,
                                ("NUMÉRO DE DEVIS" if is_devis else "NUMÉRO DE FACTURE"))
         canvas.setFillColor(MARINE)
@@ -968,7 +1001,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         canvas.circle(PAGE_W - MR - 2, PAGE_H - 26.5 * mm, 1.6, fill=1, stroke=0)
         # Dates
         canvas.setFillColor(INK_SOFT)
-        canvas.setFont("Helvetica", 10)
+        canvas.setFont(FONT_BODY, 10)
         canvas.drawRightString(PAGE_W - MR, PAGE_H - 31.5 * mm, f"Émis le {d_emis}")
         if is_devis and d_valid:
             canvas.drawRightString(PAGE_W - MR, PAGE_H - 36 * mm, f"Valide jusqu'au {d_valid}")
@@ -977,7 +1010,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         canvas.setFillColor(HAIRLINE)
         canvas.rect(ML, 15 * mm, CONTENT_W, 0.6, fill=1, stroke=0)
         canvas.setFillColor(INK_SOFT)
-        canvas.setFont("Helvetica", 7.6)
+        canvas.setFont(FONT_BODY, 7.6)
         canvas.drawString(ML, 11 * mm,
                           f"{brand_name} — Montants exprimés en francs CFA (FCFA).")
         canvas.drawRightString(PAGE_W - MR, 11 * mm, f"Page {doc_.page}")
@@ -994,7 +1027,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     # ── Eyebrow DESTINATAIRE ──
     def _eyebrow(text):
         p = Paragraph(f"<font color='#021A3D'><b>{'  '.join(list(text))}</b></font>",
-                      ParagraphStyle("ey", fontName="Helvetica-Bold", fontSize=9,
+                      ParagraphStyle("ey", fontName=FONT_BODY_BOLD, fontSize=9,
                                      textColor=INK_SOFT, leading=12))
         bar = Table([[""]], colWidths=[26 * mm], rowHeights=[2])
         bar.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), OR)]))
@@ -1062,7 +1095,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(Spacer(1, 2.5 * mm))
 
     col_desc = CONTENT_W - (24 * mm + 34 * mm + 40 * mm)
-    thst = ParagraphStyle("thh", fontName="Helvetica-Bold", fontSize=8.5,
+    thst = ParagraphStyle("thh", fontName=FONT_BODY_BOLD, fontSize=8.5,
                           textColor=colors.white, leading=11)
     thr = ParagraphStyle("thr", parent=thst, alignment=TA_RIGHT)
     thc = ParagraphStyle("thc", parent=thst, alignment=TA_CENTER)
@@ -1092,14 +1125,14 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     # ── Bloc totaux encadré (à droite) ──
     tva = (Decimal(str(amount_incl or 0)) - Decimal(str(amount_excl or 0)))
     tva_pct = 0 if (amount_excl in (None, 0) or tva == 0) else int(TAX_RATE * 100)
-    st_tl = ParagraphStyle("tl", fontName="Helvetica", fontSize=12, textColor=INK_SOFT, leading=16)
-    st_tv = ParagraphStyle("tv", fontName="Helvetica", fontSize=12, textColor=MARINE,
+    st_tl = ParagraphStyle("tl", fontName=FONT_BODY, fontSize=12, textColor=INK_SOFT, leading=16)
+    st_tv = ParagraphStyle("tv", fontName=FONT_BODY, fontSize=12, textColor=MARINE,
                            alignment=TA_RIGHT, leading=16)
-    st_ttcl = ParagraphStyle("ttl", fontName="Helvetica-Bold", fontSize=12,
+    st_ttcl = ParagraphStyle("ttl", fontName=FONT_BODY_BOLD, fontSize=12,
                              textColor=colors.white, leading=16)
-    st_ttcv = ParagraphStyle("ttv", fontName="Helvetica-Bold", fontSize=12,
+    st_ttcv = ParagraphStyle("ttv", fontName=FONT_BODY_BOLD, fontSize=12,
                              textColor=colors.white, alignment=TA_RIGHT, leading=16)
-    st_words = ParagraphStyle("wd", fontName="Helvetica-Oblique", fontSize=9,
+    st_words = ParagraphStyle("wd", fontName=FONT_BODY_ITALIC, fontSize=9,
                               textColor=INK_SOFT, leading=13)
 
     inner_rows = [
@@ -1208,7 +1241,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     except Exception:
         qr_cell = Paragraph("", st_muted)
     qr_txt = Paragraph(
-        "<font size=11 color='#021A3D'><b>✍ Signature électronique</b></font><br/>"
+        "<font size=11 color='#021A3D'><b>Signature électronique</b></font><br/>"
         "Scannez ce QR code pour <b>consulter et signer ce devis en ligne</b>. "
         "<font size=9 color='#021A3D'><i>Signature sécurisée — valeur juridique.</i></font>",
         st_muted)
