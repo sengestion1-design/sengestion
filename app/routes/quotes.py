@@ -1177,7 +1177,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
     ]))
     story.append(totals_holder)
-    story.append(Spacer(1, 4.5 * mm))
+    story.append(Spacer(1, 2.5 * mm))
 
     # ── CONDITIONS (barre latérale) ──
     story.append(_eyebrow("CONDITIONS"))
@@ -1193,7 +1193,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("TOPPADDING", (0, 0), (-1, -1), 12), ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
     ]))
     story.append(cond)
-    story.append(Spacer(1, 4.5 * mm))
+    story.append(Spacer(1, 3 * mm))
 
     # ── SIGNATURES : cadre "Bon pour accord" | cachet ──
     story.append(_eyebrow("SIGNATURES"))
@@ -1201,7 +1201,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     accord = Table(
         [[Paragraph("<b>BON POUR ACCORD — CLIENT</b>", st_label)],
          [Paragraph("<i>Nom, date &amp; signature précédés de « Lu et approuvé »</i>", st_muted)],
-         [Spacer(1, 5 * mm)]],
+         [Spacer(1, 13 * mm)]],           # espace pour la signature manuscrite
         colWidths=[CONTENT_W * 0.58],
     )
     accord.setStyle(TableStyle([
