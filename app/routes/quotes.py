@@ -1134,7 +1134,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                              textColor=colors.white, leading=16)
     st_ttcv = ParagraphStyle("ttv", fontName=FONT_BODY_BOLD, fontSize=12,
                              textColor=colors.white, alignment=TA_RIGHT, leading=16)
-    st_words = ParagraphStyle("wd", fontName=FONT_BODY_ITALIC, fontSize=12,
+    st_words = ParagraphStyle("wd", fontName=FONT_BODY, fontSize=12,
                               textColor=INK_SOFT, leading=16)
 
     inner_rows = [
@@ -1198,7 +1198,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(Spacer(1, 2.5 * mm))
     accord = Table(
         [[Paragraph("<b>BON POUR ACCORD — CLIENT</b>", st_label)],
-         [Paragraph("<i>Nom, date &amp; signature précédés de « Lu et approuvé »</i>", st_muted)],
+         [Paragraph("Nom, date &amp; signature précédés de « Lu et approuvé »", st_muted)],
          [Spacer(1, 13 * mm)]],           # espace pour la signature manuscrite
         colWidths=[CONTENT_W * 0.58],
     )
@@ -1243,7 +1243,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     qr_txt = Paragraph(
         "<font size=11 color='#021A3D'><b>Signature électronique</b></font><br/>"
         "Scannez ce QR code pour <b>consulter et signer ce devis en ligne</b>. "
-        "<font size=9 color='#021A3D'><i>Signature sécurisée — valeur juridique.</i></font>",
+        "<font size=9 color='#021A3D'>Signature sécurisée — valeur juridique.</font>",
         st_muted)
     qr_row = Table([[qr_cell, qr_txt]], colWidths=[22 * mm, CONTENT_W - 22 * mm])
     qr_row.setStyle(TableStyle([
