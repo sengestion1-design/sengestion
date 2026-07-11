@@ -994,7 +994,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         rows.append([Paragraph("Reste à payer", st_ttc_lbl),
                      Paragraph(f"{_fmt(due)} FCFA", st_ttc_val)])
 
-    totals = Table(rows, colWidths=[38 * mm, 46 * mm], hAlign="RIGHT")
+    totals = Table(rows, colWidths=[38 * mm, 46 * mm])
     ts = [
         ("LEFTPADDING", (0, 0), (-1, -1), 12),
         ("RIGHTPADDING", (0, 0), (-1, -1), 12),
@@ -1013,10 +1013,40 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ts.append(("TOPPADDING", (0, extra_start + 1), (-1, extra_start + 1), 9))
         ts.append(("BOTTOMPADDING", (0, extra_start + 1), (-1, extra_start + 1), 9))
     totals.setStyle(TableStyle(ts))
-    story.append(totals)
-    story.append(Spacer(1, 10 * mm))
 
-    story.append(Spacer(1, 4 * mm))
+    # Bloc "Mode de règlement" à gauche (comble le vide + info métier utile).
+    pay_lines = ["Espèces · Chèque · Virement bancaire"]
+    if settings and (settings.phone or settings.email):
+        contact = settings.phone or settings.email
+        pay_lines.append(f"Contact règlement : {contact}")
+    if settings and settings.rccm:
+        pay_lines.append(f"RCCM {settings.rccm}")
+    pay_html = ("<font size=9 color='#F2B10E'><b>MODE DE RÈGLEMENT</b></font><br/>"
+                + "<br/>".join(pay_lines))
+    pay_card = Table([[Paragraph(pay_html, st_muted)]], colWidths=[CONTENT_W / 2 - 6 * mm])
+    pay_card.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), CARD_BG),
+        ("LINEABOVE", (0, 0), (-1, 0), 2, OR),
+        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+        ("TOPPADDING", (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+    ]))
+
+    # Deux colonnes : mode de règlement (gauche) | totaux (droite alignés)
+    totals_row = Table(
+        [[pay_card, totals]],
+        colWidths=[CONTENT_W / 2 + 6 * mm, CONTENT_W / 2 - 6 * mm],
+    )
+    totals_row.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (0, 0), "TOP"),
+        ("VALIGN", (1, 0), (1, 0), "TOP"),
+        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(totals_row)
+    story.append(Spacer(1, 8 * mm))
 
     # ── Encadré "Conditions & validité" (pleine largeur, équilibre la page) ──
     is_devis = title.strip().upper().startswith("DEV")
