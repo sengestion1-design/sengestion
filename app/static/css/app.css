@@ -662,8 +662,8 @@
   font-size: var(--text-base);
   color: var(--ink);
   background: var(--surface);
-  /* Bordure nettement visible (l'ancienne --line était trop pâle) */
-  border: 1px solid #C3CAD4;
+  /* Bordure marine (charte) atténuée — visible mais pas lourde */
+  border: 1px solid rgba(2, 26, 61, 0.35);
   border-radius: var(--radius-input);
   padding: 11px 14px;
   line-height: var(--leading-base);
