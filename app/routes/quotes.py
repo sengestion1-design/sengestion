@@ -1069,13 +1069,13 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     # ── Bloc totaux encadré (à droite) ──
     tva = (Decimal(str(amount_incl or 0)) - Decimal(str(amount_excl or 0)))
     tva_pct = 0 if (amount_excl in (None, 0) or tva == 0) else int(TAX_RATE * 100)
-    st_tl = ParagraphStyle("tl", fontName="Helvetica", fontSize=11, textColor=INK_SOFT, leading=15)
-    st_tv = ParagraphStyle("tv", fontName="Helvetica", fontSize=11, textColor=MARINE,
-                           alignment=TA_RIGHT, leading=15)
-    st_ttcl = ParagraphStyle("ttl", fontName="Helvetica-Bold", fontSize=13,
-                             textColor=colors.white, leading=17)
-    st_ttcv = ParagraphStyle("ttv", fontName="Helvetica-Bold", fontSize=13,
-                             textColor=colors.white, alignment=TA_RIGHT, leading=17)
+    st_tl = ParagraphStyle("tl", fontName="Helvetica", fontSize=12, textColor=INK_SOFT, leading=16)
+    st_tv = ParagraphStyle("tv", fontName="Helvetica", fontSize=12, textColor=MARINE,
+                           alignment=TA_RIGHT, leading=16)
+    st_ttcl = ParagraphStyle("ttl", fontName="Helvetica-Bold", fontSize=12,
+                             textColor=colors.white, leading=16)
+    st_ttcv = ParagraphStyle("ttv", fontName="Helvetica-Bold", fontSize=12,
+                             textColor=colors.white, alignment=TA_RIGHT, leading=16)
     st_words = ParagraphStyle("wd", fontName="Helvetica-Oblique", fontSize=9,
                               textColor=INK_SOFT, leading=13)
 
