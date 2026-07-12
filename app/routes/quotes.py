@@ -338,6 +338,30 @@ def voice():
     return render_template("quotes/voice.html")
 
 
+@quotes_bp.route("/voice/transcribe", methods=["POST"])
+@login_required
+@subscription_required
+def voice_transcribe():
+    """Reçoit un audio (MediaRecorder), le transcrit (Whisper), renvoie le texte JSON.
+
+    Compatible tous navigateurs (Safari inclus) : l'enregistrement audio est
+    universel, contrairement à la Web Speech API réservée à Chrome.
+    """
+    from flask import jsonify
+    from app.services.transcription_service import transcribe_audio
+
+    audio = request.files.get("audio")
+    if audio is None or not audio.filename:
+        return jsonify({"ok": False, "error": "Aucun audio reçu."}), 400
+
+    data = audio.read()
+    # Garde-fou taille (MAX_CONTENT_LENGTH global gère déjà, mais message clair).
+    result = transcribe_audio(data, filename=audio.filename)
+    log_action(current_user.id, "voice_transcribe",
+               {"ok": result.get("ok"), "bytes": len(data)})
+    return jsonify(result), (200 if result.get("ok") else 422)
+
+
 @quotes_bp.route("/voice", methods=["POST"])
 @login_required
 @subscription_required
