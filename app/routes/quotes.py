@@ -383,11 +383,27 @@ def voice_parse():
 
     # Match du client par nom (insensible à la casse) parmi les clients du gérant.
     matched_id = None
-    wanted = (result.get("customer_name") or "").strip().lower()
+    customer_name = (result.get("customer_name") or "").strip()
+    wanted = customer_name.lower()
     for c in customers:
         if c.name.strip().lower() == wanted:
             matched_id = c.id
             break
+
+    # Client non trouvé mais un nom a été dicté → on le crée automatiquement.
+    created_client = False
+    if not matched_id and customer_name:
+        new_customer = Customer(user_id=current_user.id, name=customer_name[:100])
+        db.session.add(new_customer)
+        db.session.commit()
+        matched_id = new_customer.id
+        created_client = True
+        log_action(current_user.id, "create_customer",
+                   {"customer_id": new_customer.id, "name": new_customer.name,
+                    "source": "voice_quote"})
+        # recharger la liste pour que le select l'affiche
+        customers = (Customer.query.filter_by(user_id=current_user.id)
+                     .order_by(Customer.name).all())
 
     # Construire un MultiDict pour pré-remplir le formulaire (comme un POST rejoué).
     form = MultiDict()
@@ -400,9 +416,8 @@ def voice_parse():
         form.add("unit_price[]", str(it["unit_price"]))
 
     note = "Devis pré-rempli par commande vocale : vérifiez le client, les articles et les prix."
-    if not matched_id and result.get("customer_name"):
-        note += (f" Client « {result['customer_name']} » non trouvé dans votre carnet — "
-                 "sélectionnez-le ou créez-le d'abord.")
+    if created_client:
+        note += f" Nouveau client « {customer_name} » ajouté à votre carnet."
     flash(note, "success")
 
     return render_template(
