@@ -9,9 +9,17 @@
       <h1 class="page-title">Factures</h1>
       <p class="page-subtitle">Suivez vos encaissements et le solde de chaque facture</p>
     </div>
-    <a href="{{ url_for('quotes.index') }}" class="btn btn-primary">
-      <i data-lucide="file-text" style="width:16px;height:16px;vertical-align:-3px;"></i> Devis
-    </a>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="{{ url_for('quotes.index') }}" class="btn btn-primary">
+        <i data-lucide="file-text" style="width:16px;height:16px;vertical-align:-3px;"></i> Devis
+      </a>
+      <a href="{{ url_for('invoices.voice') }}" class="btn btn-secondary">
+        <i data-lucide="mic" style="width:16px;height:16px;vertical-align:-3px;"></i> Facture vocale
+      </a>
+      <a href="{{ url_for('invoices.new') }}" class="btn btn-accent">
+        <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i> Nouvelle facture
+      </a>
+    </div>
   </div>
 
   {# ── KPI tiles ── #}
