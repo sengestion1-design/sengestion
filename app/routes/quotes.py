@@ -1143,7 +1143,9 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         [Paragraph("TOTAL TTC", st_ttcl), Paragraph(f"{_fmt(amount_incl)} FCFA", st_ttcv)],
     ]
     ttc_i = 2
-    if paid is not None:
+    # 'Déjà réglé / Reste à payer' : uniquement si au moins un paiement enregistré.
+    show_payment_lines = paid is not None and Decimal(str(paid or 0)) > 0
+    if show_payment_lines:
         inner_rows.append([Paragraph("Déjà réglé", st_tl), Paragraph(f"{_fmt(paid)} FCFA", st_tv)])
         inner_rows.append([Paragraph("Reste à payer", st_ttcl),
                            Paragraph(f"{_fmt(due)} FCFA", st_ttcv)])
@@ -1157,7 +1159,8 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("BACKGROUND", (0, ttc_i), (-1, ttc_i), MARINE),
         ("TOPPADDING", (0, ttc_i), (-1, ttc_i), 11), ("BOTTOMPADDING", (0, ttc_i), (-1, ttc_i), 11),
     ]
-    if paid is not None:
+    if show_payment_lines:
+        # ligne 4 = "Reste à payer" (fond marine, comme le TTC)
         inner_style.append(("BACKGROUND", (0, 4), (-1, 4), MARINE))
         inner_style.append(("TOPPADDING", (0, 4), (-1, 4), 11))
         inner_style.append(("BOTTOMPADDING", (0, 4), (-1, 4), 11))
