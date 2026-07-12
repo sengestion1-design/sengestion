@@ -1195,9 +1195,11 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     # ── Bloc bas : signature (DEVIS) ou simple cachet (FACTURE) ──
     # Sur une FACTURE, rien à signer par le client (pas de "Bon pour accord", pas
-    # de QR de signature) : on n'affiche que le cachet de l'entreprise.
-    story.append(_eyebrow("SIGNATURES" if is_devis else "CACHET DE L'ENTREPRISE"))
-    story.append(Spacer(1, 2.5 * mm))
+    # de QR de signature) : on n'affiche que le cachet (sans titre de section
+    # redondant, le label "CACHET & SIGNATURE" sous l'image suffit).
+    if is_devis:
+        story.append(_eyebrow("SIGNATURES"))
+        story.append(Spacer(1, 2.5 * mm))
 
     stamp_inner = [[Paragraph(f"<font size=8.5 color='#021A3D'><b>CACHET &amp; SIGNATURE - "
                               f"{brand_name.upper()}</b></font>", st_label)]]
