@@ -110,12 +110,14 @@
             </td>
             <td class="col-actions">
               <a href="{{ url_for('invoices.show', invoice_id=inv.id) }}"
-                 class="btn btn-ghost btn-sm" aria-label="Voir la facture {{ inv.number }}">
-                <i data-lucide="eye" style="width:16px;height:16px;"></i>
+                 class="btn btn-secondary btn-sm" aria-label="Voir la facture {{ inv.number }}">
+                <i data-lucide="eye" style="width:15px;height:15px;vertical-align:-3px;"></i>
+                Voir
               </a>
               <a href="{{ url_for('invoices.pdf', invoice_id=inv.id) }}" target="_blank"
                  class="btn btn-ghost btn-sm" aria-label="PDF de la facture {{ inv.number }}">
-                <i data-lucide="file-down" style="width:16px;height:16px;"></i>
+                <i data-lucide="file-down" style="width:15px;height:15px;vertical-align:-3px;"></i>
+                PDF
               </a>
             </td>
           </tr>
