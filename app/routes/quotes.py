@@ -1193,21 +1193,11 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(cond)
     story.append(Spacer(1, 3 * mm))
 
-    # ── SIGNATURES : cadre "Bon pour accord" | cachet ──
-    story.append(_eyebrow("SIGNATURES"))
+    # ── Bloc bas : signature (DEVIS) ou simple cachet (FACTURE) ──
+    # Sur une FACTURE, rien à signer par le client (pas de "Bon pour accord", pas
+    # de QR de signature) : on n'affiche que le cachet de l'entreprise.
+    story.append(_eyebrow("SIGNATURES" if is_devis else "CACHET DE L'ENTREPRISE"))
     story.append(Spacer(1, 2.5 * mm))
-    accord = Table(
-        [[Paragraph("<b>BON POUR ACCORD - CLIENT</b>", st_label)],
-         [Paragraph("Nom, date &amp; signature précédés de « Lu et approuvé »", st_muted)],
-         [Spacer(1, 13 * mm)]],           # espace pour la signature manuscrite
-        colWidths=[CONTENT_W * 0.58],
-    )
-    accord.setStyle(TableStyle([
-        ("BOX", (0, 0), (-1, -1), 1, HAIRLINE), ("ROUNDEDCORNERS", [6, 6, 6, 6]),
-        ("LEFTPADDING", (0, 0), (-1, -1), 12), ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-        ("TOPPADDING", (0, 0), (0, 0), 10), ("BOTTOMPADDING", (0, 0), (0, 0), 3),
-        ("TOPPADDING", (0, 1), (0, 1), 0), ("BOTTOMPADDING", (0, 2), (0, 2), 4),
-    ]))
 
     stamp_inner = [[Paragraph(f"<font size=8.5 color='#021A3D'><b>CACHET &amp; SIGNATURE - "
                               f"{brand_name.upper()}</b></font>", st_label)]]
@@ -1222,37 +1212,57 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("TOPPADDING", (0, 0), (0, 0), 0), ("BOTTOMPADDING", (0, 0), (0, 0), 8),
     ]))
 
-    sign = Table([[accord, stamp_c]], colWidths=[CONTENT_W * 0.60, CONTENT_W * 0.40])
-    sign.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (0, 0), "TOP"), ("VALIGN", (1, 0), (1, 0), "TOP"),
-        ("LEFTPADDING", (0, 0), (0, 0), 0), ("RIGHTPADDING", (0, 0), (0, 0), 4 * mm),
-        ("LEFTPADDING", (1, 0), (1, 0), 4 * mm), ("RIGHTPADDING", (1, 0), (1, 0), 0),
-    ]))
-    story.append(sign)
+    if is_devis:
+        # Cadre "Bon pour accord" à gauche (à signer par le client) + cachet à droite.
+        accord = Table(
+            [[Paragraph("<b>BON POUR ACCORD - CLIENT</b>", st_label)],
+             [Paragraph("Nom, date &amp; signature précédés de « Lu et approuvé »", st_muted)],
+             [Spacer(1, 13 * mm)]],
+            colWidths=[CONTENT_W * 0.58],
+        )
+        accord.setStyle(TableStyle([
+            ("BOX", (0, 0), (-1, -1), 1, HAIRLINE), ("ROUNDEDCORNERS", [6, 6, 6, 6]),
+            ("LEFTPADDING", (0, 0), (-1, -1), 12), ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+            ("TOPPADDING", (0, 0), (0, 0), 10), ("BOTTOMPADDING", (0, 0), (0, 0), 3),
+            ("TOPPADDING", (0, 1), (0, 1), 0), ("BOTTOMPADDING", (0, 2), (0, 2), 4),
+        ]))
+        sign = Table([[accord, stamp_c]], colWidths=[CONTENT_W * 0.60, CONTENT_W * 0.40])
+        sign.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (0, 0), "TOP"), ("VALIGN", (1, 0), (1, 0), "TOP"),
+            ("LEFTPADDING", (0, 0), (0, 0), 0), ("RIGHTPADDING", (0, 0), (0, 0), 4 * mm),
+            ("LEFTPADDING", (1, 0), (1, 0), 4 * mm), ("RIGHTPADDING", (1, 0), (1, 0), 0),
+        ]))
+        story.append(sign)
+    else:
+        # Facture : cachet seul, aligné à droite.
+        stamp_c.hAlign = "RIGHT"
+        story.append(stamp_c)
+
     story.append(Spacer(1, 3 * mm))
 
-    # ── Bandeau QR "signer en ligne" (QR à gauche + texte) ──
-    try:
-        import qrcode
-        qr_img = qrcode.make(f"{brand_name} - {title} {number}")
-        from io import BytesIO as _BIO
-        _qb = _BIO(); qr_img.save(_qb, format="PNG"); _qb.seek(0)
-        qr_cell = RLImage(_qb, width=18 * mm, height=18 * mm)
-    except Exception:
-        qr_cell = Paragraph("", st_muted)
-    qr_txt = Paragraph(
-        "<font size=11 color='#021A3D'><b>Signature électronique</b></font><br/>"
-        "Scannez ce QR code pour <b>consulter et signer ce devis en ligne</b>. "
-        "<font size=9 color='#021A3D'>Signature sécurisée - valeur juridique.</font>",
-        st_muted)
-    qr_row = Table([[qr_cell, qr_txt]], colWidths=[22 * mm, CONTENT_W - 22 * mm])
-    qr_row.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LINEABOVE", (0, 0), (-1, 0), 1, HAIRLINE),
-        ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-        ("LEFTPADDING", (0, 0), (0, 0), 0), ("LEFTPADDING", (1, 0), (1, 0), 8),
-    ]))
-    story.append(qr_row)
+    # ── QR "signer en ligne" : uniquement sur le DEVIS (une facture ne se signe pas) ──
+    if is_devis:
+        try:
+            import qrcode
+            qr_img = qrcode.make(f"{brand_name} - {title} {number}")
+            from io import BytesIO as _BIO
+            _qb = _BIO(); qr_img.save(_qb, format="PNG"); _qb.seek(0)
+            qr_cell = RLImage(_qb, width=18 * mm, height=18 * mm)
+        except Exception:
+            qr_cell = Paragraph("", st_muted)
+        qr_txt = Paragraph(
+            "<font size=11 color='#021A3D'><b>Signature électronique</b></font><br/>"
+            "Scannez ce QR code pour <b>consulter et signer ce devis en ligne</b>. "
+            "<font size=9 color='#021A3D'>Signature sécurisée - valeur juridique.</font>",
+            st_muted)
+        qr_row = Table([[qr_cell, qr_txt]], colWidths=[22 * mm, CONTENT_W - 22 * mm])
+        qr_row.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("LINEABOVE", (0, 0), (-1, 0), 1, HAIRLINE),
+            ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ("LEFTPADDING", (0, 0), (0, 0), 0), ("LEFTPADDING", (1, 0), (1, 0), 8),
+        ]))
+        story.append(qr_row)
 
     doc.build(story, onFirstPage=_decorate, onLaterPages=_decorate)
     buffer.seek(0)
