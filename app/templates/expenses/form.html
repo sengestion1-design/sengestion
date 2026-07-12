@@ -18,6 +18,30 @@
     </div>
   </div>
 
+  {% if from_scan %}
+  <div class="trial-banner" role="status" style="max-width:640px; margin-bottom:20px;">
+    <i data-lucide="sparkles" class="trial-banner-icon" aria-hidden="true"></i>
+    <div class="trial-banner-text">
+      <div class="trial-banner-title">Reçu analysé par l'IA</div>
+      <div class="trial-banner-sub">Vérifiez le libellé, le montant et la date, puis enregistrez.</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% set the_receipt = receipt_ref if receipt_ref is defined and receipt_ref else (expense.receipt_ref if editing else None) %}
+  {% if the_receipt %}
+  <div class="card" style="max-width:640px; margin-bottom:20px; text-align:center;">
+    <div style="font-size:var(--text-sm); color:rgba(2,26,61,0.62); font-weight:var(--weight-bold); margin-bottom:10px; text-align:left;">
+      <i data-lucide="receipt" style="width:15px;height:15px;vertical-align:-2px;"></i>
+      Reçu / facture{{ ' (sera enregistré)' if not editing }}
+    </div>
+    <a href="{{ url_for('static', filename=the_receipt) }}" target="_blank" title="Ouvrir en grand">
+      <img src="{{ url_for('static', filename=the_receipt) }}" alt="Reçu scanné"
+           style="max-width:100%; max-height:300px; border-radius:var(--radius-btn); box-shadow:0 4px 16px rgba(2,26,61,0.12);">
+    </a>
+  </div>
+  {% endif %}
+
   {% set v_label = (form.label if form) or (expense.label if editing) or '' %}
   {% set v_amount = (form.amount if form) or ('%0.0f'|format(expense.amount) if editing and expense.amount) or '' %}
   {% set v_date = (form.expense_date if form)
@@ -31,6 +55,7 @@
           action="{{ url_for('expenses.update', expense_id=expense.id) if editing
                     else url_for('expenses.create') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if the_receipt %}<input type="hidden" name="receipt_ref" value="{{ the_receipt }}">{% endif %}
 
       <div class="form-group">
         <label class="form-label" for="label">

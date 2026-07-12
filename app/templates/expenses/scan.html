@@ -1,0 +1,314 @@
+{% extends "layouts/app.html" %}
+{% set active = 'expenses' %}
+{% block title %}Scanner un reçu de charge — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">Intelligence artificielle</div>
+      <h1 class="page-title">Scanner un reçu de charge</h1>
+      <p class="page-subtitle">
+        Photographiez ou importez une carte : l'IA extrait le libellé, le montant et la date.
+      </p>
+    </div>
+    <a href="{{ url_for('expenses.index') }}" class="btn btn-secondary">
+      <i data-lucide="arrow-left" style="width:16px;height:16px;vertical-align:-3px;"></i>
+      Retour
+    </a>
+  </div>
+
+  <div class="scan-grid">
+
+    {# ─── Colonne gauche : zone de dépôt ─── #}
+    <div class="card scan-card">
+      <form method="post" action="{{ url_for('expenses.scan_upload') }}"
+            enctype="multipart/form-data" id="scan-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        {# Zone de dépôt / sélection #}
+        <label for="card-input" class="scan-drop" id="scan-drop">
+          {# État initial : invitation à déposer #}
+          <div class="scan-drop-inner" id="scan-placeholder">
+            <span class="scan-drop-icon"><i data-lucide="scan-line"></i></span>
+            <p class="scan-drop-title">Déposez le reçu (image ou PDF) ici ou cliquez pour choisir</p>
+            <p class="scan-drop-sub">Photo (JPG, PNG, HEIC) ou PDF — carte bien éclairée et nette</p>
+          </div>
+
+          {# État "carte ajoutée" : aperçu + confirmation (masqué au départ) #}
+          <div class="scan-preview-wrap" id="scan-preview-wrap" style="display:none;">
+            <img id="scan-preview" class="scan-preview" alt="Aperçu de la carte" style="display:none;">
+            {# Vignette de remplacement quand l'aperçu n'est pas affichable (HEIC iPhone) #}
+            <div class="scan-fileicon" id="scan-fileicon" style="display:none;">
+              <i data-lucide="file-image"></i>
+              <span>Aperçu indisponible pour ce format,<br>mais la carte sera bien analysée.</span>
+            </div>
+            <div class="scan-filemeta">
+              <span class="scan-badge">
+                <i data-lucide="check" style="width:14px;height:14px;vertical-align:-2px;"></i>
+                Carte ajoutée
+              </span>
+              <span class="scan-filename" id="scan-filename"></span>
+              <button type="button" class="scan-change" id="scan-change">Changer d'image</button>
+            </div>
+          </div>
+        </label>
+        <input type="file" id="card-input" name="receipt" accept="image/*,application/pdf,.pdf"
+               capture="environment" style="display:none;" required>
+
+        <div class="scan-actions">
+          <button type="submit" class="btn btn-accent" id="scan-submit" disabled>
+            <i data-lucide="sparkles" style="width:16px;height:16px;vertical-align:-3px;"></i>
+            <span id="scan-submit-label">Analyser le reçu</span>
+          </button>
+          <a href="{{ url_for('expenses.new') }}" class="btn btn-ghost">Saisie manuelle</a>
+        </div>
+      </form>
+    </div>
+
+    {# ─── Colonne droite : mode d'emploi ─── #}
+    <aside class="scan-aside card">
+      <h2 class="scan-aside-title">
+        <i data-lucide="sparkles" style="width:18px;height:18px;vertical-align:-3px;"></i>
+        Comment ça marche
+      </h2>
+      <ol class="scan-steps">
+        <li>
+          <span class="scan-step-num">1</span>
+          <div>
+            <strong>Importez le reçu</strong>
+            <p>Prenez une photo ou déposez une image de la reçu / facture.</p>
+          </div>
+        </li>
+        <li>
+          <span class="scan-step-num">2</span>
+          <div>
+            <strong>L'IA lit les informations</strong>
+            <p>Libellé, montant et date sont extraits automatiquement.</p>
+          </div>
+        </li>
+        <li>
+          <span class="scan-step-num">3</span>
+          <div>
+            <strong>Vérifiez et enregistrez</strong>
+            <p>Corrigez si besoin, puis enregistrez la charge en un clic.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="scan-tip">
+        <i data-lucide="lightbulb" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        <span>Astuce : une carte nette, bien éclairée et à plat donne les meilleurs résultats.</span>
+      </div>
+
+      <p class="scan-privacy">
+        <i data-lucide="shield-check" style="width:15px;height:15px;vertical-align:-2px;"></i>
+        Le reçu est enregistré avec la charge, comme justificatif.
+      </p>
+    </aside>
+
+  </div>
+
+  <style>
+    /* Grille pleine largeur : dépôt (2fr) + mode d'emploi (1fr) */
+    .scan-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--space-6);
+      align-items: start;
+    }
+    .scan-card { margin: 0; }
+
+    .scan-drop {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+      border: 2px dashed var(--line-strong);
+      border-radius: var(--radius-card);
+      background: var(--bg);
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--duration-fast), background var(--duration-fast);
+    }
+    .scan-drop:hover, .scan-drop.is-drag { border-color: var(--or); background: var(--jaune-pale); }
+    /* Quand une carte est chargée : bordure pleine + fond blanc pour bien voir l'image */
+    .scan-drop.has-file { border-style: solid; border-color: var(--or); background: #fff; cursor: default; }
+    .scan-drop-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 64px; height: 64px; border-radius: var(--radius-card);
+      background: var(--jaune-pale); color: var(--marine); margin-bottom: 16px;
+    }
+    .scan-drop-icon i { width: 30px; height: 30px; }
+    .scan-drop-title { font-size: var(--text-lg); font-weight: var(--weight-bold); color: var(--marine); }
+    .scan-drop-sub { font-size: var(--text-sm); color: var(--muted); margin-top: 6px; }
+
+    /* Aperçu de la carte ajoutée */
+    .scan-preview-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+    .scan-preview {
+      max-height: 360px; max-width: 100%; width: auto;
+      border-radius: var(--radius-btn);
+      box-shadow: 0 4px 16px rgba(2, 26, 61, 0.12);
+    }
+    /* Vignette de remplacement (HEIC non affichable par le navigateur) */
+    .scan-fileicon {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      padding: 32px 24px; text-align: center;
+      color: var(--muted); font-size: var(--text-sm); line-height: 1.5;
+    }
+    .scan-fileicon i { width: 48px; height: 48px; color: var(--or); }
+
+    .scan-filemeta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .scan-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 999px;
+      background: var(--marine); color: #fff;
+      font-size: var(--text-sm); font-weight: var(--weight-bold);
+    }
+    .scan-filename { font-size: var(--text-sm); color: var(--muted); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .scan-change {
+      background: none; border: none; cursor: pointer;
+      color: var(--or); font-size: var(--text-sm); font-weight: var(--weight-bold);
+      text-decoration: underline; padding: 0;
+    }
+    .scan-change:hover { color: var(--marine); }
+
+    .scan-actions { display: flex; gap: 12px; margin-top: 24px; align-items: center; flex-wrap: wrap; }
+    #scan-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Panneau latéral — mode d'emploi */
+    .scan-aside { margin: 0; }
+    .scan-aside-title {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      color: var(--marine);
+      font-weight: var(--weight-bold);
+      margin-bottom: 20px;
+    }
+    .scan-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+    .scan-steps li { display: flex; gap: 14px; align-items: flex-start; }
+    .scan-step-num {
+      flex: 0 0 auto;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--marine); color: #fff;
+      font-size: var(--text-sm); font-weight: var(--weight-bold);
+    }
+    .scan-steps strong { color: var(--marine); font-size: var(--text-base); }
+    .scan-steps p { font-size: var(--text-sm); color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+    .scan-tip {
+      display: flex; gap: 10px; align-items: flex-start;
+      margin-top: 24px; padding: 14px 16px;
+      background: var(--jaune-pale); border-radius: var(--radius-btn);
+      font-size: var(--text-sm); color: var(--marine);
+    }
+    .scan-privacy { font-size: var(--text-sm); color: var(--muted); margin-top: 18px; }
+
+    /* Responsive : une seule colonne sous 1024px */
+    @media (max-width: 1024px) {
+      .scan-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <script defer>
+    (function () {
+      var input       = document.getElementById('card-input');
+      var drop        = document.getElementById('scan-drop');
+      var placeholder = document.getElementById('scan-placeholder');
+      var previewWrap = document.getElementById('scan-preview-wrap');
+      var preview     = document.getElementById('scan-preview');
+      var filename    = document.getElementById('scan-filename');
+      var changeBtn   = document.getElementById('scan-change');
+      var submit      = document.getElementById('scan-submit');
+      var submitLabel = document.getElementById('scan-submit-label');
+
+      var fileIcon = document.getElementById('scan-fileicon');
+
+      function showFile(file) {
+        if (!file) return;
+        filename.textContent = file.name || 'image';
+
+        // Basculer en état "carte ajoutée"
+        placeholder.style.display = 'none';
+        previewWrap.style.display = 'flex';
+        drop.classList.add('has-file');
+
+        var isHeic = /\.heic$|\.heif$/i.test(file.name) ||
+                     /heic|heif/i.test(file.type || '') ||
+                     /\.pdf$/i.test(file.name) ||          // PDF : pas affichable en <img>
+                     /pdf/i.test(file.type || '');
+
+        if (isHeic) {
+          // HEIC ou PDF ne s'affichent pas en <img> → vignette de remplacement.
+          preview.style.display = 'none';
+          fileIcon.style.display = 'flex';
+        } else {
+          // Aperçu réel de l'image.
+          fileIcon.style.display = 'none';
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+          };
+          reader.onerror = function () {
+            preview.style.display = 'none';
+            fileIcon.style.display = 'flex';
+          };
+          reader.readAsDataURL(file);
+        }
+
+        // Activer le bouton et adapter son libellé
+        submit.disabled = false;
+        submitLabel.textContent = 'Analyser ce reçu';
+
+        if (window.lucide) lucide.createIcons();
+      }
+
+      function resetFile() {
+        input.value = '';
+        preview.src = '';
+        preview.style.display = 'none';
+        if (fileIcon) fileIcon.style.display = 'none';
+        previewWrap.style.display = 'none';
+        placeholder.style.display = 'block';
+        drop.classList.remove('has-file');
+        submit.disabled = true;
+        submitLabel.textContent = 'Analyser le reçu';
+      }
+
+      input.addEventListener('change', function () {
+        if (input.files && input.files[0]) showFile(input.files[0]);
+      });
+
+      // Bouton "Changer d'image" — sans rouvrir la boîte de dépôt (stopPropagation)
+      changeBtn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        resetFile();
+        input.click();
+      });
+
+      ['dragenter', 'dragover'].forEach(function (ev) {
+        drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('is-drag'); });
+      });
+      ['dragleave', 'drop'].forEach(function (ev) {
+        drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('is-drag'); });
+      });
+      drop.addEventListener('drop', function (e) {
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          input.files = e.dataTransfer.files;
+          showFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      // Feedback pendant l'analyse (l'appel IA peut prendre quelques secondes)
+      document.getElementById('scan-form').addEventListener('submit', function () {
+        submit.disabled = true;
+        submitLabel.textContent = 'Analyse en cours…';
+      });
+    })();
+  </script>
+
+{% endblock %}

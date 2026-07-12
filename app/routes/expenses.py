@@ -149,6 +149,89 @@ def new():
     )
 
 
+def _save_receipt(jpeg_bytes, user_id):
+    """Enregistre le reçu (JPEG) sous /static/uploads/recus/, retourne le chemin relatif."""
+    import os
+    import uuid
+    from flask import current_app
+    try:
+        rel_dir = os.path.join("uploads", "recus")
+        abs_dir = os.path.join(current_app.static_folder, rel_dir)
+        os.makedirs(abs_dir, exist_ok=True)
+        fname = f"u{user_id}-{uuid.uuid4().hex[:12]}.jpg"
+        with open(os.path.join(abs_dir, fname), "wb") as fh:
+            fh.write(jpeg_bytes)
+        return f"{rel_dir}/{fname}"
+    except Exception:
+        current_app.logger.warning("Échec sauvegarde reçu", exc_info=True)
+        return None
+
+
+@expenses_bp.route("/scan")
+@login_required
+@subscription_required
+def scan():
+    """Page d'import d'un reçu/facture de charge à analyser."""
+    return render_template("expenses/scan.html")
+
+
+@expenses_bp.route("/scan", methods=["POST"])
+@login_required
+@subscription_required
+def scan_upload():
+    """Reçoit le reçu (image/PDF), le lit via Claude Vision, pré-remplit le formulaire."""
+    from app.services.receipt_scan_service import scan_receipt
+
+    file = request.files.get("receipt")
+    if file is None or not file.filename:
+        flash("Veuillez sélectionner une image ou un PDF de reçu.", "danger")
+        return redirect(url_for("expenses.scan"))
+
+    raw = file.read()
+    result = scan_receipt(raw, filename=file.filename, content_type=file.mimetype)
+    log_action(current_user.id, "scan_receipt",
+               {"ok": result.get("ok"), "filename": file.filename})
+
+    if not result.get("ok"):
+        flash(result.get("error", "Le reçu n'a pas pu être analysé."), "danger")
+        return redirect(url_for("expenses.scan"))
+
+    # Sauvegarde du reçu (image normalisée) pour le rattacher à la dépense.
+    receipt_ref = _save_receipt(result["image"], current_user.id)
+
+    fields = result["fields"]
+    _ensure_default_categories()
+    categories = ExpenseCategory.query.filter_by(
+        user_id=current_user.id).order_by(ExpenseCategory.name).all()
+
+    # Matcher la catégorie proposée par l'IA avec celles du gérant.
+    matched_cat = None
+    wanted = (fields.get("category") or "").strip().lower()
+    for c in categories:
+        if c.name.strip().lower() == wanted:
+            matched_cat = c.id
+            break
+
+    from werkzeug.datastructures import MultiDict
+    form = MultiDict()
+    form["label"] = fields.get("label", "")
+    if fields.get("amount"):
+        form["amount"] = str(fields["amount"])
+    form["expense_date"] = fields.get("date") or date.today().isoformat()
+    if matched_cat:
+        form["category_id"] = str(matched_cat)
+    if receipt_ref:
+        form["receipt_ref"] = receipt_ref
+
+    flash("Reçu analysé : vérifiez et complétez avant d'enregistrer.", "success")
+    return render_template(
+        "expenses/form.html",
+        expense=None, categories=categories,
+        today=date.today().isoformat(),
+        form=form, from_scan=True, receipt_ref=receipt_ref,
+    )
+
+
 @expenses_bp.route("/", methods=["POST"])
 @login_required
 @subscription_required
@@ -181,12 +264,18 @@ def create():
             form=request.form,
         ), 400
 
+    # Reçu scanné : ne garder que les chemins qu'on a nous-mêmes générés (anti-injection).
+    receipt_ref = request.form.get("receipt_ref") or None
+    if receipt_ref and (not receipt_ref.startswith("uploads/recus/") or ".." in receipt_ref):
+        receipt_ref = None
+
     expense = Expense(
         user_id=current_user.id,
         category_id=category_id or None,
         label=label,
         amount=amount,
         expense_date=expense_date,
+        receipt_ref=receipt_ref,
     )
     db.session.add(expense)
     db.session.commit()
