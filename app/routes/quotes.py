@@ -330,6 +330,67 @@ def new():
     )
 
 
+@quotes_bp.route("/voice")
+@login_required
+@subscription_required
+def voice():
+    """Page de dictée d'un devis par commande vocale (Web Speech API)."""
+    return render_template("quotes/voice.html")
+
+
+@quotes_bp.route("/voice", methods=["POST"])
+@login_required
+@subscription_required
+def voice_parse():
+    """Reçoit le texte dicté, l'interprète via Claude, pré-remplit le formulaire."""
+    from app.services.voice_quote_service import parse_voice_quote
+    from werkzeug.datastructures import MultiDict
+
+    transcript = (request.form.get("transcript") or "").strip()
+    customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.name).all()
+    result = parse_voice_quote(transcript, [c.name for c in customers])
+
+    log_action(current_user.id, "voice_quote",
+               {"ok": result.get("ok"), "len": len(transcript)})
+
+    if not result.get("ok"):
+        flash(result.get("error", "Commande vocale non comprise."), "danger")
+        return redirect(url_for("quotes.voice"))
+
+    # Match du client par nom (insensible à la casse) parmi les clients du gérant.
+    matched_id = None
+    wanted = (result.get("customer_name") or "").strip().lower()
+    for c in customers:
+        if c.name.strip().lower() == wanted:
+            matched_id = c.id
+            break
+
+    # Construire un MultiDict pour pré-remplir le formulaire (comme un POST rejoué).
+    form = MultiDict()
+    if matched_id:
+        form["customer_id"] = str(matched_id)
+    form["quote_date"] = date.today().isoformat()
+    for it in result["items"]:
+        form.add("designation[]", it["description"])
+        form.add("quantity[]", str(it["quantity"]))
+        form.add("unit_price[]", str(it["unit_price"]))
+
+    note = "Devis pré-rempli par commande vocale : vérifiez le client, les articles et les prix."
+    if not matched_id and result.get("customer_name"):
+        note += (f" Client « {result['customer_name']} » non trouvé dans votre carnet — "
+                 "sélectionnez-le ou créez-le d'abord.")
+    flash(note, "success")
+
+    return render_template(
+        "quotes/form.html",
+        quote=None,
+        customers=customers,
+        tax_rate=TAX_RATE,
+        today=date.today().isoformat(),
+        form=form,
+    )
+
+
 @quotes_bp.route("/", methods=["POST"])
 @login_required
 @subscription_required
