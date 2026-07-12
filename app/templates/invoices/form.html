@@ -1,0 +1,198 @@
+{% extends "layouts/app.html" %}
+{% set active = 'invoices' %}
+{% block title %}Nouvelle facture — SenGestion{% endblock %}
+
+{% block page %}
+
+  <div class="page-header">
+    <div>
+      <a href="{{ url_for('invoices.index') }}" class="back-link">
+        <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Retour aux factures
+      </a>
+      <h1 class="page-title">Nouvelle facture</h1>
+    </div>
+  </div>
+
+  {% if not customers %}
+  <div class="alert alert-warning" role="alert">
+    Vous devez d'abord enregistrer au moins un client avant de créer une facture.
+    <a href="{{ url_for('customers.new') }}" style="color:var(--marine); font-weight:600;">Ajouter un client</a>.
+  </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('invoices.create') }}" id="invoice-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {# ── Informations générales ── #}
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="customer_id">Client <span class="required" aria-hidden="true">*</span></label>
+          <select class="form-input" id="customer_id" name="customer_id" required>
+            <option value="">— Sélectionner un client —</option>
+            {% for c in customers %}
+            {% set current_cid = (form.customer_id if form else None) %}
+            <option value="{{ c.id }}" {{ 'selected' if current_cid and (current_cid|string) == (c.id|string) }}>
+              {{ c.name }}{% if c.company %} — {{ c.company }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="invoice_date">Date de la facture</label>
+          <input class="form-input" id="invoice_date" name="invoice_date" type="date"
+                 value="{{ form.invoice_date if form else today }}">
+        </div>
+      </div>
+    </div>
+
+    {# ── Lignes de la facture ── #}
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        <h2 class="card-title">Lignes de la facture</h2>
+        <button type="button" id="add-line" class="btn btn-accent">
+          <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i> Ajouter une ligne
+        </button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse;" id="lines-table">
+          <thead>
+            <tr style="border-bottom:2px solid var(--line);">
+              <th style="font-size:16px; font-weight:600; color:var(--muted); text-align:left; padding:10px 8px;">Désignation</th>
+              <th style="font-size:16px; font-weight:600; color:var(--muted); text-align:right; padding:10px 8px; width:110px;">Quantité</th>
+              <th style="font-size:16px; font-weight:600; color:var(--muted); text-align:right; padding:10px 8px; width:150px;">P.U. (FCFA)</th>
+              <th style="font-size:16px; font-weight:600; color:var(--muted); text-align:right; padding:10px 8px; width:150px;">Montant</th>
+              <th style="padding:10px 8px; width:48px;"></th>
+            </tr>
+          </thead>
+          <tbody id="lines-body"><!-- lignes injectées en JS --></tbody>
+        </table>
+      </div>
+
+      <p style="font-size:16px; color:var(--muted); margin:14px 0 0;">
+        <i data-lucide="info" style="width:14px;height:14px;vertical-align:-2px;"></i>
+        TVA appliquée : <strong>{{ (tax_rate * 100)|int }} %</strong> (Sénégal).
+      </p>
+    </div>
+
+    {# ── Totaux ── #}
+    <div class="card" style="margin-bottom:20px;">
+      <div style="max-width:340px; margin-left:auto;">
+        <div class="total-row">
+          <span>Total HT</span><span id="total-ht" style="font-weight:600;">0 FCFA</span>
+        </div>
+        <div class="total-row total-row--muted">
+          <span>TVA ({{ (tax_rate * 100)|int }} %)</span><span id="total-tva">0 FCFA</span>
+        </div>
+        <div class="total-row total-row--final">
+          <span>Total TTC</span><span id="total-ttc">0 FCFA</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
+      <a href="{{ url_for('invoices.index') }}" class="btn btn-ghost">Annuler</a>
+      <button type="submit" class="btn btn-accent">
+        <i data-lucide="save" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Créer la facture
+      </button>
+    </div>
+  </form>
+
+  {# ── Données initiales des lignes (réaffichage après erreur / vocal) ── #}
+  <script type="application/json" id="initial-lines">
+    {%- set rows = [] -%}
+    {%- if form -%}
+      {%- set descs = form.getlist('designation[]') -%}
+      {%- set qtys = form.getlist('quantity[]') -%}
+      {%- set prices = form.getlist('unit_price[]') -%}
+      {%- for i in range(descs|length) -%}
+        {%- set _ = rows.append({'d': descs[i], 'q': qtys[i] if i < qtys|length else '', 'p': prices[i] if i < prices|length else ''}) -%}
+      {%- endfor -%}
+    {%- endif -%}
+    {{ rows|tojson }}
+  </script>
+
+  <script defer>
+    (function () {
+      var TAX_RATE = {{ tax_rate }};
+      var body = document.getElementById('lines-body');
+
+      function fmt(n) {
+        if (isNaN(n)) n = 0;
+        return Math.round(n).toLocaleString('fr-FR').replace(/ | /g, ' ') + ' FCFA';
+      }
+
+      function recalc() {
+        var ht = 0;
+        body.querySelectorAll('tr').forEach(function (tr) {
+          var q = parseFloat((tr.querySelector('.js-qty').value || '').replace(',', '.')) || 0;
+          var p = parseFloat((tr.querySelector('.js-price').value || '').replace(',', '.')) || 0;
+          var amount = q * p;
+          tr.querySelector('.js-amount').textContent = fmt(amount);
+          ht += amount;
+        });
+        var tva = ht * TAX_RATE;
+        document.getElementById('total-ht').textContent = fmt(ht);
+        document.getElementById('total-tva').textContent = fmt(tva);
+        document.getElementById('total-ttc').textContent = fmt(ht + tva);
+      }
+
+      function addLine(data) {
+        data = data || { d: '', q: '1', p: '' };
+        var tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--line)';
+        tr.innerHTML =
+          '<td style="padding:8px;">' +
+            '<input type="text" name="designation[]" class="form-input js-desc" ' +
+            'maxlength="255" placeholder="Désignation de la prestation" ' +
+            'style="font-size:16px; width:100%;" required></td>' +
+          '<td style="padding:8px;">' +
+            '<input type="number" name="quantity[]" class="form-input js-qty" ' +
+            'min="0" step="0.01" style="font-size:16px; width:100%; text-align:right;" required></td>' +
+          '<td style="padding:8px;">' +
+            '<input type="number" name="unit_price[]" class="form-input js-price" ' +
+            'min="0" step="0.01" style="font-size:16px; width:100%; text-align:right;" required></td>' +
+          '<td class="js-amount" style="padding:8px; text-align:right; font-size:16px; ' +
+            'font-weight:600; color:var(--marine); white-space:nowrap;">0 FCFA</td>' +
+          '<td style="padding:8px; text-align:center;">' +
+            '<button type="button" class="js-remove btn btn-danger btn-sm" aria-label="Supprimer la ligne">' +
+            '<i data-lucide="trash-2" style="width:16px;height:16px;"></i></button></td>';
+        body.appendChild(tr);
+        tr.querySelector('.js-desc').value = data.d || '';
+        tr.querySelector('.js-qty').value = data.q || '';
+        tr.querySelector('.js-price').value = data.p || '';
+        tr.querySelectorAll('input').forEach(function (inp) {
+          inp.addEventListener('input', recalc);
+        });
+        tr.querySelector('.js-remove').addEventListener('click', function () {
+          tr.remove();
+          if (!body.querySelector('tr')) addLine();
+          recalc();
+        });
+        if (window.lucide) lucide.createIcons();
+      }
+
+      var initial = [];
+      try { initial = JSON.parse(document.getElementById('initial-lines').textContent.trim()); }
+      catch (e) { initial = []; }
+      if (initial && initial.length) {
+        initial.forEach(function (row) { addLine(row); });
+      } else {
+        addLine();
+      }
+      recalc();
+
+      document.getElementById('add-line').addEventListener('click', function () { addLine(); });
+
+      document.getElementById('invoice-form').addEventListener('submit', function (e) {
+        if (!body.querySelector('tr')) {
+          e.preventDefault();
+          alert('Ajoutez au moins une ligne à la facture.');
+        }
+      });
+    })();
+  </script>
+
+{% endblock %}

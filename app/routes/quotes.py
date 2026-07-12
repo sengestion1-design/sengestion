@@ -684,6 +684,141 @@ def to_invoice(quote_id):
 # ─────────────────────────────────────────────────────────────────────────────
 #  FACTURES
 # ─────────────────────────────────────────────────────────────────────────────
+@invoices_bp.route("/new")
+@login_required
+@subscription_required
+def new():
+    """Formulaire de création directe d'une facture."""
+    customers = Customer.query.filter_by(
+        user_id=current_user.id
+    ).order_by(Customer.name).all()
+    return render_template(
+        "invoices/form.html",
+        invoice=None, customers=customers,
+        tax_rate=TAX_RATE, today=date.today().isoformat(),
+    )
+
+
+@invoices_bp.route("/", methods=["POST"])
+@login_required
+@subscription_required
+def create():
+    """Enregistre une nouvelle facture avec ses lignes (validation serveur)."""
+    customer_id = request.form.get("customer_id", type=int)
+    invoice_date = _parse_date(request.form.get("invoice_date"))
+
+    customer = _owned_customer_or_none(customer_id)
+    items, errors = _read_lines()
+    if customer is None:
+        errors.insert(0, "Sélectionnez un client valide.")
+    if invoice_date is None:
+        errors.append("La date de la facture est invalide.")
+
+    if errors:
+        for msg in errors:
+            flash(msg, "danger")
+        customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.name).all()
+        return render_template("invoices/form.html", invoice=None, customers=customers,
+                               tax_rate=TAX_RATE, today=date.today().isoformat(),
+                               form=request.form), 400
+
+    excl, incl = _totals(items)
+    invoice = Invoice(
+        user_id=current_user.id,
+        customer_id=customer.id,
+        number=_next_number("FAC", Invoice),
+        invoice_date=invoice_date,
+        status="unpaid",
+        amount_excl_tax=excl,
+        amount_incl_tax=incl,
+    )
+    for it in items:
+        invoice.items.append(InvoiceItem(**it))
+    db.session.add(invoice)
+    db.session.commit()
+    log_action(current_user.id, "create_invoice",
+               {"invoice_id": invoice.id, "number": invoice.number, "amount_incl_tax": str(incl)})
+    flash(f"Facture {invoice.number} créée avec succès.", "success")
+    return redirect(url_for("invoices.show", invoice_id=invoice.id))
+
+
+@invoices_bp.route("/voice")
+@login_required
+@subscription_required
+def voice():
+    """Page de dictée d'une facture par commande vocale."""
+    return render_template("invoices/voice.html")
+
+
+@invoices_bp.route("/voice/transcribe", methods=["POST"])
+@login_required
+@subscription_required
+def voice_transcribe():
+    """Transcrit l'audio (Whisper) et renvoie le texte JSON (identique au devis)."""
+    from flask import jsonify
+    from app.services.transcription_service import transcribe_audio
+    audio = request.files.get("audio")
+    if audio is None or not audio.filename:
+        return jsonify({"ok": False, "error": "Aucun audio reçu."}), 400
+    data = audio.read()
+    result = transcribe_audio(data, filename=audio.filename)
+    log_action(current_user.id, "voice_transcribe", {"ok": result.get("ok"), "bytes": len(data)})
+    return jsonify(result), (200 if result.get("ok") else 422)
+
+
+@invoices_bp.route("/voice", methods=["POST"])
+@login_required
+@subscription_required
+def voice_parse():
+    """Interprète le texte dicté (Claude) et pré-remplit le formulaire de facture."""
+    from app.services.voice_quote_service import parse_voice_quote
+    from werkzeug.datastructures import MultiDict
+
+    transcript = (request.form.get("transcript") or "").strip()
+    customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.name).all()
+    result = parse_voice_quote(transcript, [c.name for c in customers])
+    log_action(current_user.id, "voice_invoice", {"ok": result.get("ok"), "len": len(transcript)})
+
+    if not result.get("ok"):
+        flash(result.get("error", "Commande vocale non comprise."), "danger")
+        return redirect(url_for("invoices.voice"))
+
+    # Match / création automatique du client (comme le devis vocal).
+    matched_id = None
+    customer_name = (result.get("customer_name") or "").strip()
+    wanted = customer_name.lower()
+    for c in customers:
+        if c.name.strip().lower() == wanted:
+            matched_id = c.id
+            break
+    created_client = False
+    if not matched_id and customer_name:
+        nc = Customer(user_id=current_user.id, name=customer_name[:100])
+        db.session.add(nc); db.session.commit()
+        matched_id = nc.id
+        created_client = True
+        log_action(current_user.id, "create_customer",
+                   {"customer_id": nc.id, "name": nc.name, "source": "voice_invoice"})
+        customers = (Customer.query.filter_by(user_id=current_user.id)
+                     .order_by(Customer.name).all())
+
+    form = MultiDict()
+    if matched_id:
+        form["customer_id"] = str(matched_id)
+    form["invoice_date"] = date.today().isoformat()
+    for it in result["items"]:
+        form.add("designation[]", it["description"])
+        form.add("quantity[]", str(it["quantity"]))
+        form.add("unit_price[]", str(it["unit_price"]))
+
+    note = "Facture pré-remplie par commande vocale : vérifiez le client, les articles et les prix."
+    if created_client:
+        note += f" Nouveau client « {customer_name} » ajouté à votre carnet."
+    flash(note, "success")
+    return render_template("invoices/form.html", invoice=None, customers=customers,
+                           tax_rate=TAX_RATE, today=date.today().isoformat(), form=form)
+
+
 @invoices_bp.route("/")
 @login_required
 @subscription_required
