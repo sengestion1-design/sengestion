@@ -114,6 +114,24 @@
                  class="btn btn-ghost btn-sm" aria-label="Éditer le devis {{ q.number }}">
                 <i data-lucide="pencil" style="width:16px;height:16px;"></i>
               </a>
+              <form method="post" action="{{ url_for('quotes.to_invoice', quote_id=q.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Convertir le devis {{ q.number }} en facture ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-accent btn-sm"
+                        aria-label="Convertir le devis {{ q.number }} en facture"
+                        title="Convertir en facture">
+                  <i data-lucide="file-check" style="width:15px;height:15px;vertical-align:-3px;"></i>
+                  Facturer
+                </button>
+              </form>
+              {% else %}
+              <a href="{{ url_for('invoices.show', invoice_id=q.invoice_id) }}"
+                 class="btn btn-secondary btn-sm" title="Voir la facture liée"
+                 aria-label="Voir la facture du devis {{ q.number }}">
+                <i data-lucide="receipt" style="width:15px;height:15px;vertical-align:-3px;"></i>
+                Facturé
+              </a>
               {% endif %}
             </td>
           </tr>
