@@ -32,3 +32,6 @@ app/static/uploads/settings/*
 # Polices système embarquées (non versionnées — droits)
 app/static/fonts/*.ttc
 app/static/fonts/*.ttf
+
+app/static/uploads/recus/*
+!app/static/uploads/recus/.gitkeep
