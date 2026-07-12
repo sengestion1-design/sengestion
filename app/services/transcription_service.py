@@ -15,8 +15,10 @@ import tempfile
 from flask import current_app
 
 # Cache module-level du modèle Whisper (chargement long : une seule fois).
+# 'base' : ~10x plus rapide que 'small' sur CPU (~2-3s), qualité suffisante car
+# Claude corrige ensuite les noms via la liste des clients existants.
 _MODEL = None
-_MODEL_NAME = "small"   # bon compromis qualité/vitesse pour le français
+_MODEL_NAME = "base"
 
 
 def _get_model():
@@ -25,6 +27,20 @@ def _get_model():
         import whisper
         _MODEL = whisper.load_model(_MODEL_NAME)
     return _MODEL
+
+
+def preload_model_async():
+    """Précharge le modèle Whisper en arrière-plan au démarrage de l'app,
+    pour que la première transcription soit rapide (pas de latence de chargement)."""
+    import threading
+
+    def _load():
+        try:
+            _get_model()
+        except Exception:
+            pass  # best-effort : si ça échoue, le chargement se fera à la 1re requête
+
+    threading.Thread(target=_load, daemon=True).start()
 
 
 def transcribe_audio(audio_bytes: bytes, filename: str = "audio.webm") -> dict:

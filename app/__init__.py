@@ -51,6 +51,14 @@ def create_app(env="default"):
     app.register_blueprint(messages_bp)
     app.register_blueprint(settings_bp)
 
+    # Précharge le modèle Whisper (transcription vocale) en arrière-plan,
+    # pour que la première dictée soit rapide (pas d'attente de chargement).
+    try:
+        from app.services.transcription_service import preload_model_async
+        preload_model_async()
+    except Exception:
+        pass
+
     # Cache-busting : ajoute la date de modif du fichier à l'URL statique.
     # Ainsi tout changement CSS/JS force le navigateur à recharger (fini le cache).
     import os
