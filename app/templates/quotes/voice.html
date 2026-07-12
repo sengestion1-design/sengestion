@@ -137,30 +137,80 @@
                                              : 'Appuyez sur le micro et parlez');
       }
 
+      var gotSound = false;    // le micro a-t-il capté du son ?
+      var gotResult = false;   // a-t-on reçu un résultat de reconnaissance ?
+
       micBtn.addEventListener('click', function () {
         if (recording) { recognition.stop(); return; }
         finalText = '';
+        gotSound = false;
+        gotResult = false;
         transcriptBox.textContent = '';
-        try { recognition.start(); } catch (e) { /* déjà démarré */ }
+        transcriptInput.value = '';
+        submitBtn.disabled = true;
+        try { recognition.start(); }
+        catch (e) {
+          // start() relancé trop vite : on arrête et on réessaie
+          try { recognition.stop(); } catch (_) {}
+        }
       });
 
       recognition.onstart = function () { setRecording(true); };
-      recognition.onend = function () { setRecording(false); };
+
+      // Le micro capte de l'audio (confirme qu'un micro fonctionne)
+      recognition.onsoundstart = function () { gotSound = true; };
+      recognition.onspeechstart = function () {
+        gotSound = true;
+        status.textContent = 'Je vous entends…';
+      };
+
       recognition.onerror = function (e) {
-        status.textContent = 'Erreur micro : ' + (e.error || 'inconnue') + '. Réessayez.';
+        var msg;
+        switch (e.error) {
+          case 'not-allowed':
+          case 'service-not-allowed':
+            msg = "Micro bloqué. Autorisez le micro pour ce site (icône cadenas dans la barre d'adresse).";
+            break;
+          case 'no-speech':
+            msg = "Aucune parole détectée. Parlez plus près du micro et réessayez.";
+            break;
+          case 'audio-capture':
+            msg = "Aucun micro détecté. Vérifiez votre micro dans les réglages système.";
+            break;
+          case 'network':
+            msg = "La reconnaissance vocale de Chrome nécessite Internet (serveurs Google). Vérifiez votre connexion.";
+            break;
+          default:
+            msg = 'Erreur : ' + (e.error || 'inconnue') + '. Réessayez.';
+        }
+        status.textContent = msg;
         setRecording(false);
       };
 
+      recognition.onend = function () {
+        setRecording(false);
+        // Micro arrêté sans aucun résultat : donner un diagnostic clair
+        if (!gotResult && !transcriptInput.value) {
+          if (!gotSound) {
+            status.textContent = "Aucun son capté. Vérifiez que le bon micro est sélectionné dans Chrome (icône caméra/micro dans la barre d'adresse) et qu'il n'est pas coupé.";
+          } else {
+            status.textContent = "Son capté mais rien transcrit. La reconnaissance vocale de Chrome a besoin d'Internet — vérifiez votre connexion, puis réessayez.";
+          }
+        }
+      };
+
       recognition.onresult = function (event) {
+        gotResult = true;
         var interim = '';
         for (var i = event.resultIndex; i < event.results.length; i++) {
           var r = event.results[i];
           if (r.isFinal) { finalText += r[0].transcript + ' '; }
           else { interim += r[0].transcript; }
         }
-        transcriptBox.textContent = (finalText + interim).trim();
-        transcriptInput.value = (finalText + interim).trim();
-        submitBtn.disabled = transcriptInput.value.length === 0;
+        var text = (finalText + interim).trim();
+        transcriptBox.textContent = text;
+        transcriptInput.value = text;
+        submitBtn.disabled = text.length === 0;
       };
 
       form.addEventListener('submit', function (e) {
