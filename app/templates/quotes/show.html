@@ -60,10 +60,10 @@
       <div>
         <dt class="detail-label">Statut</dt>
         <dd class="detail-value">
-          {% set meta = statuses.get(quote.status, ('—', '#F9FAFB', '#5A6472')) %}
+          {% set meta = statuses.get(quote.status, ('—', '#FFFFFF', '#021A3D')) %}
           <span class="badge"
                 style="background:{{ meta[1] }}; color:{{ meta[2] }}; padding:4px 12px;
-                       border-radius:999px; display:inline-block; font-weight:600;">{{ meta[0] }}</span>
+                       border:1px solid #021A3D; border-radius:999px; display:inline-block; font-weight:600;">{{ meta[0] }}</span>
         </dd>
       </div>
     </dl>

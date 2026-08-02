@@ -30,15 +30,33 @@
         <input class="form-input" type="password" id="password" name="password"
                required minlength="12" autocomplete="new-password"
                pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}"
+               aria-describedby="password-hint"
                title="Au moins 12 caractères, avec majuscule, minuscule, chiffre et caractère spécial.">
-        <p class="form-hint">
+        <p class="form-hint" id="password-hint">
           12 caractères min., avec majuscule, minuscule, chiffre et caractère spécial.
         </p>
+      </div>
+
+      <!-- Consentement RGPD (art. 13 : information au moment de la collecte) -->
+      <div class="form-group" style="display:flex; gap:10px; align-items:flex-start;">
+        <input type="checkbox" id="privacy" name="privacy" required
+               style="margin-top:4px; width:16px; height:16px; flex-shrink:0; accent-color:var(--or, #F2B10E);">
+        <label for="privacy" style="font-size:var(--text-sm); line-height:1.5; font-weight:normal;">
+          J'ai lu et j'accepte la
+          <a href="{{ url_for('legal.confidentialite') }}" target="_blank" rel="noopener">politique de confidentialité</a>.
+        </label>
       </div>
 
       <button type="submit" class="btn btn-accent btn-block" style="margin-top:8px;">
         Créer mon compte
       </button>
+
+      <p class="form-hint" style="margin-top:14px; line-height:1.6;">
+        Les données collectées (nom, e-mail) servent uniquement à créer et gérer votre
+        compte SenGestion. Elles ne sont jamais transmises à des tiers. Vous disposez
+        d'un droit d'accès, de rectification et de suppression :
+        <a href="{{ url_for('legal.confidentialite') }}" target="_blank" rel="noopener">en savoir plus</a>.
+      </p>
     </form>
 
     <p class="auth-alt">Déjà inscrit ?

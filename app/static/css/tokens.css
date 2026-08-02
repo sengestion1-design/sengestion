@@ -11,7 +11,7 @@
   --marine:          #021A3D;   /* Fond sombre, texte principal, nav */
   --marine-700:      #021A3D;   /* Hover marine (fond foncé interactif) — charte */
   --marine-500:      #021A3D;   /* Teinte intermédiaire — charte (pas de bleu inventé) */
-  --marine-100:      #EEF1F6;   /* Fond marine clair neutre (gris bleuté très léger) */
+  --marine-100:      #E8E7A2;   /* Fond clair = jaune pâle (charte stricte, plus de gris inventé) */
 
   --or:              #F2B10E;   /* Accent : FOND & boutons UNIQUEMENT */
   --or-600:          #F2B10E;   /* Hover bouton accent — même or (opacité gérée en JS/CSS) */
@@ -30,8 +30,8 @@
 
   /* ── Texte (marine sur fond clair → 13–15:1, toujours ≥ 4.5:1) ── */
   --ink:             #021A3D;   /* Texte principal */
-  --muted:           #5A6472;   /* Texte secondaire — ≥ 5.5:1 sur blanc */
-  --placeholder:     #9BA8B5;   /* Placeholder inputs — 4.5:1 sur blanc */
+  --muted:           #021A3D;   /* Texte secondaire = marine (charte stricte : texte sur clair = marine) */
+  --placeholder:     #021A3D;   /* Placeholder inputs = marine (charte stricte), différencié par l'italique */
 
   /* ── États sémantiques (tous conformes RGAA sur fond clair) ── */
   --success:         #021A3D;   /* Texte succès = marine (charte) */
@@ -39,16 +39,16 @@
   --success-border:  #d4d38a;   /* Bordure succès = jaune pâle foncé (charte) */
 
   --danger:          #021A3D;   /* Texte danger = marine (PAS de rouge) */
-  --danger-soft:     #EEF1F6;   /* Fond danger = marine clair neutre */
-  --danger-border:   #C8D5E4;   /* Bordure danger = marine clair neutre */
+  --danger-soft:     #FFFFFF;   /* Fond danger = blanc + bordure marine (charte stricte) */
+  --danger-border:   #021A3D;   /* Bordure danger = marine (charte stricte) */
 
   --warning:         #021A3D;   /* Texte warning = marine (charte) */
   --warning-soft:    #E8E7A2;   /* Fond warning = jaune pâle (charte) */
   --warning-border:  #d4d38a;   /* Bordure warning = jaune pâle foncé (charte) */
 
   --info:            #021A3D;   /* Texte info = marine */
-  --info-soft:       #EEF1F6;   /* Fond info = gris bleuté très léger neutre */
-  --info-border:     #C8D5E4;   /* Bordure info = marine clair neutre */
+  --info-soft:       #FFFFFF;   /* Fond info = blanc + bordure marine (charte stricte) */
+  --info-border:     #021A3D;   /* Bordure info = marine (charte stricte) */
 
   /* ── Bordures & séparateurs — plus fins, plus légers ── */
   --line:            #E2E6EA;   /* Bordure standard neutre */
@@ -117,7 +117,7 @@
   /* ── Sidebar ── */
   --sidebar-width:           248px;
   --sidebar-width-collapsed: 64px;
-  --navbar-height:           60px;
+  --navbar-height:           80px;
 
   /* ── Z-index ── */
   --z-sidebar:   100;

@@ -1,0 +1,159 @@
+{% extends "layouts/app.html" %}
+{% set active = 'reports' %}
+{% block title %}Rapports — SenGestion{% endblock %}
+
+{% block page %}
+
+  {# ── En-tête de page ── #}
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">Analyse</div>
+      <h1 class="page-title">Rapports</h1>
+      <p class="page-subtitle">
+        Période du {{ report.period_start.strftime('%d/%m/%Y') if report else '—' }}
+        au {{ report.period_end.strftime('%d/%m/%Y') if report else '—' }}
+      </p>
+    </div>
+  </div>
+
+  {# ── Filtres ── #}
+  <div class="card" style="margin-bottom:24px;">
+    <form method="get" action="{{ url_for('reports.index') }}"
+          style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
+      <div style="flex:1; min-width:160px;">
+        <label class="form-label" for="filter-period">Période</label>
+        <select class="form-input" id="filter-period" name="period">
+          <option value="month" {{ 'selected' if period == 'month' }}>Mensuel</option>
+          <option value="year" {{ 'selected' if period == 'year' }}>Annuel</option>
+        </select>
+      </div>
+
+      {% if period == 'month' %}
+      <div style="flex:1; min-width:160px;">
+        <label class="form-label" for="filter-month">Mois</label>
+        <select class="form-input" id="filter-month" name="month">
+          {% for m in range(1, 13) %}
+          <option value="{{ m }}" {{ 'selected' if m == month }}>
+            {{ ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'][m-1] }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+
+      <div style="flex:1; min-width:120px;">
+        <label class="form-label" for="filter-year">Année</label>
+        <select class="form-input" id="filter-year" name="year">
+          {% for y in range(today.year - 3, today.year + 1) %}
+          <option value="{{ y }}" {{ 'selected' if y == year }}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary">
+          <i data-lucide="filter" style="width:16px;height:16px;vertical-align:-3px;"></i> Filtrer
+        </button>
+        {% if report %}
+        <a class="btn btn-secondary"
+           href="{{ url_for('reports.export_csv', period=period, year=year, month=month) }}">
+          <i data-lucide="download" style="width:16px;height:16px;vertical-align:-3px;"></i> Exporter CSV
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  {% if report %}
+  {# ── KPI tiles ── #}
+  <div class="kpi-grid">
+
+    <div class="kpi-card">
+      <div class="kpi-card-accent accent-marine"></div>
+      <div class="kpi-icon-wrap bg-marine-pale"><i data-lucide="file-text"></i></div>
+      <div class="kpi-label">Devis émis</div>
+      <div class="kpi-value">{{ report.quotes_count }}</div>
+      <span class="kpi-delta neutral">{{ report.conversion_rate }}% acceptés</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-card-accent accent-pale"></div>
+      <div class="kpi-icon-wrap bg-pale"><i data-lucide="receipt"></i></div>
+      <div class="kpi-label">Factures émises</div>
+      <div class="kpi-value">{{ report.invoices_count }}</div>
+      <span class="kpi-delta neutral">Sur la période</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-card-accent accent-or"></div>
+      <div class="kpi-icon-wrap bg-or-pale"><i data-lucide="trending-up"></i></div>
+      <div class="kpi-label">Chiffre d'affaires facturé</div>
+      <div class="kpi-value">{{ '{:,.0f}'.format(report.revenue).replace(',', ' ') }}</div>
+      <div class="kpi-unit">FCFA</div>
+    </div>
+
+    <div class="kpi-card kpi-card--accent">
+      <div class="kpi-icon-wrap"><i data-lucide="wallet"></i></div>
+      <div class="kpi-label">Solde net</div>
+      <div class="kpi-value">{{ '{:,.0f}'.format(report.net_balance).replace(',', ' ') }}</div>
+      <div class="kpi-unit">FCFA — encaissé moins dépenses</div>
+    </div>
+
+  </div>
+
+  {# ── Graphiques ── #}
+  <div class="charts-grid" style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-bottom:24px;">
+    <div class="card">
+      <div class="table-header-title" style="margin-bottom:12px;">Évolution sur 6 mois</div>
+      <canvas id="chart-trend" role="img" aria-label="Graphique d'évolution du chiffre d'affaires et des dépenses sur 6 mois" height="220"></canvas>
+    </div>
+    <div class="card">
+      <div class="table-header-title" style="margin-bottom:12px;">Dépenses par catégorie</div>
+      {% if breakdown and breakdown.labels %}
+      <canvas id="chart-breakdown" role="img" aria-label="Graphique de répartition des dépenses par catégorie" height="220"></canvas>
+      {% else %}
+      <p class="page-subtitle">Aucune dépense sur la période.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Détail ── #}
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-header-title">Détail de la période</div>
+    </div>
+    <div class="table-wrapper">
+      <table class="table" aria-label="Détail des rapports">
+        <tbody>
+          <tr>
+            <td class="td-primary">Montant encaissé</td>
+            <td class="td-nowrap">{{ '{:,.0f}'.format(report.collected).replace(',', ' ') }} FCFA</td>
+          </tr>
+          <tr>
+            <td class="td-primary">Dépenses</td>
+            <td class="td-nowrap">{{ '{:,.0f}'.format(report.expenses).replace(',', ' ') }} FCFA</td>
+          </tr>
+          <tr>
+            <td class="td-primary">Devis acceptés</td>
+            <td class="td-nowrap">{{ report.quotes_accepted }} / {{ report.quotes_count }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
+          integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt"
+          crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='js/reports-charts.js') }}"
+          data-trend='{{ trend | tojson }}'
+          data-breakdown='{{ breakdown | tojson }}'></script>
+
+  {% else %}
+  <div class="empty-state">
+    <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+    <p>Aucune donnée disponible pour cette période.</p>
+  </div>
+  {% endif %}
+
+{% endblock %}

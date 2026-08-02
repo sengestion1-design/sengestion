@@ -41,18 +41,18 @@ TAX_RATE = Decimal("0.18")
 # Libellés + couleurs de badge par statut — CHARTE STRICTE (3 couleurs).
 # Format : (libellé, fond, texte). L'or/jaune pâle = fond, texte toujours marine.
 #   - positif (accepté / payé)  → jaune pâle
-#   - en cours (envoyé/partielle)→ gris bleuté neutre (info-soft)
-#   - négatif (refusé/impayé)    → gris neutre
-#   - brouillon                  → gris fond + bordure
+#   - en cours (envoyé/partielle)→ fond or (charte)
+#   - négatif (refusé/impayé)    → fond blanc + bordure marine
+#   - brouillon                  → fond blanc + bordure marine
 QUOTE_STATUSES = {
-    "draft": ("Brouillon", "#F9FAFB", "#021A3D"),
-    "sent": ("Envoyé", "#EEF1F6", "#021A3D"),
+    "draft": ("Brouillon", "#FFFFFF", "#021A3D"),
+    "sent": ("Envoyé", "#F2B10E", "#021A3D"),
     "accepted": ("Accepté", "#E8E7A2", "#021A3D"),
-    "refused": ("Refusé", "#F9FAFB", "#021A3D"),
+    "refused": ("Refusé", "#FFFFFF", "#021A3D"),
 }
 INVOICE_STATUSES = {
-    "unpaid": ("Impayée", "#F9FAFB", "#021A3D"),
-    "partial": ("Partielle", "#EEF1F6", "#021A3D"),
+    "unpaid": ("Impayée", "#FFFFFF", "#021A3D"),
+    "partial": ("Partielle", "#F2B10E", "#021A3D"),
     "paid": ("Payée", "#E8E7A2", "#021A3D"),
 }
 PAYMENT_METHODS = {

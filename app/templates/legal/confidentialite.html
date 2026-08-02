@@ -1,0 +1,93 @@
+{% extends "legal/_legal_layout.html" %}
+{% block title %}Politique de confidentialité — SenGestion{% endblock %}
+
+{% block legal_body %}
+<h1>Politique de confidentialité</h1>
+<p class="legal-date">Dernière mise à jour : 30 juillet 2026</p>
+
+<p>
+  SenGestion s'engage à protéger les données personnelles de ses utilisateurs,
+  conformément au <strong>Règlement Général sur la Protection des Données (RGPD —
+  règlement UE 2016/679)</strong> et, pour les utilisateurs situés au Sénégal, à la
+  loi n°2008-12 sur la protection des données à caractère personnel (CDP).
+</p>
+
+<h2>1. Responsable du traitement</h2>
+<p>
+  Mor Seck, éditeur de SenGestion —
+  <a href="mailto:sengestion1@gmail.com">sengestion1@gmail.com</a>.
+</p>
+
+<h2>2. Données collectées</h2>
+<table>
+  <tr><th>Catégorie</th><th>Données</th><th>Finalité</th></tr>
+  <tr>
+    <td>Compte utilisateur</td>
+    <td>Nom, e-mail, mot de passe (haché, jamais stocké en clair), nom d'entreprise</td>
+    <td>Création et gestion du compte, authentification</td>
+  </tr>
+  <tr>
+    <td>Données de gestion</td>
+    <td>Clients, contacts, devis, factures, dépenses saisis par l'utilisateur</td>
+    <td>Fourniture du service de gestion (exécution du contrat)</td>
+  </tr>
+  <tr>
+    <td>Journaux techniques</td>
+    <td>Actions applicatives horodatées (connexion, création de documents…)</td>
+    <td>Sécurité, traçabilité et amélioration du service (intérêt légitime)</td>
+  </tr>
+  <tr>
+    <td>Cookie de session</td>
+    <td>Identifiant de session chiffré</td>
+    <td>Maintien de la connexion et protection anti-CSRF (voir <a href="{{ url_for('legal.cookies') }}">politique cookies</a>)</td>
+  </tr>
+</table>
+<p>Aucune donnée n'est collectée à des fins publicitaires. Aucun outil de suivi (tracker) n'est utilisé.</p>
+
+<h2>3. Base légale des traitements</h2>
+<ul>
+  <li><strong>Exécution du contrat</strong> : gestion du compte et fourniture du service ;</li>
+  <li><strong>Intérêt légitime</strong> : sécurité du site et journalisation technique ;</li>
+  <li><strong>Consentement</strong> : envoi d'e-mails autres que transactionnels, le cas échéant.</li>
+</ul>
+
+<h2>4. Destinataires des données</h2>
+<p>
+  Les données ne sont ni vendues, ni louées, ni transmises à des tiers. Chaque gérant
+  n'accède qu'à ses propres données (cloisonnement par compte). Seul l'éditeur peut
+  y accéder pour la maintenance technique.
+</p>
+
+<h2>5. Hébergement et sécurité</h2>
+<ul>
+  <li>Hébergement dans l'Union européenne (IONOS, France) ;</li>
+  <li>Connexion chiffrée HTTPS (certificat TLS) sur tout le site ;</li>
+  <li>Mots de passe hachés avec un algorithme robuste, jamais stockés en clair ;</li>
+  <li>Protection des formulaires contre les attaques CSRF, validation des entrées ;</li>
+  <li>Sauvegardes régulières des bases de données.</li>
+</ul>
+
+<h2>6. Durée de conservation</h2>
+<ul>
+  <li>Données du compte : pendant toute la durée d'utilisation du service ;</li>
+  <li>Après suppression du compte : effacement des données personnelles dans un délai de 30 jours ;</li>
+  <li>Journaux techniques : 12 mois maximum.</li>
+</ul>
+
+<h2>7. Vos droits</h2>
+<p>Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants :</p>
+<ul>
+  <li>droit d'<strong>accès</strong> à vos données ;</li>
+  <li>droit de <strong>rectification</strong> ;</li>
+  <li>droit à l'<strong>effacement</strong> (« droit à l'oubli ») ;</li>
+  <li>droit à la <strong>portabilité</strong> ;</li>
+  <li>droit d'<strong>opposition</strong> et de <strong>limitation</strong> du traitement.</li>
+</ul>
+<p>
+  Pour exercer ces droits : <a href="mailto:sengestion1@gmail.com">sengestion1@gmail.com</a>.
+  Réponse sous 30 jours. Vous pouvez également introduire une réclamation auprès de la
+  <strong>CNIL</strong> (<a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a>)
+  ou, au Sénégal, de la <strong>CDP</strong>
+  (<a href="https://www.cdp.sn" target="_blank" rel="noopener">www.cdp.sn</a>).
+</p>
+{% endblock %}

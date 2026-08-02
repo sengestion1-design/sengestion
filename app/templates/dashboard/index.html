@@ -113,7 +113,7 @@
       </div>
     </a>
 
-    <a class="shortcut-card" href="#">
+    <a class="shortcut-card" href="{{ url_for('reports.index') }}">
       <span class="shortcut-icon"><i data-lucide="bar-chart-3"></i></span>
       <div>
         <div class="shortcut-label">Rapport mensuel</div>
@@ -127,7 +127,6 @@
   <div class="table-wrap">
     <div class="table-header">
       <div class="table-header-title">Activité récente</div>
-      <a class="table-header-link" href="#">Voir tout →</a>
     </div>
 
     {% if recent_logs %}
@@ -143,8 +142,8 @@
         <tbody>
           {% for log in recent_logs %}
           <tr>
-            <td class="td-primary">{{ log.action }}</td>
-            <td class="td-muted td-clamp">{{ log.details }}</td>
+            <td class="td-primary">{{ log.label }}</td>
+            <td class="td-muted td-clamp">{{ log.readable_details }}</td>
             <td class="td-muted td-nowrap">
               {{ log.created_at.strftime('%d/%m/%Y %H:%M') if log.created_at else '—' }}
             </td>

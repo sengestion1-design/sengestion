@@ -1,0 +1,21 @@
+# Exclusions du contexte Docker
+.git
+.env
+__pycache__
+**/__pycache__
+*.pyc
+.DS_Store
+venv
+.venv
+
+# Fichiers de conception / documents hors application
+maquettes
+landing
+presentation
+generate_merise.py
+*.md
+
+# Uploads locaux (persistés via volume, pas dans l'image)
+app/static/uploads/cartes/*
+app/static/uploads/recus/*
+app/static/uploads/settings/*

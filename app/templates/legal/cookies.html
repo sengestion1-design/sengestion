@@ -1,0 +1,57 @@
+{% extends "legal/_legal_layout.html" %}
+{% block title %}Politique cookies — SenGestion{% endblock %}
+
+{% block legal_body %}
+<h1>Politique cookies</h1>
+<p class="legal-date">Dernière mise à jour : 30 juillet 2026</p>
+
+<h2>1. Qu'est-ce qu'un cookie&nbsp;?</h2>
+<p>
+  Un cookie est un petit fichier texte déposé sur votre appareil lors de la visite
+  d'un site. Il permet notamment de maintenir votre session ouverte entre deux pages.
+</p>
+
+<h2>2. Cookies utilisés par SenGestion</h2>
+<p>
+  SenGestion n'utilise <strong>que des cookies strictement nécessaires</strong> au
+  fonctionnement du service. Aucun cookie publicitaire, statistique ou de suivi n'est déposé.
+</p>
+<table>
+  <tr><th>Nom</th><th>Type</th><th>Finalité</th><th>Durée</th></tr>
+  <tr>
+    <td><code>session</code></td>
+    <td>Technique (essentiel)</td>
+    <td>Authentification de l'utilisateur connecté et protection des formulaires
+        contre les attaques CSRF. Contenu signé et chiffré.</td>
+    <td>Session (supprimé à la fermeture du navigateur ou à la déconnexion)</td>
+  </tr>
+  <tr>
+    <td><code>sg_cookie_notice</code></td>
+    <td>Technique (préférence)</td>
+    <td>Mémorise que le bandeau d'information cookies a été lu, pour ne pas le réafficher.</td>
+    <td>12 mois (stockage local du navigateur)</td>
+  </tr>
+</table>
+
+<h2>3. Consentement</h2>
+<p>
+  Les cookies strictement nécessaires sont exemptés de consentement (article 82 de la
+  loi Informatique et Libertés, lignes directrices CNIL). C'est pourquoi le bandeau
+  affiché lors de votre première visite est purement informatif.
+</p>
+
+<h2>4. Comment supprimer les cookies&nbsp;?</h2>
+<p>
+  Vous pouvez supprimer les cookies à tout moment depuis les réglages de votre navigateur
+  (rubrique « Confidentialité » ou « Cookies et données de site »). La suppression du
+  cookie de session entraîne simplement votre déconnexion.
+</p>
+
+<h2>5. En savoir plus</h2>
+<p>
+  Consultez notre <a href="{{ url_for('legal.confidentialite') }}">politique de
+  confidentialité</a> ou le site de la CNIL :
+  <a href="https://www.cnil.fr/fr/cookies-et-autres-traceurs" target="_blank" rel="noopener">
+  cnil.fr/fr/cookies-et-autres-traceurs</a>.
+</p>
+{% endblock %}

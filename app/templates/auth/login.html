@@ -2,40 +2,486 @@
 {% block title %}Connexion — SenGestion{% endblock %}
 
 {% block content %}
-<div class="auth-wrap">
-  <div class="auth-card">
 
-    <div class="auth-brand">
-      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion" class="auth-logo">
+<!-- ═══════════ Hero de présentation ═══════════ -->
+<section class="landing-hero">
+
+  <div class="landing-nav">
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion">
+    <div class="landing-nav-actions">
+      <a href="#connexion" class="btn btn-secondary btn-sm">Se connecter</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-accent btn-sm">Essai gratuit</a>
+    </div>
+  </div>
+
+  <div class="landing-hero-inner">
+
+    <div>
+      <span class="landing-eyebrow">
+        <i data-lucide="sparkles" aria-hidden="true"></i>
+        Logiciel de gestion tout-en-un
+      </span>
+
+      <h1 class="landing-title">
+        Gérez votre entreprise <em>avec intelligence</em>
+      </h1>
+      <p class="landing-sub">
+        La solution complète pour les TPE/PME sénégalaises — clients, devis, factures,
+        dépenses et relances depuis une seule plateforme, avec un assistant IA qui
+        vous fait gagner du temps.
+      </p>
+
+      <div class="landing-btns">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-accent">
+          <i data-lucide="rocket" style="width:16px;height:16px;" aria-hidden="true"></i>
+          Essai gratuit 15 jours
+        </a>
+        <a href="#connexion" class="btn btn-secondary">
+          <i data-lucide="log-in" style="width:16px;height:16px;" aria-hidden="true"></i>
+          Se connecter
+        </a>
+      </div>
+
+      <div class="landing-stats">
+        <div class="landing-stat">
+          <div class="landing-stat-val">6</div>
+          <div class="landing-stat-label">Modules métier</div>
+        </div>
+        <div class="landing-stat">
+          <div class="landing-stat-val">IA</div>
+          <div class="landing-stat-label">Scan &amp; voix IA</div>
+        </div>
+        <div class="landing-stat">
+          <div class="landing-stat-val">FCFA</div>
+          <div class="landing-stat-label">Devis &amp; factures</div>
+        </div>
+        <div class="landing-stat">
+          <div class="landing-stat-val">15j</div>
+          <div class="landing-stat-label">Essai gratuit</div>
+        </div>
+      </div>
     </div>
 
-    <h1 class="auth-title">Connexion</h1>
-    <p class="auth-sub">Accédez à votre espace de gestion</p>
-
-    <form method="POST" action="{{ url_for('auth.login') }}" style="margin-top:28px;">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-      <div class="form-group">
-        <label class="form-label" for="email">E-mail</label>
-        <input class="form-input" type="email" id="email" name="email"
-               required autocomplete="email" placeholder="vous@entreprise.sn">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="password">Mot de passe</label>
-        <input class="form-input" type="password" id="password" name="password"
-               required autocomplete="current-password">
-      </div>
-
-      <button type="submit" class="btn btn-accent btn-block" style="margin-top:8px;">
-        Se connecter
-      </button>
-    </form>
-
-    <p class="auth-alt">Pas encore de compte ?
-      <a href="{{ url_for('auth.register') }}">Créer un compte</a>
-    </p>
+    <div class="landing-hero-photo">
+      <img src="{{ url_for('static', filename='img/landing/hero-gerante.jpg') }}"
+           alt="Une gérante de boutique sénégalaise consulte SenGestion sur sa tablette"
+           width="1600" height="900" fetchpriority="high">
+    </div>
 
   </div>
+
+</section>
+
+<!-- ═══════════ SenGestion au quotidien (photos) ═══════════ -->
+<section class="landing-showcase" aria-label="SenGestion au quotidien">
+  <div class="landing-showcase-grid">
+    <img src="{{ url_for('static', filename='img/landing/vitrine-boutique.jpg') }}"
+         alt="Une commerçante ajoute un contact depuis une carte de visite" loading="lazy">
+    <img src="{{ url_for('static', filename='img/landing/vitrine-vocal.jpg') }}"
+         alt="Un gérant crée une facture par la voix sur son téléphone" loading="lazy">
+    <img src="{{ url_for('static', filename='img/landing/vitrine-atelier.jpg') }}"
+         alt="Un artisan suit ses factures depuis son atelier" loading="lazy">
+  </div>
+</section>
+
+<!-- ═══════════ Modules ═══════════ -->
+<section class="landing-modules" aria-label="Modules de l'application">
+  <div class="landing-modules-head">
+    <h2>Tout votre quotidien de gestion, réuni</h2>
+    <p>Chaque module a été pensé pour un gérant sénégalais, sans jargon comptable.</p>
+  </div>
+
+  <div class="landing-modules-grid">
+
+    <button type="button" class="landing-module-card" aria-haspopup="dialog" data-module="dashboard">
+      <span class="landing-module-icon"><i data-lucide="layout-dashboard" aria-hidden="true"></i></span>
+      <h3>Tableau de bord</h3>
+      <p>Vue d'ensemble en temps réel : chiffre d'affaires, factures en attente, dépenses et activité récente.</p>
+      <span class="landing-module-more">En savoir plus <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+    </button>
+
+    <button type="button" class="landing-module-card" aria-haspopup="dialog" data-module="customers">
+      <span class="landing-module-icon"><i data-lucide="users" aria-hidden="true"></i></span>
+      <h3>Clients &amp; contacts</h3>
+      <p>Fiches clients, prospects, et scan de cartes de visite par IA pour créer un contact en une photo.</p>
+      <span class="landing-module-more">En savoir plus <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+    </button>
+
+    <button type="button" class="landing-module-card" aria-haspopup="dialog" data-module="quotes">
+      <span class="landing-module-icon"><i data-lucide="file-text" aria-hidden="true"></i></span>
+      <h3>Devis &amp; factures</h3>
+      <p>Créez un devis à la voix, transformez-le en facture en un clic, et exportez en PDF professionnel.</p>
+      <span class="landing-module-more">En savoir plus <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+    </button>
+
+    <button type="button" class="landing-module-card" aria-haspopup="dialog" data-module="expenses">
+      <span class="landing-module-icon"><i data-lucide="wallet" aria-hidden="true"></i></span>
+      <h3>Dépenses</h3>
+      <p>Suivi par catégories et scan automatique de reçus par IA pour ne plus ressaisir vos justificatifs.</p>
+      <span class="landing-module-more">En savoir plus <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+    </button>
+
+    <button type="button" class="landing-module-card" aria-haspopup="dialog" data-module="messages">
+      <span class="landing-module-icon"><i data-lucide="mail" aria-hidden="true"></i></span>
+      <h3>Messages &amp; relances</h3>
+      <p>Envoyez des emails de relance et de suivi directement depuis l'application, avec historique.</p>
+      <span class="landing-module-more">En savoir plus <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+    </button>
+
+    <button type="button" class="landing-module-card" aria-haspopup="dialog" data-module="settings">
+      <span class="landing-module-icon"><i data-lucide="settings" aria-hidden="true"></i></span>
+      <h3>Paramètres</h3>
+      <p>Logo, cachet et informations d'entreprise centralisés, réutilisés sur tous vos documents PDF.</p>
+      <span class="landing-module-more">En savoir plus <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+    </button>
+
+  </div>
+</section>
+
+<!-- ═══════════ Modale détail module (contenu injecté en JS) ═══════════ -->
+<div class="modal-backdrop" id="module-modal-backdrop" style="display:none;" role="presentation">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="module-modal-title">
+    <div class="modal-header">
+      <span id="module-modal-title" class="modal-title" style="display:flex; align-items:center; gap:10px;">
+        <span class="module-modal-icon" id="module-modal-icon" style="width:36px;height:36px;margin-bottom:0;"><i data-lucide="layout-dashboard" aria-hidden="true"></i></span>
+        <span id="module-modal-title-text">Module</span>
+      </span>
+      <button type="button" class="modal-close" id="module-modal-close" aria-label="Fermer">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="module-modal-lead" id="module-modal-lead"></p>
+      <ul class="module-modal-list" id="module-modal-list"></ul>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="module-modal-close-2">Fermer</button>
+      <a href="#connexion" class="btn btn-accent" id="module-modal-cta">
+        <i data-lucide="log-in" style="width:16px;height:16px;" aria-hidden="true"></i>
+        Se connecter pour tester
+      </a>
+    </div>
+  </div>
 </div>
+
+<script>
+  // Contenu des modales "détail module" — fidèle aux fonctionnalités réelles de l'application.
+  const MODULE_DETAILS = {
+    dashboard: {
+      icon: 'layout-dashboard',
+      title: 'Tableau de bord',
+      lead: "Dès la connexion, retrouvez en un coup d'œil la santé de votre activité : rien à configurer, tout est calculé automatiquement à partir de vos données.",
+      items: [
+        'Chiffre d’affaires encaissé (paiements reçus moins dépenses)',
+        'Nombre de clients, devis et factures enregistrés',
+        'Factures en attente de paiement',
+        'Activité récente : dernières actions effectuées sur votre compte',
+      ],
+    },
+    customers: {
+      icon: 'users',
+      title: 'Clients & contacts',
+      lead: "Centralisez vos fiches clients et prospects, avec une recherche rapide et un scan de carte de visite par intelligence artificielle.",
+      items: [
+        'Liste de vos clients avec recherche par nom ou entreprise',
+        'Gestion des prospects, promus en clients en un clic',
+        'Scan d’une carte de visite (photo) : l’IA remplit le formulaire de contact pour vous',
+        'Fiche détaillée par client : coordonnées, historique',
+      ],
+    },
+    quotes: {
+      icon: 'file-text',
+      title: 'Devis & factures',
+      lead: "Créez vos documents commerciaux rapidement — au clavier ou à la voix — et transformez un devis accepté en facture sans ressaisie.",
+      items: [
+        'Création de devis, y compris par dictée vocale',
+        'Transformation d’un devis en facture en un clic',
+        'Export PDF professionnel, prêt à envoyer au client',
+        'Suivi des paiements reçus sur chaque facture',
+      ],
+    },
+    expenses: {
+      icon: 'wallet',
+      title: 'Dépenses',
+      lead: "Suivez vos charges par catégorie et scannez vos reçus au lieu de les ressaisir à la main.",
+      items: [
+        'Enregistrement des dépenses par catégorie personnalisable',
+        'Scan automatique de reçus par IA (photo → dépense pré-remplie)',
+        'Historique complet des dépenses de l’entreprise',
+        'Impact direct sur le solde affiché au tableau de bord',
+      ],
+    },
+    messages: {
+      icon: 'mail',
+      title: 'Messages & relances',
+      lead: "Envoyez des emails de relance ou de suivi à vos clients directement depuis l’application, sans changer d’outil.",
+      items: [
+        'Rédaction et envoi d’emails depuis SenGestion',
+        'Historique des messages envoyés, avec possibilité de renvoi',
+        'Utile pour relancer une facture impayée ou un devis en attente',
+      ],
+    },
+    settings: {
+      icon: 'settings',
+      title: 'Paramètres',
+      lead: "Renseignez une fois les informations de votre entreprise : elles sont ensuite réutilisées automatiquement sur tous vos documents.",
+      items: [
+        'Logo et cachet d’entreprise, intégrés aux PDF générés',
+        'Coordonnées de l’entreprise (nom, adresse, contact)',
+        'Informations centralisées, valables pour devis, factures et rapports',
+      ],
+    },
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const backdrop = document.getElementById('module-modal-backdrop');
+    const titleText = document.getElementById('module-modal-title-text');
+    const iconWrap = document.getElementById('module-modal-icon');
+    const lead = document.getElementById('module-modal-lead');
+    const list = document.getElementById('module-modal-list');
+
+    let lastTrigger = null;
+
+    function openModal(key) {
+      const data = MODULE_DETAILS[key];
+      if (!data) return;
+      lastTrigger = document.activeElement;
+
+      titleText.textContent = data.title;
+      lead.textContent = data.lead;
+      iconWrap.innerHTML = '<i data-lucide="' + data.icon + '" aria-hidden="true"></i>';
+      list.innerHTML = data.items.map(function (item) {
+        return '<li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>' + item + '</span></li>';
+      }).join('');
+
+      backdrop.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      if (window.lucide) { lucide.createIcons(); }
+      // focus initial dans la modale (WCAG 2.4.3)
+      document.getElementById('module-modal-close').focus();
+    }
+
+    function closeModal() {
+      backdrop.style.display = 'none';
+      document.body.style.overflow = '';
+      // retour du focus à la carte qui a ouvert la modale
+      if (lastTrigger) { lastTrigger.focus(); lastTrigger = null; }
+    }
+
+    // piège le focus clavier à l'intérieur de la modale tant qu'elle est ouverte
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab' || backdrop.style.display !== 'flex') return;
+      const focusables = backdrop.querySelectorAll('button, a[href]');
+      const first = focusables[0], last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+
+    document.querySelectorAll('.landing-module-card').forEach(function (card) {
+      card.addEventListener('click', function () {
+        openModal(card.getAttribute('data-module'));
+      });
+    });
+
+    document.getElementById('module-modal-close').addEventListener('click', closeModal);
+    document.getElementById('module-modal-close-2').addEventListener('click', closeModal);
+    document.getElementById('module-modal-cta').addEventListener('click', closeModal);
+
+    backdrop.addEventListener('click', function (e) {
+      if (e.target === backdrop) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && backdrop.style.display === 'flex') closeModal();
+    });
+  });
+</script>
+
+<!-- ═══════════ Comment ça marche ═══════════ -->
+<section class="landing-steps" aria-label="Comment ça marche">
+  <div class="landing-steps-head">
+    <h2>Comment ça marche</h2>
+    <p>Trois étapes pour passer de vos cahiers et fichiers Excel à une gestion centralisée.</p>
+  </div>
+
+  <div class="landing-steps-grid">
+
+    <div class="landing-step">
+      <span class="landing-step-num">1</span>
+      <h3>Créez votre compte</h3>
+      <p>Inscrivez votre entreprise en 2 minutes et profitez de 15 jours d'essai gratuit, sans carte bancaire.</p>
+      <i class="landing-step-arrow" data-lucide="arrow-right" aria-hidden="true"></i>
+    </div>
+
+    <div class="landing-step">
+      <span class="landing-step-num">2</span>
+      <h3>Ajoutez vos infos</h3>
+      <p>Logo, cachet et coordonnées dans Paramètres : ils apparaissent automatiquement sur vos devis et factures.</p>
+      <i class="landing-step-arrow" data-lucide="arrow-right" aria-hidden="true"></i>
+    </div>
+
+    <div class="landing-step">
+      <span class="landing-step-num">3</span>
+      <h3>Gérez au quotidien</h3>
+      <p>Clients, devis, factures et dépenses depuis un seul tableau de bord, à la souris ou à la voix.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════ Pourquoi SenGestion ═══════════ -->
+<section class="landing-why" aria-label="Pourquoi choisir SenGestion">
+  <div class="landing-why-inner">
+
+    <div class="landing-why-head">
+      <h2>Pensé pour les gérants sénégalais</h2>
+      <p>
+        Fini les cahiers, les fichiers Excel éparpillés et les relances oubliées.
+        SenGestion centralise votre gestion commerciale et vous fait gagner un temps
+        précieux chaque semaine.
+      </p>
+      <div class="landing-why-list">
+        <div class="landing-why-item">
+          <span class="check"><i data-lucide="check" aria-hidden="true"></i></span>
+          <span>Devis et factures générés en quelques clics, PDF prêts à envoyer</span>
+        </div>
+        <div class="landing-why-item">
+          <span class="check"><i data-lucide="check" aria-hidden="true"></i></span>
+          <span>Scan IA des cartes de visite et des reçus — plus de ressaisie manuelle</span>
+        </div>
+        <div class="landing-why-item">
+          <span class="check"><i data-lucide="check" aria-hidden="true"></i></span>
+          <span>Toutes vos données regroupées et accessibles depuis n'importe où</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="landing-compare">
+      <div class="landing-compare-row">
+        <div class="landing-compare-col">
+          <h4>Avant</h4>
+          <ul>
+            <li><span class="cross"><i data-lucide="x" aria-hidden="true"></i></span><span>Cahiers et Excel éparpillés</span></li>
+            <li><span class="cross"><i data-lucide="x" aria-hidden="true"></i></span><span>Devis refaits à la main</span></li>
+            <li><span class="cross"><i data-lucide="x" aria-hidden="true"></i></span><span>Reçus perdus ou ressaisis</span></li>
+            <li><span class="cross"><i data-lucide="x" aria-hidden="true"></i></span><span>Relances clients oubliées</span></li>
+            <li><span class="cross"><i data-lucide="x" aria-hidden="true"></i></span><span>Contacts sur papier ou téléphone</span></li>
+            <li><span class="cross"><i data-lucide="x" aria-hidden="true"></i></span><span>Aucune vue d'ensemble des finances</span></li>
+          </ul>
+        </div>
+        <div class="landing-compare-col">
+          <h4>Avec SenGestion</h4>
+          <ul>
+            <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Une seule plateforme centralisée</span></li>
+            <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Devis → facture en 1 clic</span></li>
+            <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Dépenses scannées par IA</span></li>
+            <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Relances envoyées depuis l'appli</span></li>
+            <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Cartes de visite scannées par IA</span></li>
+            <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Tableau de bord en temps réel</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════ Tarif ═══════════ -->
+<section class="landing-pricing" aria-label="Tarif">
+  <div class="landing-pricing-head">
+    <h2>Un tarif simple et transparent</h2>
+    <p>Un seul abonnement, tous les modules inclus. Commencez gratuitement, décidez ensuite.</p>
+  </div>
+
+  <div class="landing-price-card">
+    <span class="landing-price-badge">15 jours d'essai gratuit</span>
+    <div class="landing-price-value">10 000 <small>FCFA / mois</small></div>
+    <p class="landing-price-sub">Abonnement annuel — 120 000 FCFA / an</p>
+
+    <ul class="landing-price-list">
+      <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Les 6 modules inclus : clients, devis, factures, dépenses, messages, tableau de bord</span></li>
+      <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Scan IA des cartes de visite et des reçus</span></li>
+      <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Création de devis à la voix et export PDF professionnel</span></li>
+      <li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>Logo et cachet de votre entreprise sur tous vos documents</span></li>
+    </ul>
+
+    <a href="{{ url_for('auth.register') }}" class="btn btn-accent btn-block">
+      Commencer l'essai gratuit
+    </a>
+    <p class="landing-price-note">Sans carte bancaire. À la fin de l'essai, votre abonnement est activé après validation.</p>
+  </div>
+</section>
+
+<!-- ═══════════ Formulaire de connexion ═══════════ -->
+<section class="landing-login" id="connexion">
+  <div class="auth-wrap" style="min-height:auto; padding:0;">
+    <div class="auth-card">
+
+      <h2 class="auth-title">Connexion</h2>
+      <p class="auth-sub">Accédez à votre espace de gestion</p>
+
+      <div class="landing-trust">
+        <i data-lucide="shield-check" aria-hidden="true"></i>
+        Vos données sont privées : chaque gérant ne voit que les siennes
+      </div>
+
+      <form method="POST" action="{{ url_for('auth.login') }}" style="margin-top:28px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label class="form-label" for="email">E-mail</label>
+          <input class="form-input" type="email" id="email" name="email"
+                 required autocomplete="email" placeholder="vous@entreprise.sn">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Mot de passe</label>
+          <input class="form-input" type="password" id="password" name="password"
+                 required autocomplete="current-password">
+          <p style="text-align:right; margin-top:6px;">
+            <a href="{{ url_for('auth.forgot_password') }}" style="font-size:var(--text-sm);">Mot de passe oublié ?</a>
+          </p>
+        </div>
+
+        <button type="submit" class="btn btn-accent btn-block" style="margin-top:8px;">
+          Se connecter
+        </button>
+      </form>
+
+      <p class="auth-alt">Pas encore de compte ?
+        <a href="{{ url_for('auth.register') }}">Créer un compte</a>
+      </p>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Bandeau CTA final ═══════════ -->
+<section class="landing-cta" aria-label="Commencer">
+  <h2>Prêt à simplifier votre gestion ?</h2>
+  <p>Créez votre compte en 2 minutes et testez tous les modules gratuitement pendant 15 jours, sans carte bancaire.</p>
+  <a href="{{ url_for('auth.register') }}" class="btn btn-accent btn-lg">
+    <i data-lucide="rocket" style="width:18px;height:18px;" aria-hidden="true"></i>
+    Commencer l'essai gratuit
+  </a>
+</section>
+
+<!-- ═══════════ Footer ═══════════ -->
+<footer class="landing-footer">
+  <div class="landing-footer-inner">
+    <div class="landing-footer-brand">
+      <img src="{{ url_for('static', filename='img/logo-icon.png') }}" alt="">
+      <span>SenGestion — La gestion simplifiée pour les TPE/PME sénégalaises</span>
+    </div>
+    <nav class="landing-footer-links" aria-label="Liens du pied de page">
+      <a href="{{ url_for('auth.login') }}">Connexion</a>
+      <a href="{{ url_for('auth.register') }}">Créer un compte</a>
+      <a href="{{ url_for('legal.mentions') }}">Mentions légales</a>
+      <a href="{{ url_for('legal.confidentialite') }}">Confidentialité</a>
+      <a href="{{ url_for('legal.cookies') }}">Cookies</a>
+    </nav>
+    <div class="landing-footer-copy">© 2026 SenGestion. Tous droits réservés.</div>
+  </div>
+</footer>
+
 {% endblock %}

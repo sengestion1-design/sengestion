@@ -29,7 +29,7 @@
       <div class="stat-card__header">
         <span class="stat-card__label">Total devis (TTC)</span>
         <span class="stat-card__icon">
-          <i data-lucide="file-text" style="width:16px;height:16px;color:#F2B10E;"></i>
+          <i data-lucide="file-text" style="width:16px;height:16px;color:var(--marine);"></i>
         </span>
       </div>
       <p class="stat-card__value">{{ fmt(total_ttc) }}</p>
@@ -92,10 +92,10 @@
             </td>
             <td>{{ q.customer.name if q.customer else '—' }}</td>
             <td>
-              {% set meta = statuses.get(q.status, ('—', '#F9FAFB', '#5A6472')) %}
+              {% set meta = statuses.get(q.status, ('—', '#FFFFFF', '#021A3D')) %}
               <span class="badge"
                     style="background:{{ meta[1] }}; color:{{ meta[2] }}; padding:4px 12px;
-                           border-radius:999px; display:inline-block; font-weight:600;">
+                           border:1px solid #021A3D; border-radius:999px; display:inline-block; font-weight:600;">
                 {{ meta[0] }}{% if q.invoice_id %} · facturé{% endif %}
               </span>
             </td>
