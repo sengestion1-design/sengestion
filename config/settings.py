@@ -30,6 +30,7 @@ class Config:
     # --- Sécurité / uploads ---
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 Mo
     WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = 60 * 60 * 24  # 24h — évite l'expiration si la page reste ouverte longtemps (démo)
 
     # --- Email (Gmail SMTP) ---
     MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
@@ -56,8 +57,15 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SAMESITE = "Lax"
 
 
+class DockerConfig(ProductionConfig):
+    """Exécution en conteneur pour la démo locale : debug désactivé,
+    mais cookies non-Secure car l'app est servie en HTTP sur localhost."""
+    SESSION_COOKIE_SECURE = False
+
+
 config = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
+    "docker": DockerConfig,
     "default": DevelopmentConfig,
 }

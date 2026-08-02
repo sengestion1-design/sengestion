@@ -66,21 +66,21 @@ def collect_schema():
 # ---------- SVG : une entité ----------
 def entity_svg(x, y, w, name, info):
     fill = COLORS.get(name, MARINE)
-    hdr = 26; rh = 15
+    hdr = 36; rh = 22
     fields = info["cols"]
-    h = hdr + rh * len(fields) + 6
-    s = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="7" fill="#fff" stroke="{fill}" stroke-width="2"/>'
-    s += f'<rect x="{x}" y="{y}" width="{w}" height="{hdr}" rx="7" fill="{fill}"/>'
-    s += f'<rect x="{x}" y="{y+hdr-7}" width="{w}" height="7" fill="{fill}"/>'
-    s += f'<text x="{x+w/2}" y="{y+17}" fill="#fff" font-size="11" font-weight="700" text-anchor="middle" font-family="Helvetica">{esc(name)}</text>'
-    yy = y + hdr + 12
+    h = hdr + rh * len(fields) + 8
+    s = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="9" fill="#fff" stroke="{fill}" stroke-width="2.5"/>'
+    s += f'<rect x="{x}" y="{y}" width="{w}" height="{hdr}" rx="9" fill="{fill}"/>'
+    s += f'<rect x="{x}" y="{y+hdr-9}" width="{w}" height="9" fill="{fill}"/>'
+    s += f'<text x="{x+w/2}" y="{y+23}" fill="#fff" font-size="16" font-weight="700" text-anchor="middle" font-family="Helvetica">{esc(name)}</text>'
+    yy = y + hdr + 17
     for c in fields:
         col, weight, prefix = "#1a2b45", "400", ""
         if c in info["pk"]:
             col, weight, prefix = OR, "700", "PK "
         elif c in info["fks"]:
             col, weight, prefix = "#8F6600", "600", "FK "
-        s += f'<text x="{x+9}" y="{yy}" fill="{col}" font-size="8.5" font-weight="{weight}" font-family="Helvetica">{esc(prefix+c)}</text>'
+        s += f'<text x="{x+12}" y="{yy}" fill="{col}" font-size="12.5" font-weight="{weight}" font-family="Helvetica">{esc(prefix+c)}</text>'
         yy += rh
     return s, h
 
@@ -92,22 +92,22 @@ def build_mcd_png(schema):
     # (chaque boîte fait ~185px de large et jusqu'à ~230px de haut)
     layout = {
         # top row: SaaS (users) centered + finances on the right
-        "users":              (620, 40),
-        "expense_categories": (1240, 40),
+        "users":              (900, 60),
+        "expense_categories": (1800, 60),
         # middle row
-        "customers":          (60, 340),
-        "expenses":           (1000, 380),
-        "messages":           (1450, 380),
+        "customers":          (90, 500),
+        "expenses":           (1450, 550),
+        "messages":           (2100, 550),
         # bottom row: commercial chain
-        "contacts":           (60, 760),
-        "quotes":             (420, 760),
-        "invoices":           (820, 760),
-        "payments":           (1240, 760),
+        "contacts":           (90, 1100),
+        "quotes":             (610, 1100),
+        "invoices":           (1190, 1100),
+        "payments":           (1800, 1100),
         # sub-row: line items
-        "quote_items":        (420, 1080),
-        "invoice_items":      (820, 1080),
+        "quote_items":        (610, 1580),
+        "invoice_items":      (1190, 1580),
     }
-    W = 200
+    W = 290
     body = ""
     boxes = {}
     for name, (x, y) in layout.items():
@@ -186,11 +186,12 @@ def build_mcd_png(schema):
     ]
     # dessiner les lignes AVANT les boîtes pour qu'elles passent dessous
     lines = "".join(line(a, b, l, fk, cb) for a, b, l, fk, cb in rels)
-    full = (f'<svg viewBox="0 0 1700 1360" width="1700" height="1360" '
+    CW, CH = 2500, 2100
+    full = (f'<svg viewBox="0 0 {CW} {CH}" width="{CW}" height="{CH}" '
             f'xmlns="http://www.w3.org/2000/svg">'
-            f'<rect width="1700" height="1360" fill="#f8fafc"/>{lines}{body}</svg>')
+            f'<rect width="{CW}" height="{CH}" fill="#f8fafc"/>{lines}{body}</svg>')
     png = cairosvg.svg2png(bytestring=full.encode("utf-8"),
-                           output_width=2550, output_height=2040)
+                           output_width=CW*1.5, output_height=CH*1.5)
     return base64.b64encode(png).decode()
 
 

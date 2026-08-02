@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}SenGestion{% endblock %}</title>
 
-  <!-- Favicon emoji -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <!-- Favicon SG (logo officiel) — .ico multi-résolutions + PNG -->
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
 
   <!-- Feuilles de style (versionnées : rechargement auto à chaque modif) -->
   <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
@@ -59,6 +61,38 @@
     {% block content %}{% endblock %}
 
   </main>
+
+  <!-- Bandeau cookies (informatif : uniquement des cookies techniques, exemptés
+       de consentement — lignes directrices CNIL). Mémorisé en stockage local. -->
+  <div id="cookie-notice"
+       style="position:fixed; left:0; right:0; bottom:0; z-index:9999; background:#021A3D;
+              padding:14px 20px; display:none; flex-wrap:wrap; gap:12px; align-items:center;
+              justify-content:center; box-shadow:0 -4px 16px rgba(2,26,61,.35);">
+    <p style="margin:0; color:#E8E7A2; font-size:14px; line-height:1.5; max-width:720px;">
+      🍪 SenGestion utilise uniquement des <strong>cookies techniques</strong> indispensables
+      au fonctionnement du site (connexion sécurisée). Aucun cookie publicitaire ni de suivi.
+      <a href="{{ url_for('legal.cookies') }}" style="color:#E8E7A2; text-decoration:underline;">En savoir plus</a>
+    </p>
+    <button id="cookie-notice-ok" type="button"
+            style="background:#F2B10E; color:#021A3D; border:none; border-radius:8px;
+                   padding:10px 22px; font-weight:700; font-size:14px; cursor:pointer;">
+      J'ai compris
+    </button>
+  </div>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', function () {
+      var KEY = 'sg_cookie_notice', banner = document.getElementById('cookie-notice');
+      try {
+        var seen = localStorage.getItem(KEY);
+        // ré-affiche après 12 mois
+        if (!seen || Date.now() - Number(seen) > 365 * 24 * 3600 * 1000) banner.style.display = 'flex';
+      } catch (e) { banner.style.display = 'flex'; }
+      document.getElementById('cookie-notice-ok').addEventListener('click', function () {
+        banner.style.display = 'none';
+        try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {}
+      });
+    });
+  </script>
 
 </body>
 </html>

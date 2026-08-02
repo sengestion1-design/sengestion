@@ -1,0 +1,54 @@
+# SenGestion — orchestration complète : app Flask + MySQL + MongoDB
+# Lancer :  docker compose up -d --build
+# Arrêter : docker compose down          (les données persistent dans les volumes)
+
+services:
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: sengestion_root
+      MYSQL_DATABASE: sengestion_flask_v2
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-psengestion_root"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo-data:/data/db
+
+  web:
+    build: .
+    ports:
+      - "5002:5002"
+    # Les secrets (clé API Claude, SMTP...) sont lus depuis le fichier .env local.
+    # Les variables ci-dessous ÉCRASENT celles du .env pour pointer vers les conteneurs.
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: sengestion_root
+      DB_NAME: sengestion_flask_v2
+      MONGO_URI: mongodb://mongo:27017/
+    volumes:
+      - uploads:/app/app/static/uploads
+      - whisper-cache:/root/.cache/whisper
+    depends_on:
+      db:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+
+volumes:
+  db-data:
+  mongo-data:
+  uploads:
+  whisper-cache:

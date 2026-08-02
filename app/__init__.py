@@ -36,9 +36,12 @@ def create_app(env="default"):
     from app.routes.customers import customers_bp, contacts_bp
     from app.routes.quotes import quotes_bp, invoices_bp
     from app.routes.expenses import expenses_bp
+    from app.routes.reports import reports_bp
     from app.routes.messages import messages_bp
     from app.routes.settings import settings_bp
+    from app.routes.legal import legal_bp
     app.register_blueprint(auth_bp)
+    app.register_blueprint(legal_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(subscription_bp)
@@ -48,6 +51,7 @@ def create_app(env="default"):
     app.register_blueprint(quotes_bp)
     app.register_blueprint(invoices_bp)
     app.register_blueprint(expenses_bp)
+    app.register_blueprint(reports_bp)
     app.register_blueprint(messages_bp)
     app.register_blueprint(settings_bp)
 
@@ -74,5 +78,19 @@ def create_app(env="default"):
                 ver = 0
             return url_for("static", filename=filename, v=ver)
         return {"static_v": static_v}
+
+    # Compteurs du menu (factures impayées, relances en attente).
+    @app.context_processor
+    def _sidebar_counters():
+        from flask_login import current_user
+        if not current_user.is_authenticated or current_user.role != "manager":
+            return {"unpaid_invoices_count": 0, "pending_messages_count": 0}
+        from app.models.quote import Invoice
+        from app.models.message import Message
+        unpaid = Invoice.query.filter_by(
+            user_id=current_user.id
+        ).filter(Invoice.status.in_(["unpaid", "partial"])).count()
+        pending = Message.query.filter_by(user_id=current_user.id, status="draft").count()
+        return {"unpaid_invoices_count": unpaid, "pending_messages_count": pending}
 
     return app

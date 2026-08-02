@@ -29,7 +29,7 @@
       <div class="stat-card__header">
         <span class="stat-card__label">Facturé (TTC)</span>
         <span class="stat-card__icon">
-          <i data-lucide="receipt" style="width:16px;height:16px;color:#F2B10E;"></i>
+          <i data-lucide="receipt" style="width:16px;height:16px;color:var(--marine);"></i>
         </span>
       </div>
       <p class="stat-card__value">{{ fmt(total_ttc) }}</p>
@@ -104,10 +104,10 @@
             </td>
             <td>{{ inv.customer.name if inv.customer else '—' }}</td>
             <td>
-              {% set meta = statuses.get(inv.status, ('—', '#F9FAFB', '#5A6472')) %}
+              {% set meta = statuses.get(inv.status, ('—', '#FFFFFF', '#021A3D')) %}
               <span class="badge"
                     style="background:{{ meta[1] }}; color:{{ meta[2] }}; padding:4px 12px;
-                           border-radius:999px; display:inline-block; font-weight:600;">{{ meta[0] }}</span>
+                           border:1px solid #021A3D; border-radius:999px; display:inline-block; font-weight:600;">{{ meta[0] }}</span>
             </td>
             <td style="color:var(--muted); white-space:nowrap;">
               {{ inv.invoice_date.strftime('%d/%m/%Y') if inv.invoice_date else '—' }}

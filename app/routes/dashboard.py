@@ -6,7 +6,7 @@ from app.extensions import db
 from app.models.customer import Customer
 from app.models.quote import Quote, Invoice, Payment
 from app.models.expense import Expense
-from app.services.activity_log_service import get_recent
+from app.services.activity_log_service import get_recent, describe
 from app.utils.access import subscription_required
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -46,8 +46,11 @@ def index():
         # tolérant : si un agrégat échoue, on affiche des zéros plutôt que planter
         stats = {"customers": 0, "quotes": 0, "invoices": 0, "balance": None}
 
-    # lecture NoSQL : dernières activités (CP6)
-    recent_logs = get_recent(limit=10)
+    # lecture NoSQL : dernières activités de l'utilisateur connecté (CP6)
+    recent_logs = get_recent(limit=10, user_id=current_user.id)
+    for log in recent_logs:
+        log["label"], log["readable_details"] = describe(log)
+
     return render_template(
         "dashboard/index.html",
         user=current_user,

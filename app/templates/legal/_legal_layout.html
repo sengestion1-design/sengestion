@@ -1,0 +1,52 @@
+{% extends "layouts/base.html" %}
+
+{#
+  Gabarit commun des pages légales : bandeau marine avec logo, carte blanche
+  centrée, typo de la charte (titres Palatino via .legal-h*, texte Arial).
+#}
+
+{% block content %}
+<style>
+  .legal-page { min-height: 100vh; background: var(--gris-fond, #f4f6f8); padding-bottom: 48px; }
+  .legal-hero { background: var(--marine, #021A3D); padding: 26px 20px; text-align: center; }
+  .legal-hero img { height: 54px; }
+  .legal-hero-bar { height: 5px; background: var(--or, #F2B10E); }
+  .legal-card { max-width: 860px; margin: 32px auto 0; background: #fff; border: 1px solid #e2e6ea;
+                border-radius: 14px; padding: 40px 44px; }
+  .legal-card h1 { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+                   color: var(--marine, #021A3D); font-size: 30px; margin: 0 0 6px; }
+  .legal-card .legal-date { color: #5a6b80; font-size: 13px; margin: 0 0 26px; }
+  .legal-card h2 { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+                   color: var(--marine, #021A3D); font-size: 20px; margin: 30px 0 10px;
+                   padding-bottom: 6px; border-bottom: 2px solid var(--or, #F2B10E); }
+  .legal-card p, .legal-card li { color: var(--marine, #021A3D); font-size: 15px; line-height: 1.7; }
+  .legal-card ul { padding-left: 22px; margin: 8px 0 14px; }
+  .legal-card table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 14px; }
+  .legal-card th { background: var(--jaune-pale, #E8E7A2); color: var(--marine, #021A3D);
+                   text-align: left; padding: 10px 12px; }
+  .legal-card td { border-bottom: 1px solid #e2e6ea; padding: 10px 12px; color: var(--marine, #021A3D); }
+  .legal-card a { color: var(--marine, #021A3D); }
+  .legal-back { display: inline-block; margin-top: 28px; }
+  .legal-nav { max-width: 860px; margin: 14px auto 0; text-align: center; font-size: 14px; }
+  .legal-nav a { color: var(--marine, #021A3D); margin: 0 10px; }
+  @media (max-width: 640px) { .legal-card { margin: 20px 12px 0; padding: 26px 20px; } }
+</style>
+
+<div class="legal-page">
+  <div class="legal-hero">
+    <a href="{{ url_for('auth.login') }}"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion"></a>
+  </div>
+  <div class="legal-hero-bar"></div>
+
+  <div class="legal-card">
+    {% block legal_body %}{% endblock %}
+    <a class="legal-back" href="{{ url_for('auth.login') }}">&larr; Retour à l'accueil</a>
+  </div>
+
+  <nav class="legal-nav" aria-label="Pages légales">
+    <a href="{{ url_for('legal.mentions') }}">Mentions légales</a> ·
+    <a href="{{ url_for('legal.confidentialite') }}">Politique de confidentialité</a> ·
+    <a href="{{ url_for('legal.cookies') }}">Cookies</a>
+  </nav>
+</div>
+{% endblock %}

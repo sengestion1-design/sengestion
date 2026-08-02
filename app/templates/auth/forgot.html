@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+{% block title %}Mot de passe oublié — SenGestion{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card" style="text-align:center;">
+
+    <div class="auth-brand">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion" class="auth-logo">
+    </div>
+
+    <h1 class="auth-title">Mot de passe oublié</h1>
+    <p class="auth-sub">
+      Indiquez l'e-mail de votre compte : nous vous enverrons<br>un code à 6 chiffres pour choisir un nouveau mot de passe.
+    </p>
+
+    <form method="POST" action="{{ url_for('auth.forgot_password') }}" style="margin-top:28px; text-align:left;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label" for="email">E-mail</label>
+        <input class="form-input" type="email" id="email" name="email"
+               required autocomplete="email" placeholder="vous@entreprise.sn">
+      </div>
+
+      <button type="submit" class="btn btn-accent btn-block">Recevoir le code</button>
+    </form>
+
+    <p class="auth-alt" style="margin-top:16px;">
+      <a href="{{ url_for('auth.login') }}">Retour à la connexion</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}
