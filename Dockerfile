@@ -1,21 +1,21 @@
-# SenGestion — image de l'application Flask
+# SenGestion — Flask application image
 FROM python:3.12-slim
 
-# ffmpeg : requis par Whisper (transcription vocale des devis/factures)
+# ffmpeg: required by Whisper (voice transcription of quotes/invoices)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg curl poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Dépendances d'abord (cache Docker : ne se réinstalle que si requirements.txt change)
+# Dependencies first (Docker cache: reinstalled only when requirements.txt changes)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Code de l'application
+# Application code
 COPY . .
 
-# Dossier d'uploads (persisté via volume dans docker-compose)
+# Upload folders (persisted through a docker-compose volume)
 RUN mkdir -p app/static/uploads/cartes app/static/uploads/recus app/static/uploads/settings
 
 EXPOSE 5002

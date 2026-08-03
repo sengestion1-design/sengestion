@@ -1,6 +1,6 @@
-# SenGestion — orchestration complète : app Flask + MySQL + MongoDB
-# Lancer :  docker compose up -d --build
-# Arrêter : docker compose down          (les données persistent dans les volumes)
+# SenGestion — full orchestration: Flask app + MySQL + MongoDB
+# Start:  docker compose up -d --build
+# Stop:   docker compose down          (data persists in the volumes)
 
 services:
 
@@ -27,8 +27,8 @@ services:
     build: .
     ports:
       - "5002:5002"
-    # Les secrets (clé API Claude, SMTP...) sont lus depuis le fichier .env local.
-    # Les variables ci-dessous ÉCRASENT celles du .env pour pointer vers les conteneurs.
+    # Secrets (Claude API key, SMTP…) are read from the local .env file.
+    # The variables below OVERRIDE the .env ones to point to the containers.
     env_file:
       - .env
     environment:
