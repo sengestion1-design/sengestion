@@ -30,7 +30,7 @@ def log_action(user_id, action: str, details: dict | None = None):
         result = mongo.db[COLLECTION].insert_one(doc)
         return str(result.inserted_id)
     except Exception as exc:  # noqa: BLE001
-        current_app.logger.warning("MongoDB log_action indisponible: %s", exc)
+        current_app.logger.warning("MongoDB log_action unavailable: %s", exc)
         return None
 
 
@@ -49,7 +49,7 @@ def get_recent(limit: int = 20, user_id: int | None = None) -> list[dict]:
             logs.append(doc)
         return logs
     except Exception as exc:  # noqa: BLE001
-        current_app.logger.warning("MongoDB get_recent indisponible: %s", exc)
+        current_app.logger.warning("MongoDB get_recent unavailable: %s", exc)
         return []
 
 
@@ -66,7 +66,7 @@ ACTION_LABELS = {
 
 
 def describe(log: dict) -> tuple[str, str]:
-    """Traduit une entrée de log brute en (libellé d'action, détail lisible)."""
+    """Translate a raw log entry into (action label, readable detail)."""
     action = log.get("action", "")
     label = ACTION_LABELS.get(action, action.replace("_", " ").capitalize())
     details = log.get("details") or {}

@@ -16,7 +16,7 @@ import json
 
 from flask import current_app
 
-# Formats d'image acceptés → media type renvoyé à l'API Vision.
+# Accepted image formats → media type sent to the Vision API.
 ALLOWED_MIME = {
     "jpg": "image/jpeg",
     "jpeg": "image/jpeg",
@@ -25,7 +25,7 @@ ALLOWED_MIME = {
     "gif": "image/gif",
 }
 
-# Instruction donnée à Claude : extraire UNIQUEMENT les champs utiles, en JSON strict.
+# Instruction given to Claude: extract ONLY the useful fields, as strict JSON.
 _EXTRACTION_PROMPT = (
     "Tu es un assistant qui lit des cartes de visite professionnelles. "
     "Analyse l'image fournie et extrais les informations de contact. "
@@ -65,7 +65,7 @@ def scan_business_card(image_bytes: bytes, filename: str = "",
 
     Returns a dict:
       {"ok": True,  "fields": {name, first_name, company, role, email, phone}}
-      {"ok": False, "error": "message utilisateur"}
+      {"ok": False, "error": "user-facing message"}
     """
     if not image_bytes:
         return {"ok": False, "error": "Aucune image reçue."}
@@ -77,14 +77,14 @@ def scan_business_card(image_bytes: bytes, filename: str = "",
 
     api_key = current_app.config.get("ANTHROPIC_API_KEY")
     if not api_key:
-        # Pas de clé configurée : on le signale clairement (démo / config manquante).
+        # No API key configured: report it clearly (demo / missing config).
         return {"ok": False,
                 "error": "La lecture IA n'est pas configurée (clé API manquante). "
                          "Vous pouvez saisir le contact manuellement."}
 
     try:
         import anthropic
-    except ImportError:  # pragma: no cover - dépendance déclarée dans requirements
+    except ImportError:  # pragma: no cover - dependency declared in requirements
         return {"ok": False,
                 "error": "Module IA indisponible sur le serveur."}
 
@@ -108,23 +108,23 @@ def scan_business_card(image_bytes: bytes, filename: str = "",
                 ],
             }],
         )
-    except anthropic.APIError as exc:  # erreurs réseau / API / quota
+    except anthropic.APIError as exc:  # network / API / quota errors
         current_app.logger.warning("Claude Vision error: %s", exc)
         return {"ok": False,
                 "error": "Le service de lecture IA est momentanément indisponible. "
                          "Réessayez ou saisissez le contact manuellement."}
-    except Exception as exc:  # garde-fou : ne jamais faire planter la requête
+    except Exception as exc:  # safety net: never crash the request
         current_app.logger.warning("Claude Vision unexpected error: %s", exc)
         return {"ok": False,
                 "error": "Impossible d'analyser l'image. "
                          "Saisissez le contact manuellement."}
 
-    # Concaténer les blocs texte de la réponse
+    # Concatenate the text blocks of the response
     raw = "".join(
         block.text for block in message.content if getattr(block, "type", "") == "text"
     ).strip()
 
-    # Claude peut entourer le JSON de ``` ; on isole l'objet {...}.
+    # Claude may wrap the JSON in ```; isolate the {...} object.
     start, end = raw.find("{"), raw.rfind("}")
     if start == -1 or end == -1:
         return {"ok": False,
@@ -136,13 +136,13 @@ def scan_business_card(image_bytes: bytes, filename: str = "",
         return {"ok": False,
                 "error": "Lecture IA illisible. Réessayez avec une photo plus nette."}
 
-    # Normaliser : ne garder que nos clés, forcer des chaînes.
+    # Normalize: keep only our keys, force strings.
     fields = _empty_fields()
     for key in fields:
         value = data.get(key, "")
         fields[key] = str(value).strip() if value is not None else ""
 
-    # Au moins un champ significatif doit être présent.
+    # At least one meaningful field must be present.
     if not any([fields["name"], fields["company"], fields["email"], fields["phone"]]):
         return {"ok": False,
                 "error": "Aucune information exploitable détectée sur la carte."}

@@ -1,9 +1,9 @@
-"""Application factory SenGestion.
+"""SenGestion application factory.
 
-Architecture MVC :
-- models/   : entités MySQL (SQLAlchemy) — CP5
-- routes/   : contrôleurs (blueprints) — CP7
-- services/ : logique métier & accès NoSQL — CP6/CP7
+MVC architecture:
+- models/   : MySQL entities (SQLAlchemy) — CP5
+- routes/   : controllers (blueprints) — CP7
+- services/ : business logic & NoSQL access — CP6/CP7
 """
 from flask import Flask
 
@@ -15,12 +15,12 @@ def create_app(env="default"):
     app = Flask(__name__)
     app.config.from_object(config[env])
 
-    # --- Bases de données ---
-    db.init_app(app)                 # MySQL (relationnel)
+    # --- Databases ---
+    db.init_app(app)                 # MySQL (relational)
     migrate.init_app(app, db)
     mongo.init_app(app)              # MongoDB (NoSQL)
 
-    # --- Sécurité & email ---
+    # --- Security & email ---
     login_manager.init_app(app)
     csrf.init_app(app)
     mail.init_app(app)               # Gmail SMTP
@@ -45,7 +45,7 @@ def create_app(env="default"):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(subscription_bp)
-    # modules métier
+    # business modules
     app.register_blueprint(customers_bp)
     app.register_blueprint(contacts_bp)
     app.register_blueprint(quotes_bp)
@@ -55,16 +55,16 @@ def create_app(env="default"):
     app.register_blueprint(messages_bp)
     app.register_blueprint(settings_bp)
 
-    # Précharge le modèle Whisper (transcription vocale) en arrière-plan,
-    # pour que la première dictée soit rapide (pas d'attente de chargement).
+    # Preload the Whisper model (voice transcription) in the background,
+    # so the first dictation is fast (no loading wait).
     try:
         from app.services.transcription_service import preload_model_async
         preload_model_async()
     except Exception:
         pass
 
-    # Cache-busting : ajoute la date de modif du fichier à l'URL statique.
-    # Ainsi tout changement CSS/JS force le navigateur à recharger (fini le cache).
+    # Cache-busting: append the file's modification time to the static URL.
+    # Any CSS/JS change thus forces the browser to reload (no more stale cache).
     import os
     from flask import url_for
 
@@ -79,7 +79,7 @@ def create_app(env="default"):
             return url_for("static", filename=filename, v=ver)
         return {"static_v": static_v}
 
-    # Compteurs du menu (factures impayées, relances en attente).
+    # Sidebar counters (unpaid invoices, pending reminders).
     @app.context_processor
     def _sidebar_counters():
         from flask_login import current_user

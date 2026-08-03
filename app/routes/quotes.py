@@ -1,18 +1,18 @@
-"""Module Devis & Factures — CRUD complet, lignes, calculs, PDF, paiements.
+"""Quotes & Invoices module — full CRUD, line items, calculations, PDF, payments.
 
-Deux blueprints :
-  - quotes_bp   (/quotes)   : devis (création avec lignes, PDF, conversion en facture)
-  - invoices_bp (/invoices) : factures (détail, PDF, paiements, suppression)
+Two blueprints:
+  - quotes_bp   (/quotes)   : quotes (creation with line items, PDF, conversion to invoice)
+  - invoices_bp (/invoices) : invoices (detail, PDF, payments, deletion)
 
-Sécurité (OWASP contrôle d'accès) :
-- @login_required + @subscription_required sur TOUTES les routes.
-- Chaque devis / facture appartient à un gérant : filtrage systématique par
-  user_id = current_user.id (un gérant ne voit JAMAIS les données d'un autre).
-- CSRF assuré globalement par Flask-WTF (CSRFProtect) — token rendu dans les forms.
-- Validation des entrées côté serveur (client possédé, lignes valides, montants > 0).
-- Actions importantes journalisées via log_action (MongoDB, best-effort).
+Security (OWASP access control):
+- @login_required + @subscription_required on ALL routes.
+- Every quote / invoice belongs to a manager: systematic filtering by
+  user_id = current_user.id (a manager NEVER sees another's data).
+- CSRF handled globally by Flask-WTF (CSRFProtect) — token rendered in the forms.
+- Server-side input validation (owned customer, valid line items, amounts > 0).
+- Important actions logged via log_action (MongoDB, best-effort).
 
-Règle métier : TVA Sénégal 18 % (configurable via TAX_RATE), montants en FCFA.
+Business rule: Senegal VAT 18% (configurable via TAX_RATE), amounts in FCFA.
 """
 from datetime import datetime, date
 from decimal import Decimal, InvalidOperation
@@ -35,15 +35,15 @@ from app.utils.access import subscription_required
 quotes_bp = Blueprint("quotes", __name__, url_prefix="/quotes")
 invoices_bp = Blueprint("invoices", __name__, url_prefix="/invoices")
 
-# Taux de TVA Sénégal (configurable). 0.18 = 18 %.
+# Senegal VAT rate (configurable). 0.18 = 18%.
 TAX_RATE = Decimal("0.18")
 
-# Libellés + couleurs de badge par statut — CHARTE STRICTE (3 couleurs).
-# Format : (libellé, fond, texte). L'or/jaune pâle = fond, texte toujours marine.
-#   - positif (accepté / payé)  → jaune pâle
-#   - en cours (envoyé/partielle)→ fond or (charte)
-#   - négatif (refusé/impayé)    → fond blanc + bordure marine
-#   - brouillon                  → fond blanc + bordure marine
+# Labels + badge colors per status — STRICT BRAND PALETTE (3 colors).
+# Format: (label, background, text). Gold/pale yellow = background, text always navy.
+#   - positive (accepted / paid)  → pale yellow
+#   - in progress (sent/partial)  → gold background (brand)
+#   - negative (refused/unpaid)   → white background + navy border
+#   - draft                       → white background + navy border
 QUOTE_STATUSES = {
     "draft": ("Brouillon", "#FFFFFF", "#021A3D"),
     "sent": ("Envoyé", "#F2B10E", "#021A3D"),
@@ -68,7 +68,7 @@ PAYMENT_METHODS = {
 #  Helpers
 # ─────────────────────────────────────────────────────────────────────────────
 def _parse_decimal(raw, allow_zero=False):
-    """Valide un nombre décimal. Renvoie Decimal(2) ou None si invalide."""
+    """Validate a decimal number. Returns Decimal(2) or None if invalid."""
     if raw is None:
         return None
     raw = str(raw).strip().replace(" ", "").replace(",", ".")
@@ -86,7 +86,7 @@ def _parse_decimal(raw, allow_zero=False):
 
 
 def _parse_date(raw):
-    """Parse une date YYYY-MM-DD ; renvoie aujourd'hui si vide, None si invalide."""
+    """Parse a YYYY-MM-DD date; returns today if empty, None if invalid."""
     if raw:
         try:
             return datetime.strptime(raw.strip(), "%Y-%m-%d").date()
@@ -96,7 +96,7 @@ def _parse_date(raw):
 
 
 def _owned_customer_or_none(customer_id):
-    """Client appartenant au gérant courant, sinon None."""
+    """Customer owned by the current manager, else None."""
     if not customer_id:
         return None
     return Customer.query.filter_by(
@@ -121,10 +121,10 @@ def _owned_invoice_or_404(invoice_id):
 
 
 def _next_number(prefix, model):
-    """Génère un numéro lisible : {prefix}-{année}-{compteur zéro-paddé}.
+    """Generate a readable number: {prefix}-{year}-{zero-padded counter}.
 
-    Le compteur est basé sur le nombre d'enregistrements du gérant courant
-    pour l'année en cours + 1, avec garde anti-collision sur l'unicité.
+    The counter is based on the current manager's record count for the
+    current year + 1, with an anti-collision guard on uniqueness.
     """
     year = date.today().year
     base = f"{prefix}-{year}-"
@@ -133,17 +133,17 @@ def _next_number(prefix, model):
         model.number.like(f"{base}%"),
     ).count()
     seq = count + 1
-    # garde anti-collision (numéro unique global en base)
+    # anti-collision guard (globally unique number in the database)
     while model.query.filter_by(number=f"{base}{seq:04d}").first() is not None:
         seq += 1
     return f"{base}{seq:04d}"
 
 
 def _read_lines():
-    """Lit les lignes du formulaire (designation[], quantity[], unit_price[]).
+    """Read the form line items (designation[], quantity[], unit_price[]).
 
-    Renvoie (items, errors) où items est une liste de dicts prêts à persister
-    et errors une liste de messages. Ignore les lignes entièrement vides.
+    Returns (items, errors) where items is a list of dicts ready to persist
+    and errors a list of messages. Fully empty lines are ignored.
     """
     designations = request.form.getlist("designation[]")
     quantities = request.form.getlist("quantity[]")
@@ -156,7 +156,7 @@ def _read_lines():
         raw_qty = quantities[i] if i < len(quantities) else ""
         raw_price = prices[i] if i < len(prices) else ""
 
-        # ligne entièrement vide → ignorée
+        # fully empty line → ignored
         if not desc and not str(raw_qty).strip() and not str(raw_price).strip():
             continue
 
@@ -186,14 +186,14 @@ def _read_lines():
 
 
 def _totals(items):
-    """Calcule (HT, TTC) à partir d'une liste d'items (dicts avec 'amount')."""
+    """Compute (excl. tax, incl. tax) from a list of items (dicts with 'amount')."""
     excl = sum((it["amount"] for it in items), Decimal("0")).quantize(Decimal("0.01"))
     incl = (excl * (Decimal("1") + TAX_RATE)).quantize(Decimal("0.01"))
     return excl, incl
 
 
 def _paid_amount(invoice):
-    """Somme des paiements enregistrés d'une facture (Decimal)."""
+    """Sum of an invoice's recorded payments (Decimal)."""
     total = db.session.query(func.coalesce(func.sum(Payment.amount), 0)).filter(
         Payment.invoice_id == invoice.id
     ).scalar()
@@ -201,7 +201,7 @@ def _paid_amount(invoice):
 
 
 def _refresh_invoice_status(invoice):
-    """Recalcule le statut d'une facture selon la somme des paiements."""
+    """Recompute an invoice's status from the sum of its payments."""
     paid = _paid_amount(invoice)
     total = Decimal(str(invoice.amount_incl_tax or 0))
     if paid <= 0:
@@ -214,7 +214,7 @@ def _refresh_invoice_status(invoice):
 
 
 def _fmt(value):
-    """Formate un montant FCFA sans décimales, séparateur espace."""
+    """Format an FCFA amount without decimals, space as thousands separator."""
     try:
         return "{:,.0f}".format(Decimal(str(value or 0))).replace(",", " ")
     except (InvalidOperation, ValueError):
@@ -229,7 +229,7 @@ _TENS = {20: "vingt", 30: "trente", 40: "quarante", 50: "cinquante",
 
 
 def _n2w(n):
-    """Nombre entier -> lettres (français). Suffisant pour les montants FCFA."""
+    """Integer -> words (French). Sufficient for FCFA amounts."""
     n = int(n)
     if n < 20:
         return _UNITS[n]
@@ -273,7 +273,7 @@ def _n2w(n):
 
 
 def _amount_words(value):
-    """Montant FCFA en toutes lettres, capitalisé."""
+    """FCFA amount spelled out in words, capitalized."""
     try:
         n = int(Decimal(str(value or 0)))
     except (InvalidOperation, ValueError):
@@ -283,13 +283,13 @@ def _amount_words(value):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  DEVIS
+#  QUOTES
 # ─────────────────────────────────────────────────────────────────────────────
 @quotes_bp.route("/")
 @login_required
 @subscription_required
 def index():
-    """Liste des devis du gérant (statut, client, TTC, date)."""
+    """List the manager's quotes (status, customer, total incl. tax, date)."""
     status = request.args.get("status", type=str)
     query = Quote.query.filter_by(user_id=current_user.id)
     if status in QUOTE_STATUSES:
@@ -317,7 +317,7 @@ def index():
 @login_required
 @subscription_required
 def new():
-    """Formulaire de création d'un devis."""
+    """Quote creation form."""
     customers = Customer.query.filter_by(
         user_id=current_user.id
     ).order_by(Customer.name).all()
@@ -334,7 +334,7 @@ def new():
 @login_required
 @subscription_required
 def voice():
-    """Page de dictée d'un devis par commande vocale (Web Speech API)."""
+    """Voice-command quote dictation page (Web Speech API)."""
     return render_template("quotes/voice.html")
 
 
@@ -342,10 +342,10 @@ def voice():
 @login_required
 @subscription_required
 def voice_transcribe():
-    """Reçoit un audio (MediaRecorder), le transcrit (Whisper), renvoie le texte JSON.
+    """Receive audio (MediaRecorder), transcribe it (Whisper), return the text as JSON.
 
-    Compatible tous navigateurs (Safari inclus) : l'enregistrement audio est
-    universel, contrairement à la Web Speech API réservée à Chrome.
+    Compatible with all browsers (Safari included): audio recording is
+    universal, unlike the Web Speech API which is Chrome-only.
     """
     from flask import jsonify
     from app.services.transcription_service import transcribe_audio
@@ -355,7 +355,7 @@ def voice_transcribe():
         return jsonify({"ok": False, "error": "Aucun audio reçu."}), 400
 
     data = audio.read()
-    # Garde-fou taille (MAX_CONTENT_LENGTH global gère déjà, mais message clair).
+    # Size safety net (the global MAX_CONTENT_LENGTH already handles it, but with a clear message).
     result = transcribe_audio(data, filename=audio.filename)
     log_action(current_user.id, "voice_transcribe",
                {"ok": result.get("ok"), "bytes": len(data)})
@@ -366,7 +366,7 @@ def voice_transcribe():
 @login_required
 @subscription_required
 def voice_parse():
-    """Reçoit le texte dicté, l'interprète via Claude, pré-remplit le formulaire."""
+    """Receive the dictated text, interpret it via Claude, pre-fill the form."""
     from app.services.voice_quote_service import parse_voice_quote
     from werkzeug.datastructures import MultiDict
 
@@ -381,7 +381,7 @@ def voice_parse():
         flash(result.get("error", "Commande vocale non comprise."), "danger")
         return redirect(url_for("quotes.voice"))
 
-    # Match du client par nom (insensible à la casse) parmi les clients du gérant.
+    # Match the customer by name (case-insensitive) among the manager's customers.
     matched_id = None
     customer_name = (result.get("customer_name") or "").strip()
     wanted = customer_name.lower()
@@ -390,7 +390,7 @@ def voice_parse():
             matched_id = c.id
             break
 
-    # Client non trouvé mais un nom a été dicté → on le crée automatiquement.
+    # Customer not found but a name was dictated → create it automatically.
     created_client = False
     if not matched_id and customer_name:
         new_customer = Customer(user_id=current_user.id, name=customer_name[:100])
@@ -401,11 +401,11 @@ def voice_parse():
         log_action(current_user.id, "create_customer",
                    {"customer_id": new_customer.id, "name": new_customer.name,
                     "source": "voice_quote"})
-        # recharger la liste pour que le select l'affiche
+        # reload the list so the select displays it
         customers = (Customer.query.filter_by(user_id=current_user.id)
                      .order_by(Customer.name).all())
 
-    # Construire un MultiDict pour pré-remplir le formulaire (comme un POST rejoué).
+    # Build a MultiDict to pre-fill the form (like a replayed POST).
     form = MultiDict()
     if matched_id:
         form["customer_id"] = str(matched_id)
@@ -434,7 +434,7 @@ def voice_parse():
 @login_required
 @subscription_required
 def create():
-    """Enregistre un nouveau devis avec ses lignes (validation serveur)."""
+    """Save a new quote with its line items (server-side validation)."""
     customer_id = request.form.get("customer_id", type=int)
     quote_date = _parse_date(request.form.get("quote_date"))
     status = request.form.get("status", "draft")
@@ -492,7 +492,7 @@ def create():
 @login_required
 @subscription_required
 def show(quote_id):
-    """Détail d'un devis (lignes + totaux)."""
+    """Quote detail (line items + totals)."""
     quote = _owned_quote_or_404(quote_id)
     linked_invoice = None
     if quote.invoice_id:
@@ -513,7 +513,7 @@ def show(quote_id):
 @login_required
 @subscription_required
 def edit(quote_id):
-    """Formulaire d'édition d'un devis."""
+    """Quote edit form."""
     quote = _owned_quote_or_404(quote_id)
     if quote.invoice_id:
         flash("Ce devis est converti en facture : édition impossible.", "warning")
@@ -534,7 +534,7 @@ def edit(quote_id):
 @login_required
 @subscription_required
 def update(quote_id):
-    """Met à jour un devis et remplace ses lignes."""
+    """Update a quote and replace its line items."""
     quote = _owned_quote_or_404(quote_id)
     if quote.invoice_id:
         flash("Ce devis est converti en facture : édition impossible.", "warning")
@@ -575,7 +575,7 @@ def update(quote_id):
     quote.status = status
     quote.amount_excl_tax = excl
     quote.amount_incl_tax = incl
-    # remplace les lignes (cascade delete-orphan)
+    # replace the line items (delete-orphan cascade)
     quote.items.clear()
     for it in items:
         quote.items.append(QuoteItem(**it))
@@ -594,7 +594,7 @@ def update(quote_id):
 @login_required
 @subscription_required
 def delete(quote_id):
-    """Supprime un devis du gérant courant."""
+    """Delete a quote owned by the current manager."""
     quote = _owned_quote_or_404(quote_id)
     if quote.invoice_id:
         flash("Impossible de supprimer un devis déjà facturé.", "warning")
@@ -612,7 +612,7 @@ def delete(quote_id):
 @login_required
 @subscription_required
 def pdf(quote_id):
-    """PDF du devis (reportlab)."""
+    """Quote PDF (reportlab)."""
     quote = _owned_quote_or_404(quote_id)
     settings = CompanySettings.query.filter_by(user_id=current_user.id).first()
     buffer = _build_document_pdf(
@@ -638,7 +638,7 @@ def pdf(quote_id):
 @login_required
 @subscription_required
 def to_invoice(quote_id):
-    """Convertit un devis en facture (crée Invoice + InvoiceItems, lie invoice_id)."""
+    """Convert a quote into an invoice (creates Invoice + InvoiceItems, links invoice_id)."""
     quote = _owned_quote_or_404(quote_id)
     if quote.invoice_id:
         flash("Ce devis a déjà été converti en facture.", "warning")
@@ -662,7 +662,7 @@ def to_invoice(quote_id):
             amount=it.amount,
         ))
     db.session.add(invoice)
-    db.session.flush()  # obtient invoice.id
+    db.session.flush()  # obtains invoice.id
     quote.invoice_id = invoice.id
     if quote.status != "accepted":
         quote.status = "accepted"
@@ -682,13 +682,13 @@ def to_invoice(quote_id):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  FACTURES
+#  INVOICES
 # ─────────────────────────────────────────────────────────────────────────────
 @invoices_bp.route("/new")
 @login_required
 @subscription_required
 def new():
-    """Formulaire de création directe d'une facture."""
+    """Direct invoice creation form."""
     customers = Customer.query.filter_by(
         user_id=current_user.id
     ).order_by(Customer.name).all()
@@ -703,7 +703,7 @@ def new():
 @login_required
 @subscription_required
 def create():
-    """Enregistre une nouvelle facture avec ses lignes (validation serveur)."""
+    """Save a new invoice with its line items (server-side validation)."""
     customer_id = request.form.get("customer_id", type=int)
     invoice_date = _parse_date(request.form.get("invoice_date"))
 
@@ -746,7 +746,7 @@ def create():
 @login_required
 @subscription_required
 def voice():
-    """Page de dictée d'une facture par commande vocale."""
+    """Voice-command invoice dictation page."""
     return render_template("invoices/voice.html")
 
 
@@ -754,7 +754,7 @@ def voice():
 @login_required
 @subscription_required
 def voice_transcribe():
-    """Transcrit l'audio (Whisper) et renvoie le texte JSON (identique au devis)."""
+    """Transcribe the audio (Whisper) and return the text as JSON (same as quotes)."""
     from flask import jsonify
     from app.services.transcription_service import transcribe_audio
     audio = request.files.get("audio")
@@ -770,7 +770,7 @@ def voice_transcribe():
 @login_required
 @subscription_required
 def voice_parse():
-    """Interprète le texte dicté (Claude) et pré-remplit le formulaire de facture."""
+    """Interpret the dictated text (Claude) and pre-fill the invoice form."""
     from app.services.voice_quote_service import parse_voice_quote
     from werkzeug.datastructures import MultiDict
 
@@ -783,7 +783,7 @@ def voice_parse():
         flash(result.get("error", "Commande vocale non comprise."), "danger")
         return redirect(url_for("invoices.voice"))
 
-    # Match / création automatique du client (comme le devis vocal).
+    # Match / automatic creation of the customer (same as the voice quote).
     matched_id = None
     customer_name = (result.get("customer_name") or "").strip()
     wanted = customer_name.lower()
@@ -823,7 +823,7 @@ def voice_parse():
 @login_required
 @subscription_required
 def index():
-    """Liste des factures du gérant (statut de paiement, client, TTC, date)."""
+    """List the manager's invoices (payment status, customer, total incl. tax, date)."""
     status = request.args.get("status", type=str)
     query = Invoice.query.filter_by(user_id=current_user.id)
     if status in INVOICE_STATUSES:
@@ -860,7 +860,7 @@ def index():
 @login_required
 @subscription_required
 def show(invoice_id):
-    """Détail d'une facture (lignes, totaux, paiements, solde)."""
+    """Invoice detail (line items, totals, payments, balance)."""
     invoice = _owned_invoice_or_404(invoice_id)
     paid = _paid_amount(invoice)
     due = Decimal(str(invoice.amount_incl_tax or 0)) - paid
@@ -885,7 +885,7 @@ def show(invoice_id):
 @login_required
 @subscription_required
 def pdf(invoice_id):
-    """PDF de la facture (reportlab)."""
+    """Invoice PDF (reportlab)."""
     invoice = _owned_invoice_or_404(invoice_id)
     paid = _paid_amount(invoice)
     due = Decimal(str(invoice.amount_incl_tax or 0)) - paid
@@ -915,7 +915,7 @@ def pdf(invoice_id):
 @login_required
 @subscription_required
 def add_payment(invoice_id):
-    """Enregistre un paiement et recalcule le statut de la facture."""
+    """Record a payment and recompute the invoice status."""
     invoice = _owned_invoice_or_404(invoice_id)
 
     amount = _parse_decimal(request.form.get("amount"))
@@ -930,7 +930,7 @@ def add_payment(invoice_id):
     if method not in PAYMENT_METHODS:
         method = "cash"
 
-    # ne pas dépasser le solde restant
+    # do not exceed the remaining balance
     if amount is not None:
         already = _paid_amount(invoice)
         remaining = Decimal(str(invoice.amount_incl_tax or 0)) - already
@@ -973,7 +973,7 @@ def add_payment(invoice_id):
 @login_required
 @subscription_required
 def delete_payment(invoice_id, payment_id):
-    """Supprime un paiement et recalcule le statut."""
+    """Delete a payment and recompute the status."""
     invoice = _owned_invoice_or_404(invoice_id)
     payment = Payment.query.filter_by(
         id=payment_id, invoice_id=invoice.id
@@ -1000,18 +1000,18 @@ def delete_payment(invoice_id, payment_id):
 @login_required
 @subscription_required
 def delete(invoice_id):
-    """Supprime une facture (et détache le devis source le cas échéant)."""
+    """Delete an invoice (and detach the source quote if any)."""
     invoice = _owned_invoice_or_404(invoice_id)
     number = invoice.number
 
-    # détache le devis source pour éviter une FK orpheline
+    # detach the source quote to avoid an orphaned FK
     source_quote = Quote.query.filter_by(
         invoice_id=invoice.id, user_id=current_user.id
     ).first()
     if source_quote:
         source_quote.invoice_id = None
 
-    # supprime les paiements liés puis la facture
+    # delete the linked payments, then the invoice
     Payment.query.filter_by(invoice_id=invoice.id).delete()
     db.session.delete(invoice)
     db.session.commit()
@@ -1024,16 +1024,16 @@ def delete(invoice_id):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  Génération PDF (reportlab)
+#  PDF generation (reportlab)
 # ─────────────────────────────────────────────────────────────────────────────
 def _build_document_pdf(title, number, doc_date, customer, items,
                         amount_excl, amount_incl, paid=None, due=None,
                         settings=None):
-    """Construit un PDF (devis ou facture) et renvoie un BytesIO.
+    """Build a PDF (quote or invoice) and return a BytesIO.
 
-    En-tête entreprise (logo + nom + coordonnées des paramètres, sinon SenGestion),
-    coordonnées client, tableau des lignes, totaux HT/TVA/TTC, cachet/signature.
-    Charte : marine #021A3D, or #F2B10E.
+    Company header (logo + name + details from settings, otherwise SenGestion),
+    customer details, line-items table, excl./VAT/incl. totals, stamp/signature.
+    Brand palette: navy #021A3D, gold #F2B10E.
     """
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import mm
@@ -1049,8 +1049,8 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
 
-    # ── Police de titre : Palatino (charte). Fallback Times si indisponible. ──
-    # On tente d'abord la police embarquée dans le projet, puis celle du système.
+    # ── Title font: Palatino (brand). Fallback to Times if unavailable. ──
+    # Try the font bundled in the project first, then the system one.
     def _register_palatino():
         candidates = [
             os.path.join(current_app.static_folder, "fonts", "Palatino.ttc"),
@@ -1065,12 +1065,12 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                     return "Palatino", "Palatino-Bold"
                 except Exception:
                     continue
-        # Fallback : Times (serif intégré, proche de Palatino — cf. CSS fallback)
+        # Fallback: Times (built-in serif, close to Palatino — cf. CSS fallback)
         return "Times-Roman", "Times-Bold"
 
     FONT_TITLE, FONT_TITLE_BOLD = _register_palatino()
 
-    # ── Police de texte : Arial (charte UI). Fallback Helvetica si indisponible. ──
+    # ── Body font: Arial (UI brand). Fallback to Helvetica if unavailable. ──
     def _register_arial():
         fdir = os.path.join(current_app.static_folder, "fonts")
         files = {
@@ -1098,25 +1098,25 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                 ok = False
         if ok:
             return "Arial", "Arial-Bold", "Arial-Italic"
-        # Fallback : Helvetica (clone d'Arial, fallback officiel de la charte)
+        # Fallback: Helvetica (Arial clone, the brand's official fallback)
         return "Helvetica", "Helvetica-Bold", "Helvetica-Oblique"
 
     FONT_BODY, FONT_BODY_BOLD, FONT_BODY_ITALIC = _register_arial()
 
-    # ── Palette — CHARTE STRICTE 3 couleurs (marine / or / jaune pâle) ──
-    # Les neutres sont des teintes DÉRIVÉES du marine (pas des gris purs), pour
-    # rester dans l'esprit charte comme le reste de l'app (rgba(2,26,61,...)).
+    # ── Palette — STRICT BRAND PALETTE, 3 colors (navy / gold / pale yellow) ──
+    # Neutrals are shades DERIVED from navy (not pure grays), to stay in the
+    # brand spirit like the rest of the app (rgba(2,26,61,...)).
     MARINE = colors.HexColor("#021A3D")
     OR = colors.HexColor("#F2B10E")
     JAUNE_PALE = colors.HexColor("#E8E7A2")
-    INK_SOFT = MARINE                          # texte secondaire = MARINE (charte, sans ambiguïté)
-    INK_FAINT = MARINE                         # labels = MARINE (charte)
-    # Neutres = blanc + marine dilué (surfaces neutres, pas des couleurs de marque)
-    ROW_ALT = colors.Color(2/255, 26/255, 61/255, 0.04)    # zébrure : marine 4 %
-    HAIRLINE = colors.Color(2/255, 26/255, 61/255, 0.14)   # filets marine 14 %
-    CREAM = colors.white                       # fond en-tête = BLANC (surface neutre)
-    OBJ_BG = JAUNE_PALE                        # carte Objet = jaune pâle (charte)
-    CARD_BG = colors.Color(2/255, 26/255, 61/255, 0.035)   # fond cartes : marine 3.5 %
+    INK_SOFT = MARINE                          # secondary text = NAVY (brand, unambiguous)
+    INK_FAINT = MARINE                         # labels = NAVY (brand)
+    # Neutrals = white + diluted navy (neutral surfaces, not brand colors)
+    ROW_ALT = colors.Color(2/255, 26/255, 61/255, 0.04)    # zebra striping: navy 4%
+    HAIRLINE = colors.Color(2/255, 26/255, 61/255, 0.14)   # navy hairlines 14%
+    CREAM = colors.white                       # header background = WHITE (neutral surface)
+    OBJ_BG = JAUNE_PALE                        # "Objet" card = pale yellow (brand)
+    CARD_BG = colors.Color(2/255, 26/255, 61/255, 0.035)   # card background: navy 3.5%
 
     PAGE_W, PAGE_H = A4
     ML = MR = 15 * mm
@@ -1129,13 +1129,13 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         path = os.path.join(current_app.static_folder, rel)
         return path if os.path.exists(path) else None
 
-    # ── Données émetteur ──
+    # ── Issuer data ──
     brand_name = (settings.company_name if settings and settings.company_name else "SenGestion")
     addr = str(settings.address).replace("\n", ", ") if settings and settings.address else ""
     phone = settings.phone if settings else ""
     email = settings.email if settings else ""
     website = settings.website if settings else ""
-    # Ligne d'identifiants légaux
+    # Legal identifiers line
     legal_bits = []
     if settings:
         if settings.rc:
@@ -1153,16 +1153,16 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     logo_path = _abs(settings.logo) if settings else None
     stamp_path = _abs(settings.stamp) if settings else None
     d_emis = doc_date.strftime("%d/%m/%Y") if doc_date else ""
-    # Validité : +30 jours pour un devis
+    # Validity: +30 days for a quote
     d_valid = ""
     if doc_date:
         from datetime import timedelta
         d_valid = (doc_date + timedelta(days=30)).strftime("%d/%m/%Y")
     is_devis = title.strip().upper().startswith("DEV")
 
-    # ── Styles (12 pt texte courant) ──
+    # ── Styles (12 pt body text) ──
     st_eyebrow = ParagraphStyle("eb", fontName=FONT_BODY_BOLD, fontSize=9,
-                                textColor=INK_SOFT, leading=12)  # letter-spaced simulé
+                                textColor=INK_SOFT, leading=12)  # simulated letter-spacing
     st_label = ParagraphStyle("lbl", fontName=FONT_BODY_BOLD, fontSize=8.5,
                               textColor=INK_SOFT, leading=12)
     st_body = ParagraphStyle("body", fontName=FONT_BODY, fontSize=12,
@@ -1182,13 +1182,13 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     buffer = BytesIO()
 
-    # ── En-tête (fond crème) + pied de page ──
+    # ── Header (cream background) + footer ──
     def _decorate(canvas, doc_):
         canvas.saveState()
-        # Fond crème de l'en-tête
+        # Cream header background
         canvas.setFillColor(CREAM)
         canvas.rect(0, PAGE_H - HEADER_H, PAGE_W, HEADER_H, fill=1, stroke=0)
-        # Double filet marine sous l'en-tête
+        # Double navy rule under the header
         canvas.setFillColor(MARINE)
         canvas.rect(0, PAGE_H - HEADER_H, PAGE_W, 2.5, fill=1, stroke=0)
 
@@ -1202,11 +1202,11 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                 img.drawOn(canvas, ML, PAGE_H - 20 * mm)
             except Exception:
                 pass
-        # Nom entreprise (titre de marque — Palatino, charte)
+        # Company name (brand title — Palatino, per brand guide)
         canvas.setFillColor(MARINE)
         canvas.setFont(FONT_TITLE_BOLD, 20)          # Palatino 20 pt
         canvas.drawString(ML + 34 * mm, PAGE_H - 15 * mm, brand_name)
-        # Coordonnées
+        # Contact details
         canvas.setFillColor(INK_SOFT)
         canvas.setFont(FONT_BODY, 10)
         y = PAGE_H - 24 * mm
@@ -1217,21 +1217,21 @@ def _build_document_pdf(title, number, doc_date, customer, items,
             canvas.drawString(ML, y, "Tél : " + tel_bits); y -= 4.6 * mm
         if email:
             canvas.drawString(ML, y, email); y -= 4.6 * mm
-        # Ligne légale (plus petite, tout en bas de l'en-tête)
+        # Legal line (smaller, at the very bottom of the header)
         if legal_line:
             canvas.setFont(FONT_BODY, 8)
             canvas.setFillColor(INK_FAINT)
             canvas.drawString(ML, PAGE_H - HEADER_H + 3 * mm, legal_line[:130])
 
-        # Bloc numéro à droite
+        # Number block on the right
         canvas.setFillColor(INK_FAINT)
         canvas.setFont(FONT_BODY_BOLD, 9)
         canvas.drawRightString(PAGE_W - MR, PAGE_H - 15 * mm,
                                ("NUMÉRO DE DEVIS" if is_devis else "NUMÉRO DE FACTURE"))
         canvas.setFillColor(MARINE)
-        canvas.setFont(FONT_TITLE_BOLD, 24)          # Palatino 24 pt (charte titres)
+        canvas.setFont(FONT_TITLE_BOLD, 24)          # Palatino 24 pt (brand titles)
         canvas.drawRightString(PAGE_W - MR, PAGE_H - 23 * mm, number)
-        # petit point or décoratif
+        # small decorative gold dot
         canvas.setFillColor(OR)
         canvas.circle(PAGE_W - MR - 2, PAGE_H - 26.5 * mm, 1.6, fill=1, stroke=0)
         # Dates
@@ -1241,7 +1241,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         if is_devis and d_valid:
             canvas.drawRightString(PAGE_W - MR, PAGE_H - 36 * mm, f"Valide jusqu'au {d_valid}")
 
-        # ── Pied de page ──
+        # ── Footer ──
         canvas.setFillColor(HAIRLINE)
         canvas.rect(ML, 15 * mm, CONTENT_W, 0.6, fill=1, stroke=0)
         canvas.setFillColor(INK_SOFT)
@@ -1259,10 +1259,10 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     )
     story = []
 
-    # ── Eyebrow DESTINATAIRE ──
+    # ── DESTINATAIRE eyebrow ──
     def _eyebrow(text):
-        # Interlettrage typographique propre (charSpace) : espace les lettres SANS
-        # confondre les espaces entre mots. Un espace normal sépare bien les mots.
+        # Clean typographic letter-spacing (charSpace): spaces the letters WITHOUT
+        # conflating word spaces. A normal space still separates words properly.
         p = Paragraph(f"<font color='#021A3D'><b>{text}</b></font>",
                       ParagraphStyle("ey", fontName=FONT_BODY_BOLD, fontSize=9,
                                      textColor=INK_SOFT, leading=12, charSpace=3))
@@ -1279,7 +1279,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(_eyebrow("DESTINATAIRE"))
     story.append(Spacer(1, 2 * mm))
 
-    # ── Carte CLIENT (bordée) | carte OBJET (fond bleu) ──
+    # ── CLIENT card (bordered) | OBJET card (colored background) ──
     cust_name = customer.name if customer else "-"
     cust_extra = []
     if customer:
@@ -1327,7 +1327,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(dest)
     story.append(Spacer(1, 4.5 * mm))
 
-    # ── Eyebrow + Tableau des prestations ──
+    # ── Eyebrow + line-items table ──
     story.append(_eyebrow("DÉTAIL DES PRESTATIONS"))
     story.append(Spacer(1, 2.5 * mm))
 
@@ -1359,7 +1359,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(table)
     story.append(Spacer(1, 2.5 * mm))
 
-    # ── Bloc totaux encadré (à droite) ──
+    # ── Boxed totals block (right-aligned) ──
     tva = (Decimal(str(amount_incl or 0)) - Decimal(str(amount_excl or 0)))
     tva_pct = 0 if (amount_excl in (None, 0) or tva == 0) else int(TAX_RATE * 100)
     st_tl = ParagraphStyle("tl", fontName=FONT_BODY, fontSize=12, textColor=INK_SOFT, leading=16)
@@ -1378,13 +1378,13 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         [Paragraph("TOTAL TTC", st_ttcl), Paragraph(f"{_fmt(amount_incl)} FCFA", st_ttcv)],
     ]
     ttc_i = 2
-    # 'Déjà réglé / Reste à payer' : uniquement si au moins un paiement enregistré.
+    # 'Déjà réglé / Reste à payer': only if at least one payment is recorded.
     show_payment_lines = paid is not None and Decimal(str(paid or 0)) > 0
     if show_payment_lines:
         inner_rows.append([Paragraph("Déjà réglé", st_tl), Paragraph(f"{_fmt(paid)} FCFA", st_tv)])
         inner_rows.append([Paragraph("Reste à payer", st_ttcl),
                            Paragraph(f"{_fmt(due)} FCFA", st_ttcv)])
-    # Largeur du bloc = moitié droite du contenu (colle au bord droit).
+    # Block width = right half of the content (flush with the right edge).
     box_w = CONTENT_W / 2 + 6 * mm
     inner = Table(inner_rows, colWidths=[box_w * 0.52, box_w * 0.48])
     inner_style = [
@@ -1395,14 +1395,14 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ("TOPPADDING", (0, ttc_i), (-1, ttc_i), 11), ("BOTTOMPADDING", (0, ttc_i), (-1, ttc_i), 11),
     ]
     if show_payment_lines:
-        # ligne 4 = "Reste à payer" (fond marine, comme le TTC)
+        # row 4 = "Reste à payer" (navy background, like the total incl. tax)
         inner_style.append(("BACKGROUND", (0, 4), (-1, 4), MARINE))
         inner_style.append(("TOPPADDING", (0, 4), (-1, 4), 11))
         inner_style.append(("BOTTOMPADDING", (0, 4), (-1, 4), 11))
     inner.setStyle(TableStyle(inner_style))
 
     words_p = Paragraph(_amount_words(amount_incl), st_words)
-    # Box collée à droite (hAlign RIGHT), largeur = celle des totaux internes.
+    # Box flush right (hAlign RIGHT), width = that of the inner totals.
     box = Table([[inner], [words_p]], colWidths=[box_w], hAlign="RIGHT")
     box.setStyle(TableStyle([
         ("BOX", (0, 0), (-1, -1), 1, HAIRLINE),
@@ -1415,7 +1415,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(box)
     story.append(Spacer(1, 2.5 * mm))
 
-    # ── CONDITIONS (barre latérale) ──
+    # ── CONDITIONS (side bar) ──
     story.append(_eyebrow("CONDITIONS"))
     story.append(Spacer(1, 2 * mm))
     cond_txt = (str(settings.footer_note) if settings and settings.footer_note
@@ -1431,10 +1431,10 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(cond)
     story.append(Spacer(1, 3 * mm))
 
-    # ── Bloc bas : signature (DEVIS) ou simple cachet (FACTURE) ──
-    # Sur une FACTURE, rien à signer par le client (pas de "Bon pour accord", pas
-    # de QR de signature) : on n'affiche que le cachet (sans titre de section
-    # redondant, le label "CACHET & SIGNATURE" sous l'image suffit).
+    # ── Bottom block: signature (QUOTE) or stamp only (INVOICE) ──
+    # On an INVOICE, nothing for the customer to sign (no "Bon pour accord", no
+    # signature QR): only the stamp is shown (no redundant section title,
+    # the "CACHET & SIGNATURE" label under the image is enough).
     if is_devis:
         story.append(_eyebrow("SIGNATURES"))
         story.append(Spacer(1, 2.5 * mm))
@@ -1453,7 +1453,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     ]))
 
     if is_devis:
-        # Cadre "Bon pour accord" à gauche (à signer par le client) + cachet à droite.
+        # "Bon pour accord" frame on the left (to be signed by the customer) + stamp on the right.
         accord = Table(
             [[Paragraph("<b>BON POUR ACCORD - CLIENT</b>", st_label)],
              [Paragraph("Nom, date &amp; signature précédés de « Lu et approuvé »", st_muted)],
@@ -1474,13 +1474,13 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         ]))
         story.append(sign)
     else:
-        # Facture : cachet seul, aligné à droite.
+        # Invoice: stamp only, right-aligned.
         stamp_c.hAlign = "RIGHT"
         story.append(stamp_c)
 
     story.append(Spacer(1, 3 * mm))
 
-    # ── QR "signer en ligne" : uniquement sur le DEVIS (une facture ne se signe pas) ──
+    # ── "Sign online" QR: only on the QUOTE (an invoice is not signed) ──
     if is_devis:
         try:
             import qrcode
