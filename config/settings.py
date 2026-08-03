@@ -1,8 +1,8 @@
 """SenGestion application configuration.
 
 Two databases:
-- MySQL (relational) : business core — competency CP5 + SQL part of CP6.
-- MongoDB (NoSQL)    : activity logs & AI data — NoSQL part of CP6.
+- MySQL (relational) : business core - competency CP5 + SQL part of CP6.
+- MongoDB (NoSQL)    : activity logs & AI data - NoSQL part of CP6.
 """
 import os
 from dotenv import load_dotenv
@@ -30,7 +30,7 @@ class Config:
     # --- Security / uploads ---
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
     WTF_CSRF_ENABLED = True
-    WTF_CSRF_TIME_LIMIT = 60 * 60 * 24  # 24h — avoids expiry if the page stays open a long time (demo)
+    WTF_CSRF_TIME_LIMIT = 60 * 60 * 24  # 24h - avoids expiry if the page stays open a long time (demo)
 
     # --- Email (Gmail SMTP) ---
     MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
@@ -40,7 +40,7 @@ class Config:
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "sengestion1@gmail.com")
 
-    # --- AI (Claude Vision — business-card / receipt scan) ---
+    # --- AI (Claude Vision - business-card / receipt scan) ---
     ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
     # Vision model used for extraction (overridable via .env)
     ANTHROPIC_VISION_MODEL = os.getenv("ANTHROPIC_VISION_MODEL", "claude-sonnet-5")

@@ -1,4 +1,4 @@
-"""AI service — quote creation by voice command.
+"""AI service - quote creation by voice command.
 
 The text dictated by the manager (transcribed browser-side via the Web Speech API)
 is sent to Claude, which extracts a structured quote from it: customer name + line

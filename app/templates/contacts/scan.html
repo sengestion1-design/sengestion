@@ -20,7 +20,7 @@
 
   <div class="scan-grid">
 
-    {# ─── Left column: drop zone ─── #}
+    {# --- Left column: drop zone --- #}
     <div class="card scan-card">
       <form method="post" action="{{ url_for('contacts.scan_upload') }}"
             enctype="multipart/form-data" id="scan-form">
@@ -66,7 +66,7 @@
       </form>
     </div>
 
-    {# ─── Right column: instructions ─── #}
+    {# --- Right column: instructions --- #}
     <aside class="scan-aside card">
       <h2 class="scan-aside-title">
         <i data-lucide="sparkles" style="width:18px;height:18px;vertical-align:-3px;"></i>
@@ -178,7 +178,7 @@
     .scan-actions { display: flex; gap: 12px; margin-top: 24px; align-items: center; flex-wrap: wrap; }
     #scan-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Side panel — instructions */
+    /* Side panel - instructions */
     .scan-aside { margin: 0; }
     .scan-aside-title {
       font-family: var(--font-display);
@@ -281,7 +281,7 @@
         if (input.files && input.files[0]) showFile(input.files[0]);
       });
 
-      // "Changer d'image" button — without reopening the drop box (stopPropagation)
+      // "Changer d'image" button - without reopening the drop box (stopPropagation)
       changeBtn.addEventListener('click', function (e) {
         e.preventDefault(); e.stopPropagation();
         resetFile();

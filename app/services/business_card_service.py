@@ -1,4 +1,4 @@
-"""IA service — business-card scanning with Claude Vision.
+"""IA service - business-card scanning with Claude Vision.
 
 An uploaded business-card image is sent to Anthropic's Claude Vision model, which
 returns the contact fields (name, company, role, email, phone) as structured JSON.

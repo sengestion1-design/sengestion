@@ -1,9 +1,9 @@
 """SenGestion application factory.
 
 MVC architecture:
-- models/   : MySQL entities (SQLAlchemy) — CP5
-- routes/   : controllers (blueprints) — CP7
-- services/ : business logic & NoSQL access — CP6/CP7
+- models/   : MySQL entities (SQLAlchemy) - CP5
+- routes/   : controllers (blueprints) - CP7
+- services/ : business logic & NoSQL access - CP6/CP7
 """
 from flask import Flask
 

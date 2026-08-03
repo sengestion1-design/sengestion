@@ -1,4 +1,4 @@
-"""Access-control decorators — security (OWASP: access control).
+"""Access-control decorators - security (OWASP: access control).
 
 - @subscription_required : blocks managers whose trial/subscription has expired.
 - @admin_required        : restricts a route to administrators.

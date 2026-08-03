@@ -1,4 +1,4 @@
-"""Settings module — company identity, logo/signature/stamp, email settings.
+"""Settings module - company identity, logo/signature/stamp, email settings.
 
 Security:
 - @login_required + @subscription_required.
@@ -34,7 +34,7 @@ def _save_setting_image(file, field: str) -> str | None:
     """Normalize and save a settings image. Returns the path relative
     to /static, or None if no file / failure.
 
-    The logo/signature/stamp keep transparency (PNG) — useful for
+    The logo/signature/stamp keep transparency (PNG) - useful for
     overlaying a stamp on a PDF.
     """
     if file is None or not file.filename:

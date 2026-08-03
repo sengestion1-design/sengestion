@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
 
 {#
-  Application layout — "Minimaliste Premium" design (validated maquette-1).
+  Application layout - "Minimaliste Premium" design (validated maquette-1).
   Navy navbar + PALE YELLOW sidebar (active item = solid gold + navy bar).
   Expected variable: active = identifier of the active menu item (e.g. 'dashboard', 'customers'…)
 #}
@@ -126,7 +126,7 @@
   <!-- MAIN CONTENT -->
   <main class="main-content">
 
-    {# Flash messages — rendered HERE to stay aligned with the content (right of the sidebar) #}
+    {# Flash messages - rendered HERE to stay aligned with the content (right of the sidebar) #}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="flash-stack">

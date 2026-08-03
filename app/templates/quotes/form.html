@@ -27,7 +27,7 @@
         id="quote-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    {# ── General information ── #}
+    {# -- General information -- #}
     <div class="card" style="margin-bottom:20px;">
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px;">
         <div class="form-group" style="margin-bottom:0;">
@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    {# ── Quote line items ── #}
+    {# -- Quote line items -- #}
     <div class="card" style="margin-bottom:20px;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
         <h2 class="card-title">Lignes du devis</h2>
@@ -90,7 +90,7 @@
       </p>
     </div>
 
-    {# ── Totals ── #}
+    {# -- Totals -- #}
     <div class="card" style="margin-bottom:20px;">
       <div style="max-width:340px; margin-left:auto;">
         <div class="total-row">
@@ -114,7 +114,7 @@
     </div>
   </form>
 
-  {# ── Initial row data (edit / re-display after error) ── #}
+  {# -- Initial row data (edit / re-display after error) -- #}
   <script type="application/json" id="initial-lines">
     {%- set rows = [] -%}
     {%- if form -%}

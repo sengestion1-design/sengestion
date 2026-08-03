@@ -1,4 +1,4 @@
-"""Quote / Invoice / line items / Payment models (MySQL) — Quotes & Invoices module."""
+"""Quote / Invoice / line items / Payment models (MySQL) - Quotes & Invoices module."""
 from datetime import datetime
 
 from app.extensions import db

@@ -1,4 +1,4 @@
-"""AI service — reading an expense receipt / invoice (Claude Vision).
+"""AI service - reading an expense receipt / invoice (Claude Vision).
 
 An expense invoice (JPG/PNG/HEIC photo or PDF) is sent to Claude Vision,
 which extracts the accounting information: label (supplier/purpose), total

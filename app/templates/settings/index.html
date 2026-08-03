@@ -16,7 +16,7 @@
         enctype="multipart/form-data" class="settings-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    {# ─── Section 1: Company identity (full width) ─── #}
+    {# --- Section 1: Company identity (full width) --- #}
     <section class="card settings-section settings-section--full">
       <h2 class="settings-title"><i data-lucide="building-2"></i> Identité de l'entreprise</h2>
       <div class="form-grid-2">
@@ -73,7 +73,7 @@
       </div>
     </section>
 
-    {# ─── Section 2: Logo + signed stamp ─── #}
+    {# --- Section 2: Logo + signed stamp --- #}
     <section class="card settings-section">
       <h2 class="settings-title"><i data-lucide="image"></i> Logo & cachet signé</h2>
       <p class="settings-hint">Signez sur votre cachet, photographiez le tout, puis importez cette image unique. PNG recommandé (fond transparent).</p>
@@ -100,7 +100,7 @@
       </div>
     </section>
 
-    {# ─── Section 3: Footer notices ─── #}
+    {# --- Section 3: Footer notices --- #}
     <section class="card settings-section">
       <h2 class="settings-title"><i data-lucide="file-text"></i> Mentions (bas de page des documents)</h2>
       <div class="form-group">
@@ -110,7 +110,7 @@
       </div>
     </section>
 
-    {# ─── Section 4: Email settings ─── #}
+    {# --- Section 4: Email settings --- #}
     <section class="card settings-section">
       <h2 class="settings-title"><i data-lucide="mail"></i> Réglages email</h2>
       <p class="settings-hint">Les emails partent via le serveur SenGestion. Personnalisez le nom affiché et votre signature.</p>
@@ -118,12 +118,12 @@
         <label class="form-label" for="email_sender_name">Nom d'expéditeur</label>
         <input type="text" id="email_sender_name" name="email_sender_name" class="form-input"
                maxlength="120" value="{{ s.email_sender_name or '' }}"
-               placeholder="Ex. Fatou Ndiaye — SENTECH">
+               placeholder="Ex. Fatou Ndiaye - SENTECH">
       </div>
       <div class="form-group">
         <label class="form-label" for="email_signature">Signature email</label>
         <textarea id="email_signature" name="email_signature" class="form-input" rows="4"
-                  placeholder="Cordialement,&#10;Fatou Ndiaye&#10;SENTECH SARL — +221 …">{{ s.email_signature or '' }}</textarea>
+                  placeholder="Cordialement,&#10;Fatou Ndiaye&#10;SENTECH SARL - +221 …">{{ s.email_signature or '' }}</textarea>
         <p class="form-hint">Ajoutée automatiquement en bas de vos messages aux contacts.</p>
       </div>
     </section>

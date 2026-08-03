@@ -4,7 +4,7 @@
 
 {% block page %}
 
-  {# ── Free-trial banner ── #}
+  {# -- Free-trial banner -- #}
   {% if user.status == 'trial' %}
   <div class="trial-banner" role="status">
     <i data-lucide="clock" class="trial-banner-icon" aria-hidden="true"></i>
@@ -20,7 +20,7 @@
   </div>
   {% endif %}
 
-  {# ── Page header ── #}
+  {# -- Page header -- #}
   <div class="page-header">
     <div class="page-header-left">
       <div class="page-eyebrow">Vue d'ensemble</div>
@@ -33,7 +33,7 @@
     </a>
   </div>
 
-  {# ── KPI tiles ── #}
+  {# -- KPI tiles -- #}
   <div class="kpi-grid">
 
     <div class="kpi-card">
@@ -69,7 +69,7 @@
 
   </div>
 
-  {# ── Quick access ── #}
+  {# -- Quick access -- #}
   <div class="section-title-plain">Accès rapide</div>
   <div class="shortcuts-grid">
 
@@ -123,7 +123,7 @@
 
   </div>
 
-  {# ── Recent activity ── #}
+  {# -- Recent activity -- #}
   <div class="table-wrap">
     <div class="table-header">
       <div class="table-header-title">Activité récente</div>

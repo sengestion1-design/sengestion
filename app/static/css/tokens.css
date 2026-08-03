@@ -1,5 +1,5 @@
 /* =============================================================================
-   SenGestion — Design Tokens v3.0  ·  Minimaliste Premium
+   SenGestion - Design Tokens v3.0  ·  Minimaliste Premium
    Official STRICT palette: Navy #021A3D · Gold #F2B10E · Pale yellow #E8E7A2
    Absolute rule: gold & pale yellow = BACKGROUND/accent only. Text on light = navy.
    Statuses distinguished by navy/gold/pale yellow shades (like the reference mockup).
@@ -7,33 +7,33 @@
 
 :root {
 
-  /* ── Brand colors (imposed palette) ── */
+  /* -- Brand colors (imposed palette) -- */
   --marine:          #021A3D;   /* Dark background, main text, nav */
-  --marine-700:      #021A3D;   /* Navy hover (interactive dark background) — brand */
-  --marine-500:      #021A3D;   /* Intermediate shade — brand (no invented blue) */
+  --marine-700:      #021A3D;   /* Navy hover (interactive dark background) - brand */
+  --marine-500:      #021A3D;   /* Intermediate shade - brand (no invented blue) */
   --marine-100:      #E8E7A2;   /* Light background = pale yellow (strict palette, no more invented gray) */
 
   --or:              #F2B10E;   /* Accent: BACKGROUND & buttons ONLY */
-  --or-600:          #F2B10E;   /* Accent button hover — same gold (opacity handled in JS/CSS) */
-  --or-500:          #F2B10E;   /* Accent button active — same gold */
+  --or-600:          #F2B10E;   /* Accent button hover - same gold (opacity handled in JS/CSS) */
+  --or-500:          #F2B10E;   /* Accent button active - same gold */
   --or-text:         #021A3D;   /* Text on light background = navy (never gold text) */
   --or-text-hover:   #021A3D;   /* Link hover = navy */
 
   --jaune-pale:      #E8E7A2;   /* Soft background, subtle banners */
   --jaune-pale-dark: #d4d38a;   /* Border on pale yellow background */
 
-  /* ── Application surfaces & backgrounds ── */
-  --bg:              #F8F9FB;   /* Global background — neutral gray */
-  --bg-soft:         #F9FAFB;   /* Alternate background (even table rows) — brand background gray */
+  /* -- Application surfaces & backgrounds -- */
+  --bg:              #F8F9FB;   /* Global background - neutral gray */
+  --bg-soft:         #F9FAFB;   /* Alternate background (even table rows) - brand background gray */
   --surface:         #FFFFFF;   /* Cards, modals, inputs */
-  --surface-hover:   #F9FAFB;   /* White surface hover — brand background gray */
+  --surface-hover:   #F9FAFB;   /* White surface hover - brand background gray */
 
-  /* ── Text (navy on light background → 13–15:1, always ≥ 4.5:1) ── */
+  /* -- Text (navy on light background → 13-15:1, always ≥ 4.5:1) -- */
   --ink:             #021A3D;   /* Main text */
   --muted:           #021A3D;   /* Secondary text = navy (strict palette: text on light = navy) */
   --placeholder:     #021A3D;   /* Input placeholders = navy (strict palette), differentiated by italics */
 
-  /* ── Semantic states (all RGAA-compliant on light background) ── */
+  /* -- Semantic states (all RGAA-compliant on light background) -- */
   --success:         #021A3D;   /* Success text = navy (brand) */
   --success-soft:    #E8E7A2;   /* Success background = pale yellow (brand) */
   --success-border:  #d4d38a;   /* Success border = dark pale yellow (brand) */
@@ -50,22 +50,22 @@
   --info-soft:       #FFFFFF;   /* Info background = white + navy border (strict palette) */
   --info-border:     #021A3D;   /* Info border = navy (strict palette) */
 
-  /* ── Borders & separators — thinner, lighter ── */
+  /* -- Borders & separators - thinner, lighter -- */
   --line:            #E2E6EA;   /* Standard neutral border */
-  --line-strong:     #D9DCDB;   /* Pronounced border — brand border gray */
+  --line-strong:     #D9DCDB;   /* Pronounced border - brand border gray */
 
-  /* ── Typography (imposed brand: Palatino titles, Arial UI) ── */
+  /* -- Typography (imposed brand: Palatino titles, Arial UI) -- */
   --font-display: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   --font-sans:    Arial, Helvetica, sans-serif;
 
   /* Type scale (imposed brand: body text 12 pt = 16 px, titles 24 pt = 32 px) */
   --text-xs:    16px;  /* forced to 12 pt (brand: 12 pt text everywhere) */
   --text-sm:    16px;  /* forced to 12 pt (brand) */
-  --text-base:  16px;  /* 12 pt — BODY TEXT (brand) */
-  --text-lg:    20px;  /* 15 pt — h3 */
+  --text-base:  16px;  /* 12 pt - BODY TEXT (brand) */
+  --text-lg:    20px;  /* 15 pt - h3 */
   --text-xl:    24px;  /* 18 pt */
-  --text-2xl:   28px;  /* 21 pt — h2 */
-  --text-3xl:   32px;  /* 24 pt — h1 / titles (brand) */
+  --text-2xl:   28px;  /* 21 pt - h2 */
+  --text-3xl:   32px;  /* 24 pt - h1 / titles (brand) */
 
   --leading-tight:  1.25;
   --leading-base:   1.60;   /* Slightly airier */
@@ -76,7 +76,7 @@
   --weight-medium:  500;
   --weight-bold:    700;
 
-  /* ── Radii — soft corners, premium ── */
+  /* -- Radii - soft corners, premium -- */
   --radius-sm:    4px;
   --radius-btn:   10px;   /* Buttons & inputs slightly more rounded */
   --radius-input: 10px;
@@ -84,18 +84,18 @@
   --radius-lg:    18px;   /* Modals */
   --radius-full:  9999px;
 
-  /* ── Shadows — very subtle, premium minimalism ── */
+  /* -- Shadows - very subtle, premium minimalism -- */
   --shadow-xs:  0 1px 2px rgba(2,26,61,.04);
   --shadow-sm:  0 1px 3px rgba(2,26,61,.05), 0 1px 2px rgba(2,26,61,.03);
   --shadow-md:  0 3px 10px rgba(2,26,61,.07), 0 1px 3px rgba(2,26,61,.04);
   --shadow-lg:  0 6px 20px rgba(2,26,61,.09), 0 2px 6px rgba(2,26,61,.05);
   --shadow-xl:  0 12px 36px rgba(2,26,61,.11), 0 4px 10px rgba(2,26,61,.06);
 
-  /* Visible focus — RGAA-compliant ring */
+  /* Visible focus - RGAA-compliant ring */
   --ring-focus:       0 0 0 3px rgba(2,26,61,.18);
   --ring-focus-or:    0 0 0 3px rgba(242,177,14,.35);
 
-  /* ── Spacing — more generous for breathing room ── */
+  /* -- Spacing - more generous for breathing room -- */
   --space-1:   4px;
   --space-2:   8px;
   --space-3:   12px;
@@ -107,33 +107,33 @@
   --space-12:  56px;
   --space-16:  72px;   /* Increased for empty states */
 
-  /* ── Soft transitions (minimalism) ── */
+  /* -- Soft transitions (minimalism) -- */
   --ease-out:   cubic-bezier(0.215, 0.610, 0.355, 1.000);
   --ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1.000);
   --duration-fast:   150ms;
   --duration-base:   200ms;
   --duration-slow:   300ms;
 
-  /* ── Sidebar ── */
+  /* -- Sidebar -- */
   --sidebar-width:           248px;
   --sidebar-width-collapsed: 64px;
   --navbar-height:           80px;
 
-  /* ── Z-index ── */
+  /* -- Z-index -- */
   --z-sidebar:   100;
   --z-navbar:    200;
   --z-modal:     300;
   --z-toast:     400;
 }
 
-/* ── Minimal reset ── */
+/* -- Minimal reset -- */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* ── Base document ── */
+/* -- Base document -- */
 html {
   font-size: var(--text-base);
   scroll-behavior: smooth;
@@ -150,7 +150,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Titles — Palatino (brand) ── */
+/* -- Titles - Palatino (brand) -- */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   color: var(--marine);
@@ -163,7 +163,7 @@ h2 { font-size: var(--text-2xl); }
 h3 { font-size: var(--text-lg);  }
 h4 { font-size: var(--text-base); }
 
-/* ── Links ── */
+/* -- Links -- */
 a {
   color: var(--marine);
   text-decoration: underline;
@@ -177,7 +177,7 @@ a:focus-visible {
   box-shadow: var(--ring-focus);
 }
 
-/* ── Base elements ── */
+/* -- Base elements -- */
 img, svg { display: block; max-width: 100%; }
 button, input, select, textarea { font-family: var(--font-sans); }
 ul, ol { list-style: none; }

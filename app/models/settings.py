@@ -1,4 +1,4 @@
-"""CompanySettings model (MySQL) — per-manager company & email settings.
+"""CompanySettings model (MySQL) - per-manager company & email settings.
 
 One row per user (1-1 relationship with User). Feeds:
 - the header and footer of PDFs (quotes/invoices): name, address, logo, stamp, signature;

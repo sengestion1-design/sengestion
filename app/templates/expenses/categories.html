@@ -17,7 +17,7 @@
   <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
               gap:24px; align-items:start;">
 
-    {# ── Add a category ── #}
+    {# -- Add a category -- #}
     <div class="card">
       <h2 class="card-title" style="margin-bottom:20px;">Ajouter une catégorie</h2>
       <form method="post" action="{{ url_for('expenses.create_category') }}">
@@ -35,7 +35,7 @@
       </form>
     </div>
 
-    {# ── Category list ── #}
+    {# -- Category list -- #}
     <div class="card" style="padding:0; overflow:hidden;">
       {% if categories %}
       <div class="table-wrap">

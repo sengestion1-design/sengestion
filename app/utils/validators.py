@@ -1,4 +1,4 @@
-"""Validators — security rules (CNIL 2022 / RGPD art. 32)."""
+"""Validators - security rules (CNIL 2022 / RGPD art. 32)."""
 import re
 
 PASSWORD_MIN_LENGTH = 12
