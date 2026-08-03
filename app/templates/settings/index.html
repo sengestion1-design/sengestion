@@ -16,7 +16,7 @@
         enctype="multipart/form-data" class="settings-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    {# ─── Section 1 : Identité entreprise (pleine largeur) ─── #}
+    {# ─── Section 1: Company identity (full width) ─── #}
     <section class="card settings-section settings-section--full">
       <h2 class="settings-title"><i data-lucide="building-2"></i> Identité de l'entreprise</h2>
       <div class="form-grid-2">
@@ -73,7 +73,7 @@
       </div>
     </section>
 
-    {# ─── Section 2 : Logo + cachet signé ─── #}
+    {# ─── Section 2: Logo + signed stamp ─── #}
     <section class="card settings-section">
       <h2 class="settings-title"><i data-lucide="image"></i> Logo & cachet signé</h2>
       <p class="settings-hint">Signez sur votre cachet, photographiez le tout, puis importez cette image unique. PNG recommandé (fond transparent).</p>
@@ -100,7 +100,7 @@
       </div>
     </section>
 
-    {# ─── Section 3 : Mentions bas de page ─── #}
+    {# ─── Section 3: Footer notices ─── #}
     <section class="card settings-section">
       <h2 class="settings-title"><i data-lucide="file-text"></i> Mentions (bas de page des documents)</h2>
       <div class="form-group">
@@ -110,7 +110,7 @@
       </div>
     </section>
 
-    {# ─── Section 4 : Réglages email ─── #}
+    {# ─── Section 4: Email settings ─── #}
     <section class="card settings-section">
       <h2 class="settings-title"><i data-lucide="mail"></i> Réglages email</h2>
       <p class="settings-hint">Les emails partent via le serveur SenGestion. Personnalisez le nom affiché et votre signature.</p>
@@ -137,8 +137,8 @@
   </form>
 
   <style>
-    /* Grille pleine largeur : Identité en haut sur toute la largeur,
-       puis les autres sections réparties en 2 colonnes. */
+    /* Full-width grid: Identity on top across the full width,
+       then the other sections split into 2 columns. */
     .settings-form {
       width: 100%;
       display: grid;
@@ -147,7 +147,7 @@
       align-items: start;
     }
     .settings-section { margin-bottom: 0; }
-    .settings-section--full { grid-column: 1 / -1; }   /* pleine largeur */
+    .settings-section--full { grid-column: 1 / -1; }   /* full width */
     .settings-actions { grid-column: 1 / -1; }
     .settings-title {
       display: flex; align-items: center; gap: 8px;
@@ -174,7 +174,7 @@
     .settings-remove { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-sm); color: rgba(2,26,61,0.62); margin-top: 8px; cursor: pointer; }
 
     @media (max-width: 1024px) {
-      .settings-form { grid-template-columns: 1fr; }   /* une colonne sur petits écrans */
+      .settings-form { grid-template-columns: 1fr; }   /* a single column on small screens */
     }
     @media (max-width: 768px) {
       .settings-images { grid-template-columns: 1fr; }

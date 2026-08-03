@@ -1,4 +1,4 @@
-/* Rendu des graphiques du module Rapports (Chart.js). Charte stricte : marine/or/jaune pâle. */
+/* Rendering of the Reports module charts (Chart.js). Strict palette: navy/gold/pale yellow. */
 (function () {
   const MARINE = "#021A3D";
   const OR = "#F2B10E";

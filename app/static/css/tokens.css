@@ -1,113 +1,113 @@
 /* =============================================================================
    SenGestion — Design Tokens v3.0  ·  Minimaliste Premium
-   Charte officielle STRICTE : Marine #021A3D · Or #F2B10E · Jaune pâle #E8E7A2
-   Règle absolue : or & jaune pâle = FOND/accent uniquement. Texte sur clair = marine.
-   Statuts distingués par nuances marine/or/jaune pâle (comme la maquette de référence).
+   Official STRICT palette: Navy #021A3D · Gold #F2B10E · Pale yellow #E8E7A2
+   Absolute rule: gold & pale yellow = BACKGROUND/accent only. Text on light = navy.
+   Statuses distinguished by navy/gold/pale yellow shades (like the reference mockup).
    ============================================================================= */
 
 :root {
 
-  /* ── Couleurs de marque (charte imposée) ── */
-  --marine:          #021A3D;   /* Fond sombre, texte principal, nav */
-  --marine-700:      #021A3D;   /* Hover marine (fond foncé interactif) — charte */
-  --marine-500:      #021A3D;   /* Teinte intermédiaire — charte (pas de bleu inventé) */
-  --marine-100:      #E8E7A2;   /* Fond clair = jaune pâle (charte stricte, plus de gris inventé) */
+  /* ── Brand colors (imposed palette) ── */
+  --marine:          #021A3D;   /* Dark background, main text, nav */
+  --marine-700:      #021A3D;   /* Navy hover (interactive dark background) — brand */
+  --marine-500:      #021A3D;   /* Intermediate shade — brand (no invented blue) */
+  --marine-100:      #E8E7A2;   /* Light background = pale yellow (strict palette, no more invented gray) */
 
-  --or:              #F2B10E;   /* Accent : FOND & boutons UNIQUEMENT */
-  --or-600:          #F2B10E;   /* Hover bouton accent — même or (opacité gérée en JS/CSS) */
-  --or-500:          #F2B10E;   /* Active bouton accent — même or */
-  --or-text:         #021A3D;   /* Texte sur fond clair = marine (jamais or-texte) */
-  --or-text-hover:   #021A3D;   /* Hover lien = marine */
+  --or:              #F2B10E;   /* Accent: BACKGROUND & buttons ONLY */
+  --or-600:          #F2B10E;   /* Accent button hover — same gold (opacity handled in JS/CSS) */
+  --or-500:          #F2B10E;   /* Accent button active — same gold */
+  --or-text:         #021A3D;   /* Text on light background = navy (never gold text) */
+  --or-text-hover:   #021A3D;   /* Link hover = navy */
 
-  --jaune-pale:      #E8E7A2;   /* Fond doux, bandeaux subtils */
-  --jaune-pale-dark: #d4d38a;   /* Bordure sur fond jaune pâle */
+  --jaune-pale:      #E8E7A2;   /* Soft background, subtle banners */
+  --jaune-pale-dark: #d4d38a;   /* Border on pale yellow background */
 
-  /* ── Surfaces & fonds application ── */
-  --bg:              #F8F9FB;   /* Fond global — gris fond neutre */
-  --bg-soft:         #F9FAFB;   /* Fond alternatif (lignes table paires) — gris fond charte */
-  --surface:         #FFFFFF;   /* Cartes, modales, inputs */
-  --surface-hover:   #F9FAFB;   /* Hover surface blanche — gris fond charte */
+  /* ── Application surfaces & backgrounds ── */
+  --bg:              #F8F9FB;   /* Global background — neutral gray */
+  --bg-soft:         #F9FAFB;   /* Alternate background (even table rows) — brand background gray */
+  --surface:         #FFFFFF;   /* Cards, modals, inputs */
+  --surface-hover:   #F9FAFB;   /* White surface hover — brand background gray */
 
-  /* ── Texte (marine sur fond clair → 13–15:1, toujours ≥ 4.5:1) ── */
-  --ink:             #021A3D;   /* Texte principal */
-  --muted:           #021A3D;   /* Texte secondaire = marine (charte stricte : texte sur clair = marine) */
-  --placeholder:     #021A3D;   /* Placeholder inputs = marine (charte stricte), différencié par l'italique */
+  /* ── Text (navy on light background → 13–15:1, always ≥ 4.5:1) ── */
+  --ink:             #021A3D;   /* Main text */
+  --muted:           #021A3D;   /* Secondary text = navy (strict palette: text on light = navy) */
+  --placeholder:     #021A3D;   /* Input placeholders = navy (strict palette), differentiated by italics */
 
-  /* ── États sémantiques (tous conformes RGAA sur fond clair) ── */
-  --success:         #021A3D;   /* Texte succès = marine (charte) */
-  --success-soft:    #E8E7A2;   /* Fond succès = jaune pâle (charte) */
-  --success-border:  #d4d38a;   /* Bordure succès = jaune pâle foncé (charte) */
+  /* ── Semantic states (all RGAA-compliant on light background) ── */
+  --success:         #021A3D;   /* Success text = navy (brand) */
+  --success-soft:    #E8E7A2;   /* Success background = pale yellow (brand) */
+  --success-border:  #d4d38a;   /* Success border = dark pale yellow (brand) */
 
-  --danger:          #021A3D;   /* Texte danger = marine (PAS de rouge) */
-  --danger-soft:     #FFFFFF;   /* Fond danger = blanc + bordure marine (charte stricte) */
-  --danger-border:   #021A3D;   /* Bordure danger = marine (charte stricte) */
+  --danger:          #021A3D;   /* Danger text = navy (NO red) */
+  --danger-soft:     #FFFFFF;   /* Danger background = white + navy border (strict palette) */
+  --danger-border:   #021A3D;   /* Danger border = navy (strict palette) */
 
-  --warning:         #021A3D;   /* Texte warning = marine (charte) */
-  --warning-soft:    #E8E7A2;   /* Fond warning = jaune pâle (charte) */
-  --warning-border:  #d4d38a;   /* Bordure warning = jaune pâle foncé (charte) */
+  --warning:         #021A3D;   /* Warning text = navy (brand) */
+  --warning-soft:    #E8E7A2;   /* Warning background = pale yellow (brand) */
+  --warning-border:  #d4d38a;   /* Warning border = dark pale yellow (brand) */
 
-  --info:            #021A3D;   /* Texte info = marine */
-  --info-soft:       #FFFFFF;   /* Fond info = blanc + bordure marine (charte stricte) */
-  --info-border:     #021A3D;   /* Bordure info = marine (charte stricte) */
+  --info:            #021A3D;   /* Info text = navy */
+  --info-soft:       #FFFFFF;   /* Info background = white + navy border (strict palette) */
+  --info-border:     #021A3D;   /* Info border = navy (strict palette) */
 
-  /* ── Bordures & séparateurs — plus fins, plus légers ── */
-  --line:            #E2E6EA;   /* Bordure standard neutre */
-  --line-strong:     #D9DCDB;   /* Bordure marquée — gris bordure charte */
+  /* ── Borders & separators — thinner, lighter ── */
+  --line:            #E2E6EA;   /* Standard neutral border */
+  --line-strong:     #D9DCDB;   /* Pronounced border — brand border gray */
 
-  /* ── Typographie (charte imposée : Palatino titres, Arial UI) ── */
+  /* ── Typography (imposed brand: Palatino titles, Arial UI) ── */
   --font-display: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   --font-sans:    Arial, Helvetica, sans-serif;
 
-  /* Échelle typographique (charte imposée : texte courant 12 pt = 16 px, titres 24 pt = 32 px) */
-  --text-xs:    16px;  /* forcé à 12 pt (charte : texte 12 pt partout) */
-  --text-sm:    16px;  /* forcé à 12 pt (charte) */
-  --text-base:  16px;  /* 12 pt — TEXTE COURANT (charte) */
+  /* Type scale (imposed brand: body text 12 pt = 16 px, titles 24 pt = 32 px) */
+  --text-xs:    16px;  /* forced to 12 pt (brand: 12 pt text everywhere) */
+  --text-sm:    16px;  /* forced to 12 pt (brand) */
+  --text-base:  16px;  /* 12 pt — BODY TEXT (brand) */
   --text-lg:    20px;  /* 15 pt — h3 */
   --text-xl:    24px;  /* 18 pt */
   --text-2xl:   28px;  /* 21 pt — h2 */
-  --text-3xl:   32px;  /* 24 pt — h1 / titres (charte) */
+  --text-3xl:   32px;  /* 24 pt — h1 / titles (brand) */
 
   --leading-tight:  1.25;
-  --leading-base:   1.60;   /* Légèrement plus aéré */
-  --leading-loose:  1.80;   /* Paragraphes plus respirants */
+  --leading-base:   1.60;   /* Slightly airier */
+  --leading-loose:  1.80;   /* More breathing room in paragraphs */
 
-  /* Graisses */
+  /* Font weights */
   --weight-normal:  400;
   --weight-medium:  500;
   --weight-bold:    700;
 
-  /* ── Rayons — coins doux, premium ── */
+  /* ── Radii — soft corners, premium ── */
   --radius-sm:    4px;
-  --radius-btn:   10px;   /* Boutons & inputs légèrement plus arrondis */
+  --radius-btn:   10px;   /* Buttons & inputs slightly more rounded */
   --radius-input: 10px;
-  --radius-card:  14px;   /* Cartes plus douces */
-  --radius-lg:    18px;   /* Modales */
+  --radius-card:  14px;   /* Softer cards */
+  --radius-lg:    18px;   /* Modals */
   --radius-full:  9999px;
 
-  /* ── Ombres — très subtiles, minimalisme premium ── */
+  /* ── Shadows — very subtle, premium minimalism ── */
   --shadow-xs:  0 1px 2px rgba(2,26,61,.04);
   --shadow-sm:  0 1px 3px rgba(2,26,61,.05), 0 1px 2px rgba(2,26,61,.03);
   --shadow-md:  0 3px 10px rgba(2,26,61,.07), 0 1px 3px rgba(2,26,61,.04);
   --shadow-lg:  0 6px 20px rgba(2,26,61,.09), 0 2px 6px rgba(2,26,61,.05);
   --shadow-xl:  0 12px 36px rgba(2,26,61,.11), 0 4px 10px rgba(2,26,61,.06);
 
-  /* Focus visible — anneau conforme RGAA */
+  /* Visible focus — RGAA-compliant ring */
   --ring-focus:       0 0 0 3px rgba(2,26,61,.18);
   --ring-focus-or:    0 0 0 3px rgba(242,177,14,.35);
 
-  /* ── Espacements — plus généreux pour l'aération ── */
+  /* ── Spacing — more generous for breathing room ── */
   --space-1:   4px;
   --space-2:   8px;
   --space-3:   12px;
   --space-4:   16px;
   --space-5:   20px;
-  --space-6:   28px;   /* Augmenté pour plus d'air */
-  --space-8:   36px;   /* Augmenté */
-  --space-10:  48px;   /* Augmenté */
+  --space-6:   28px;   /* Increased for more air */
+  --space-8:   36px;   /* Increased */
+  --space-10:  48px;   /* Increased */
   --space-12:  56px;
-  --space-16:  72px;   /* Augmenté pour les empty states */
+  --space-16:  72px;   /* Increased for empty states */
 
-  /* ── Transitions douces (minimalisme) ── */
+  /* ── Soft transitions (minimalism) ── */
   --ease-out:   cubic-bezier(0.215, 0.610, 0.355, 1.000);
   --ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1.000);
   --duration-fast:   150ms;
@@ -126,7 +126,7 @@
   --z-toast:     400;
 }
 
-/* ── Reset minimal ── */
+/* ── Minimal reset ── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -150,7 +150,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Titres — Palatino (charte) ── */
+/* ── Titles — Palatino (brand) ── */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   color: var(--marine);
@@ -163,7 +163,7 @@ h2 { font-size: var(--text-2xl); }
 h3 { font-size: var(--text-lg);  }
 h4 { font-size: var(--text-base); }
 
-/* ── Liens ── */
+/* ── Links ── */
 a {
   color: var(--marine);
   text-decoration: underline;
@@ -177,7 +177,7 @@ a:focus-visible {
   box-shadow: var(--ring-focus);
 }
 
-/* ── Éléments de base ── */
+/* ── Base elements ── */
 img, svg { display: block; max-width: 100%; }
 button, input, select, textarea { font-family: var(--font-sans); }
 ul, ol { list-style: none; }

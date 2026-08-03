@@ -1,9 +1,9 @@
 {% extends "layouts/base.html" %}
 
 {#
-  Layout applicatif — design "Minimaliste Premium" (maquette-1 validée).
-  Navbar marine + sidebar JAUNE PÂLE (item actif = or plein + barre marine).
-  Variable attendue : active = identifiant du menu actif (ex. 'dashboard', 'customers'…)
+  Application layout — "Minimaliste Premium" design (validated maquette-1).
+  Navy navbar + PALE YELLOW sidebar (active item = solid gold + navy bar).
+  Expected variable: active = identifier of the active menu item (e.g. 'dashboard', 'customers'…)
 #}
 
 {% block navbar %}
@@ -36,13 +36,13 @@
 </nav>
 {% endblock %}
 
-{# Les flash sont rendus dans .main-content (voir plus bas), pas en tête de page #}
+{# Flash messages are rendered in .main-content (see below), not at the top of the page #}
 {% block flash %}{% endblock %}
 
 {% block content %}
 <div class="app-layout">
 
-  <!-- SIDEBAR blanche -->
+  <!-- White SIDEBAR -->
   <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
     {% if current_user.role == 'admin' %}
     <div class="sidebar-section-label">Administration</div>
@@ -123,10 +123,10 @@
   </aside>
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-  <!-- CONTENU PRINCIPAL -->
+  <!-- MAIN CONTENT -->
   <main class="main-content">
 
-    {# Messages flash — rendus ICI pour rester alignés avec le contenu (à droite de la sidebar) #}
+    {# Flash messages — rendered HERE to stay aligned with the content (right of the sidebar) #}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="flash-stack">
