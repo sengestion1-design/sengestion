@@ -1,8 +1,8 @@
 """Contacts & Customers module — CRUD routes.
 
 Two blueprints:
-  - customers_bp (/customers) : final customers (portefeuille clients)
-  - contacts_bp  (/contacts)  : prospects (pipeline commercial) + conversion en client
+  - customers_bp (/customers) : final customers (customer portfolio)
+  - contacts_bp  (/contacts)  : prospects (sales pipeline) + conversion into customer
 
 Security (OWASP access control): every query is scoped to current_user.id so a
 manager can never read or alter another manager's records. All POST routes are
@@ -185,11 +185,11 @@ def delete(customer_id):
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  CONTACTS (carnet d'adresses)  &  PROSPECTS (pipeline commercial)
-#  Même table `contacts`, distinguée par la colonne `kind` :
-#    - kind="contact"  → répertoire, pas de démarche active
-#    - kind="prospect" → piste commerciale suivie (pipeline nouveau→gagné/perdu)
-#  Parcours : Contact → (promotion) → Prospect → (conversion) → Client.
+#  CONTACTS (address book)  &  PROSPECTS (sales pipeline)
+#  Same `contacts` table, distinguished by the `kind` column:
+#    - kind="contact"  → directory, no active outreach
+#    - kind="prospect" → tracked sales lead (pipeline new→won/lost)
+#  Journey: Contact → (promotion) → Prospect → (conversion) → Customer.
 # ═════════════════════════════════════════════════════════════════════════════
 def _contacts_of_kind(kind: str):
     """Query helper: current user's contacts of a given kind + name/company search."""
@@ -202,7 +202,7 @@ def _contacts_of_kind(kind: str):
     return query.order_by(Contact.created_at.desc()).all(), q
 
 
-# ── CONTACTS (carnet) ────────────────────────────────────────────────────────
+# ── CONTACTS (address book) ──────────────────────────────────────────────────
 @contacts_bp.route("/")
 @login_required
 @subscription_required
@@ -251,12 +251,12 @@ def create():
     if status not in CONTACT_STATUSES:
         status = "new"
 
-    # Origine : carte scannée (IA) ou saisie manuelle
+    # Origin: scanned card (AI) or manual entry
     source = "business_card_scan" if request.form.get("source") == "business_card_scan" else "manual"
 
-    # Photo de carte scannée : on ne garde que les chemins qu'on a nous-mêmes générés.
+    # Scanned card photo: only keep paths we generated ourselves.
     card_image = request.form.get("card_image") or None
-    # Anti-injection / path traversal : uniquement nos chemins, jamais de "..".
+    # Anti-injection / path traversal: only our paths, never "..".
     if card_image and (not card_image.startswith("uploads/cartes/")
                        or ".." in card_image):
         card_image = None
@@ -294,7 +294,7 @@ def promote(contact_id):
         flash("Ce contact est déjà un prospect.", "warning")
         return redirect(url_for("contacts.prospects"))
     contact.kind = "prospect"
-    contact.status = "new"          # entre dans le pipeline
+    contact.status = "new"          # enters the pipeline
     db.session.commit()
     log_action(current_user.id, "promote_contact",
                {"contact_id": contact.id, "name": contact.name})
@@ -303,33 +303,33 @@ def promote(contact_id):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  Scan de carte de visite (IA — Claude Vision)
+#  Business-card scan (AI — Claude Vision)
 # ─────────────────────────────────────────────────────────────────────────────
-# Extensions d'image autorisées à l'upload (défense en profondeur).
+# Image extensions allowed at upload (defense in depth).
 _ALLOWED_IMG_EXT = {"jpg", "jpeg", "png", "webp", "gif"}
 
 
 def _normalize_image(raw_bytes: bytes, original_name: str):
-    """Convertit n'importe quelle image en JPEG lisible par Claude Vision.
+    """Convert any image into a JPEG readable by Claude Vision.
 
-    Gère les photos iPhone (HEIC), les extensions en majuscules ou absentes,
-    et les formats variés. Retourne (jpeg_bytes, filename, "image/jpeg"),
-    ou (None, None, None) si le fichier n'est pas une image décodable.
+    Handles iPhone photos (HEIC), uppercase or missing extensions,
+    and varied formats. Returns (jpeg_bytes, filename, "image/jpeg"),
+    or (None, None, None) if the file is not a decodable image.
     """
     import io
     from PIL import Image
 
-    # Support optionnel du HEIC (photos iPhone) si pillow-heif est installé.
+    # Optional HEIC support (iPhone photos) if pillow-heif is installed.
     try:
         import pillow_heif  # type: ignore
         pillow_heif.register_heif_opener()
     except Exception:
-        pass  # HEIC non dispo → Pillow lèvera une erreur claire plus bas
+        pass  # HEIC unavailable → Pillow will raise a clear error below
 
     try:
         img = Image.open(io.BytesIO(raw_bytes))
         img.load()
-        # JPEG n'a pas d'alpha : convertir en RGB (aplati sur fond blanc si besoin).
+        # JPEG has no alpha: convert to RGB (flattened on white background if needed).
         if img.mode in ("RGBA", "LA", "P"):
             bg = Image.new("RGB", img.size, (255, 255, 255))
             img = img.convert("RGBA")
@@ -345,8 +345,8 @@ def _normalize_image(raw_bytes: bytes, original_name: str):
 
 
 def _save_card_image(jpeg_bytes: bytes, user_id: int) -> str | None:
-    """Enregistre le JPEG de la carte sous /static/uploads/cartes/ et retourne
-    son chemin relatif (ex. 'uploads/cartes/u1-ab12cd34.jpg'), ou None si échec."""
+    """Save the card's JPEG under /static/uploads/cartes/ and return its
+    relative path (e.g. 'uploads/cartes/u1-ab12cd34.jpg'), or None on failure."""
     import os
     import uuid
     from flask import current_app
@@ -358,9 +358,9 @@ def _save_card_image(jpeg_bytes: bytes, user_id: int) -> str | None:
         fname = f"u{user_id}-{uuid.uuid4().hex[:12]}.jpg"
         with open(os.path.join(abs_dir, fname), "wb") as fh:
             fh.write(jpeg_bytes)
-        return f"{rel_dir}/{fname}"          # chemin relatif à /static (slashs web)
+        return f"{rel_dir}/{fname}"          # path relative to /static (web slashes)
     except Exception:
-        current_app.logger.warning("Échec sauvegarde image carte", exc_info=True)
+        current_app.logger.warning("Failed to save card image", exc_info=True)
         return None
 
 
@@ -368,7 +368,7 @@ def _save_card_image(jpeg_bytes: bytes, user_id: int) -> str | None:
 @login_required
 @subscription_required
 def scan():
-    """Affiche la page d'upload d'une carte de visite à analyser."""
+    """Display the upload page for a business card to analyze."""
     return render_template("contacts/scan.html")
 
 
@@ -376,7 +376,7 @@ def scan():
 @login_required
 @subscription_required
 def scan_upload():
-    """Reçoit l'image, appelle Claude Vision, pré-remplit le formulaire contact."""
+    """Receive the image, call Claude Vision, pre-fill the contact form."""
     file = request.files.get("card")
     if file is None or not file.filename:
         flash("Veuillez sélectionner une image de carte de visite.", "danger")
@@ -387,9 +387,9 @@ def scan_upload():
         flash("Le fichier reçu est vide. Réessayez.", "danger")
         return redirect(url_for("contacts.scan"))
 
-    # Normalisation : on convertit TOUTE image en JPEG via Pillow.
-    # Cela accepte les photos iPhone (HEIC), les extensions en majuscules,
-    # les fichiers sans extension, etc. — et garantit un format lisible par l'IA.
+    # Normalization: EVERY image is converted to JPEG via Pillow.
+    # This accepts iPhone photos (HEIC), uppercase extensions,
+    # files without an extension, etc. — and guarantees a format readable by the AI.
     image_bytes, filename, content_type = _normalize_image(raw_bytes, file.filename)
     if image_bytes is None:
         flash("Ce fichier n'est pas une image valide. "
@@ -406,20 +406,20 @@ def scan_upload():
         flash(result.get("error", "La carte n'a pas pu être analysée."), "danger")
         return redirect(url_for("contacts.scan"))
 
-    # Sauvegarde de la photo de la carte (JPEG normalisé) pour la rattacher au contact.
+    # Save the card photo (normalized JPEG) to attach it to the contact.
     card_image = _save_card_image(image_bytes, current_user.id)
 
-    # Succès : on ré-affiche le formulaire contact, pré-rempli, marqué "scan".
-    # (Pas de flash ici : le bandeau IA de la page porte déjà l'instruction de vérification.)
+    # Success: re-display the contact form, pre-filled, marked "scan".
+    # (No flash here: the page's AI banner already carries the verification instruction.)
     fields = result["fields"]
     return render_template(
         "contacts/form.html",
         contact=None,
         statuses=CONTACT_STATUSES,
-        kind="contact",            # une carte scannée entre dans le carnet
-        form=fields,               # pré-remplissage
-        from_scan=True,            # marque l'origine (champ caché source)
-        card_image=card_image,     # chemin de la photo scannée (aperçu + sauvegarde)
+        kind="contact",            # a scanned card goes into the address book
+        form=fields,               # pre-fill
+        from_scan=True,            # marks the origin (hidden source field)
+        card_image=card_image,     # path of the scanned photo (preview + save)
     )
 
 
@@ -488,7 +488,7 @@ def delete(contact_id):
     contact = _get_owned_contact(contact_id)
     name = contact.name
     endpoint = _list_endpoint_for(contact)
-    # Nettoyage : supprimer aussi la photo de carte associée (évite les orphelins).
+    # Cleanup: also delete the associated card photo (avoids orphans).
     if (contact.card_image and contact.card_image.startswith("uploads/cartes/")
             and ".." not in contact.card_image):
         import os

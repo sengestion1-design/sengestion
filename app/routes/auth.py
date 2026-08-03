@@ -22,14 +22,14 @@ auth_bp = Blueprint("auth", __name__)
 
 
 def _safe_next(target: str | None) -> str:
-    """Retourne l'URL `next` si elle est locale et sûre, sinon le dashboard.
+    """Return the `next` URL if it is local and safe, otherwise the dashboard.
 
-    Protège contre l'open redirect : on n'accepte qu'un chemin relatif interne
-    (commence par un seul '/'), jamais une URL absolue ni un '//host' protocol-relative.
+    Protects against open redirect: only an internal relative path is accepted
+    (starts with a single '/'), never an absolute URL nor a protocol-relative '//host'.
     """
     if not target:
         return url_for("dashboard.index")
-    # Rejette les URLs absolues (http://…), protocol-relative (//…) et les backslashs.
+    # Reject absolute URLs (http://…), protocol-relative (//…) and backslashes.
     if target.startswith("//") or "://" in target or "\\" in target:
         return url_for("dashboard.index")
     if not target.startswith("/"):
@@ -52,11 +52,11 @@ def register():
         if not nom or not email or not password:
             flash("Tous les champs sont obligatoires.", "danger")
             return render_template("auth/register.html")
-        # consentement RGPD (art. 13) : vérifié aussi côté serveur
+        # GDPR consent (art. 13): also checked server-side
         if not privacy_ok:
             flash("Vous devez accepter la politique de confidentialité pour créer un compte.", "danger")
             return render_template("auth/register.html")
-        # politique mot de passe CNIL 2022 : 12 car. + complexité
+        # CNIL 2022 password policy: 12 chars + complexity
         pwd_error = validate_password(password)
         if pwd_error:
             flash(pwd_error, "danger")
@@ -73,7 +73,7 @@ def register():
         db.session.commit()
 
         send_verification_code(email, nom, code)   # automatic email
-        # trace du consentement RGPD (horodaté par le log)
+        # GDPR consent trace (timestamped by the log)
         log_action(user.id, "register", {"email": email, "privacy_accepted": True})
         # keep the email in session to know which account to verify
         session["pending_email"] = email
@@ -96,7 +96,7 @@ def verify():
         return redirect(url_for("auth.register"))
 
     if request.method == "POST":
-        # anti-brute-force du code à 6 chiffres : 5 essais max / 15 min
+        # 6-digit code anti-brute-force: 5 attempts max / 15 min
         if is_blocked("otp", email):
             flash(BLOCKED_MESSAGE, "danger")
             return render_template("auth/verify.html", email=email)
@@ -138,7 +138,7 @@ def login():
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        # anti-brute-force : 5 échecs -> blocage temporaire 15 min (OWASP/ANSSI)
+        # anti-brute-force: 5 failures -> temporary 15-min block (OWASP/ANSSI)
         if is_blocked("login", email):
             flash(BLOCKED_MESSAGE, "danger")
             return render_template("auth/login.html")
@@ -156,7 +156,7 @@ def login():
             log_action(user.id, "login", {"email": email})
             return redirect(_safe_next(request.args.get("next")))
 
-        # échec : compté pour le blocage + journalisé (traçabilité sécurité)
+        # failure: counted toward the block + logged (security traceability)
         record_failure("login", email)
         log_action(user.id if user else None, "login_failed", {"email": email})
         flash("E-mail ou mot de passe incorrect.", "danger")
@@ -166,7 +166,7 @@ def login():
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
-    """Demande de réinitialisation : envoie un code à 6 chiffres par email."""
+    """Reset request: send a 6-digit code by email."""
     if current_user.is_authenticated:
         return redirect(url_for("dashboard.index"))
 
@@ -174,11 +174,11 @@ def forgot_password():
         email = (request.form.get("email") or "").strip().lower()
         user = User.query.filter_by(email=email).first()
         if user:
-            code = user.generate_verification_code()   # réutilise le circuit 6 chiffres (15 min)
+            code = user.generate_verification_code()   # reuses the 6-digit circuit (15 min)
             db.session.commit()
             send_password_reset_code(user.email, user.name, code)
             log_action(user.id, "password_reset_requested", {"email": email})
-        # Message identique que le compte existe ou non (anti-énumération d'emails)
+        # Same message whether the account exists or not (email enumeration prevention)
         session["reset_email"] = email
         flash("Si un compte existe avec cet e-mail, un code vient de vous être envoyé.", "info")
         return redirect(url_for("auth.reset_password"))
@@ -188,7 +188,7 @@ def forgot_password():
 
 @auth_bp.route("/reset-password", methods=["GET", "POST"])
 def reset_password():
-    """Saisie du code reçu + nouveau mot de passe."""
+    """Enter the received code + new password."""
     if current_user.is_authenticated:
         return redirect(url_for("dashboard.index"))
 
@@ -209,7 +209,7 @@ def reset_password():
             flash(pwd_error, "danger")
             return render_template("auth/reset.html", email=email)
 
-        # anti-brute-force du code à 6 chiffres : 5 essais max / 15 min
+        # 6-digit code anti-brute-force: 5 attempts max / 15 min
         if is_blocked("otp", email):
             flash(BLOCKED_MESSAGE, "danger")
             return render_template("auth/reset.html", email=email)
