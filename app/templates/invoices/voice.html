@@ -20,7 +20,7 @@
 
   <div class="voice-grid">
 
-    {# ─── Colonne micro ─── #}
+    {# ─── Microphone column ─── #}
     <div class="card voice-card">
       <form method="post" action="{{ url_for('invoices.voice_parse') }}" id="voice-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -43,7 +43,7 @@
       </form>
     </div>
 
-    {# ─── Colonne aide ─── #}
+    {# ─── Help column ─── #}
     <aside class="voice-aside card">
       <h2 class="voice-aside-title">
         <i data-lucide="lightbulb" style="width:18px;height:18px;vertical-align:-3px;"></i>
@@ -116,7 +116,7 @@
       var form = document.getElementById('voice-form');
       var csrf = form.querySelector('input[name="csrf_token"]').value;
 
-      // Enregistrement audio (MediaRecorder) — compatible tous navigateurs.
+      // Audio recording (MediaRecorder) — compatible with all browsers.
       if (!navigator.mediaDevices || !window.MediaRecorder) {
         status.textContent = "L'enregistrement audio n'est pas disponible sur ce navigateur.";
         micBtn.disabled = true; micBtn.style.opacity = 0.5;
@@ -158,7 +158,7 @@
         setRecording(false);
       }
 
-      // Envoie l'audio au serveur pour transcription (Whisper).
+      // Send the audio to the server for transcription (Whisper).
       function sendAudio(blob) {
         status.textContent = 'Transcription en cours…';
         micBtn.disabled = true;

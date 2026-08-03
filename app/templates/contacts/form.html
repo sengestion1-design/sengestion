@@ -44,10 +44,10 @@
   </div>
   {% endif %}
 
-  {# Mise en page : carte à gauche, formulaire à droite (pleine largeur) #}
+  {# Layout: card on the left, form on the right (full width) #}
   <div class="contact-form-grid {{ 'has-card' if the_card else 'no-card' }}">
 
-    {# ─── Colonne carte ─── #}
+    {# ─── Card column ─── #}
     {% if the_card %}
     <aside class="card scan-card-preview">
       <div class="scan-card-preview-label">
@@ -59,7 +59,7 @@
     </aside>
     {% endif %}
 
-    {# ─── Colonne formulaire ─── #}
+    {# ─── Form column ─── #}
     <div class="card">
     <form method="post"
           action="{{ url_for('contacts.update', contact_id=contact.id) if editing else url_for('contacts.create') }}">
@@ -115,7 +115,7 @@
         </div>
       </div>
 
-      {# Le statut de pipeline ne concerne que les prospects (piste commerciale) #}
+      {# The pipeline status only applies to prospects (sales leads) #}
       {% if the_kind == 'prospect' %}
       <div class="form-group">
         <label class="form-label" for="status">Statut du pipeline</label>
@@ -137,12 +137,12 @@
         <a href="{{ url_for(back_ep) }}" class="btn btn-ghost">Annuler</a>
       </div>
     </form>
-    </div>{# /card formulaire #}
+    </div>{# /form card #}
 
   </div>{# /contact-form-grid #}
 
   <style>
-    /* Bandeau info scan — jaune pâle (charte), discret, remplace le bandeau or imposant */
+    /* Scan info banner — pale yellow (brand), subtle, replaces the imposing gold banner */
     .scan-info-banner {
       display: flex; align-items: center; gap: 10px;
       padding: 12px 16px; margin-bottom: 20px;
@@ -151,37 +151,37 @@
     }
     .scan-info-banner i { width: 18px; height: 18px; flex-shrink: 0; color: var(--marine); }
 
-    /* Grille pleine largeur : carte à gauche, formulaire à droite */
+    /* Full-width grid: card on the left, form on the right */
     .contact-form-grid {
       display: grid;
       gap: var(--space-6);
-      align-items: start;    /* chaque card à sa hauteur naturelle */
+      align-items: start;    /* each card at its natural height */
       width: 100%;
     }
     .contact-form-grid.has-card { grid-template-columns: minmax(320px, 0.85fr) 2fr; }
     .contact-form-grid.no-card  { grid-template-columns: 1fr; }
     .contact-form-grid .card { margin: 0; }
 
-    /* Carte de visite — sticky, photo affichée en grand (remplit la card) */
+    /* Business card — sticky, photo displayed large (fills the card) */
     .scan-card-preview { position: sticky; top: calc(var(--navbar-height) + var(--space-6)); }
     .scan-card-preview-label {
       font-size: var(--text-sm); color: rgba(2, 26, 61, 0.62);
       font-weight: var(--weight-bold); margin-bottom: 14px; text-align: left;
     }
     .scan-card-preview-img {
-      display: block; width: 100%; height: auto;   /* la photo occupe toute la largeur de la card */
+      display: block; width: 100%; height: auto;   /* the photo takes the full width of the card */
       border-radius: var(--radius-btn);
       box-shadow: 0 4px 16px rgba(2, 26, 61, 0.12);
     }
 
-    /* Légende champs obligatoires */
+    /* Required fields legend */
     .form-required-hint {
       font-size: var(--text-sm); color: rgba(2, 26, 61, 0.62);
       margin-bottom: var(--space-5);
     }
     .form-required-hint .required { color: var(--marine); font-weight: var(--weight-bold); }
 
-    /* Responsive : une seule colonne sous 1024px */
+    /* Responsive: a single column below 1024px */
     @media (max-width: 1024px) {
       .contact-form-grid.has-card { grid-template-columns: 1fr; }
       .scan-card-preview { position: static; }

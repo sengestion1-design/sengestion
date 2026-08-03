@@ -24,7 +24,7 @@
     </div>
   </div>
 
-  {# ── Récap ── #}
+  {# ── Summary ── #}
   <div class="card" style="margin-bottom:20px;">
     <dl class="detail-grid">
       <div>
@@ -55,7 +55,7 @@
     </dl>
   </div>
 
-  {# ── Lignes ── #}
+  {# ── Line items ── #}
   <div class="card" style="padding:0; overflow:hidden; margin-bottom:20px;">
     <div class="table-wrap">
       <table class="table">
@@ -81,7 +81,7 @@
     </div>
   </div>
 
-  {# ── Totaux ── #}
+  {# ── Totals ── #}
   <div class="card" style="margin-bottom:20px;">
     <div style="max-width:360px; margin-left:auto;">
       <div class="total-row">
@@ -103,7 +103,7 @@
     </div>
   </div>
 
-  {# ── Paiements ── #}
+  {# ── Payments ── #}
   <div class="card" style="margin-bottom:20px;">
     <h2 class="card-title" style="margin-bottom:20px;">Paiements</h2>
 
@@ -184,7 +184,7 @@
     {% endif %}
   </div>
 
-  {# ── Suppression ── #}
+  {# ── Deletion ── #}
   <div style="text-align:right;">
     <form method="post" action="{{ url_for('invoices.delete', invoice_id=invoice.id) }}"
           style="display:inline;"

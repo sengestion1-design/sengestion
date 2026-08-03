@@ -4,7 +4,7 @@
 
 {% block page %}
 
-  {# ── En-tête de page ── #}
+  {# ── Page header ── #}
   <div style="margin-bottom:32px;">
     <h1 style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
                font-size:32px; font-weight:600; color:var(--marine); margin:0 0 6px;">
@@ -15,7 +15,7 @@
     </p>
   </div>
 
-  {# ── KPI tiles abonnements ── #}
+  {# ── Subscription KPI tiles ── #}
   <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
               gap:16px; margin-bottom:36px;">
 
@@ -37,7 +37,7 @@
                 color:var(--jaune-pale); margin:0;">Gérants inscrits</p>
     </div>
 
-    <!-- Essai -->
+    <!-- Trial -->
     <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px;
                 padding:22px 18px; box-shadow:0 1px 3px rgba(2,26,61,.07);
                 display:flex; flex-direction:column; gap:10px;">
@@ -56,7 +56,7 @@
                 color:var(--muted); margin:0;">En période d'essai</p>
     </div>
 
-    <!-- Actifs -->
+    <!-- Active -->
     <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px;
                 padding:22px 18px; box-shadow:0 1px 3px rgba(2,26,61,.07);
                 display:flex; flex-direction:column; gap:10px;">
@@ -75,7 +75,7 @@
                 color:var(--muted); margin:0;">Abonnements actifs</p>
     </div>
 
-    <!-- Expirés -->
+    <!-- Expired -->
     <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px;
                 padding:22px 18px; box-shadow:0 1px 3px rgba(2,26,61,.07);
                 display:flex; flex-direction:column; gap:10px;">
@@ -94,7 +94,7 @@
                 color:var(--muted); margin:0;">À renouveler</p>
     </div>
 
-    <!-- Suspendus -->
+    <!-- Suspended -->
     <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px;
                 padding:22px 18px; box-shadow:0 1px 3px rgba(2,26,61,.07);
                 display:flex; flex-direction:column; gap:10px;">
@@ -115,7 +115,7 @@
 
   </div>
 
-  {# ── Table des gérants ── #}
+  {# ── Managers table ── #}
   <div class="card" style="border-radius:12px; padding:28px;">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;">
       <div>

@@ -19,7 +19,7 @@
     <form method="post" action="{{ url_for('messages.send') }}" id="msg-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-      {# Destinataire #}
+      {# Recipient #}
       <div class="form-group">
         <label class="form-label" for="contact_id">Destinataire <span class="required">*</span></label>
         <select id="contact_id" name="contact_id" class="form-input" required>
@@ -37,7 +37,7 @@
         {% endif %}
       </div>
 
-      {# Modèles pré-écrits #}
+      {# Pre-written templates #}
       <div class="form-group">
         <label class="form-label">Modèle (optionnel)</label>
         <div class="msg-templates">
@@ -51,7 +51,7 @@
         </div>
       </div>
 
-      {# Objet #}
+      {# Subject #}
       <div class="form-group">
         <label class="form-label" for="subject">Objet <span class="required">*</span></label>
         <input type="text" id="subject" name="subject" class="form-input" required
@@ -102,7 +102,7 @@
         return (opt && opt.getAttribute('data-name')) || '';
       }
 
-      // Appliquer un modèle (en remplaçant {name} par le destinataire choisi)
+      // Apply a template (replacing {name} with the chosen recipient)
       document.querySelectorAll('.msg-template-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var name = currentName() || '{name}';

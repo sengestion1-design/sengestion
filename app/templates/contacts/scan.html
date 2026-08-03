@@ -20,25 +20,25 @@
 
   <div class="scan-grid">
 
-    {# ─── Colonne gauche : zone de dépôt ─── #}
+    {# ─── Left column: drop zone ─── #}
     <div class="card scan-card">
       <form method="post" action="{{ url_for('contacts.scan_upload') }}"
             enctype="multipart/form-data" id="scan-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        {# Zone de dépôt / sélection #}
+        {# Drop / selection zone #}
         <label for="card-input" class="scan-drop" id="scan-drop">
-          {# État initial : invitation à déposer #}
+          {# Initial state: invitation to drop a file #}
           <div class="scan-drop-inner" id="scan-placeholder">
             <span class="scan-drop-icon"><i data-lucide="scan-line"></i></span>
             <p class="scan-drop-title">Déposez une image ici ou cliquez pour choisir</p>
             <p class="scan-drop-sub">JPG, PNG, WebP ou photo iPhone (HEIC) — carte bien éclairée et nette</p>
           </div>
 
-          {# État "carte ajoutée" : aperçu + confirmation (masqué au départ) #}
+          {# "card added" state: preview + confirmation (hidden initially) #}
           <div class="scan-preview-wrap" id="scan-preview-wrap" style="display:none;">
             <img id="scan-preview" class="scan-preview" alt="Aperçu de la carte" style="display:none;">
-            {# Vignette de remplacement quand l'aperçu n'est pas affichable (HEIC iPhone) #}
+            {# Fallback thumbnail when the preview cannot be displayed (iPhone HEIC) #}
             <div class="scan-fileicon" id="scan-fileicon" style="display:none;">
               <i data-lucide="file-image"></i>
               <span>Aperçu indisponible pour ce format,<br>mais la carte sera bien analysée.</span>
@@ -66,7 +66,7 @@
       </form>
     </div>
 
-    {# ─── Colonne droite : mode d'emploi ─── #}
+    {# ─── Right column: instructions ─── #}
     <aside class="scan-aside card">
       <h2 class="scan-aside-title">
         <i data-lucide="sparkles" style="width:18px;height:18px;vertical-align:-3px;"></i>
@@ -110,7 +110,7 @@
   </div>
 
   <style>
-    /* Grille pleine largeur : dépôt (2fr) + mode d'emploi (1fr) */
+    /* Full-width grid: drop zone (2fr) + instructions (1fr) */
     .scan-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -134,7 +134,7 @@
       transition: border-color var(--duration-fast), background var(--duration-fast);
     }
     .scan-drop:hover, .scan-drop.is-drag { border-color: var(--or); background: var(--jaune-pale); }
-    /* Quand une carte est chargée : bordure pleine + fond blanc pour bien voir l'image */
+    /* When a card is loaded: solid border + white background to see the image clearly */
     .scan-drop.has-file { border-style: solid; border-color: var(--or); background: #fff; cursor: default; }
     .scan-drop-icon {
       display: inline-flex; align-items: center; justify-content: center;
@@ -145,14 +145,14 @@
     .scan-drop-title { font-size: var(--text-lg); font-weight: var(--weight-bold); color: var(--marine); }
     .scan-drop-sub { font-size: var(--text-sm); color: var(--muted); margin-top: 6px; }
 
-    /* Aperçu de la carte ajoutée */
+    /* Preview of the added card */
     .scan-preview-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
     .scan-preview {
       max-height: 360px; max-width: 100%; width: auto;
       border-radius: var(--radius-btn);
       box-shadow: 0 4px 16px rgba(2, 26, 61, 0.12);
     }
-    /* Vignette de remplacement (HEIC non affichable par le navigateur) */
+    /* Fallback thumbnail (HEIC not displayable by the browser) */
     .scan-fileicon {
       display: flex; flex-direction: column; align-items: center; gap: 12px;
       padding: 32px 24px; text-align: center;
@@ -178,7 +178,7 @@
     .scan-actions { display: flex; gap: 12px; margin-top: 24px; align-items: center; flex-wrap: wrap; }
     #scan-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Panneau latéral — mode d'emploi */
+    /* Side panel — instructions */
     .scan-aside { margin: 0; }
     .scan-aside-title {
       font-family: var(--font-display);
@@ -207,7 +207,7 @@
     }
     .scan-privacy { font-size: var(--text-sm); color: var(--muted); margin-top: 18px; }
 
-    /* Responsive : une seule colonne sous 1024px */
+    /* Responsive: a single column below 1024px */
     @media (max-width: 1024px) {
       .scan-grid { grid-template-columns: 1fr; }
     }
@@ -231,7 +231,7 @@
         if (!file) return;
         filename.textContent = file.name || 'image';
 
-        // Basculer en état "carte ajoutée"
+        // Switch to the "card added" state
         placeholder.style.display = 'none';
         previewWrap.style.display = 'flex';
         drop.classList.add('has-file');
@@ -240,11 +240,11 @@
                      /heic|heif/i.test(file.type || '');
 
         if (isHeic) {
-          // Le navigateur ne sait pas afficher le HEIC → vignette de remplacement.
+          // The browser cannot display HEIC → fallback thumbnail.
           preview.style.display = 'none';
           fileIcon.style.display = 'flex';
         } else {
-          // Aperçu réel de l'image.
+          // Actual image preview.
           fileIcon.style.display = 'none';
           var reader = new FileReader();
           reader.onload = function (e) {
@@ -258,7 +258,7 @@
           reader.readAsDataURL(file);
         }
 
-        // Activer le bouton et adapter son libellé
+        // Enable the button and adjust its label
         submit.disabled = false;
         submitLabel.textContent = 'Analyser cette carte';
 
@@ -281,7 +281,7 @@
         if (input.files && input.files[0]) showFile(input.files[0]);
       });
 
-      // Bouton "Changer d'image" — sans rouvrir la boîte de dépôt (stopPropagation)
+      // "Changer d'image" button — without reopening the drop box (stopPropagation)
       changeBtn.addEventListener('click', function (e) {
         e.preventDefault(); e.stopPropagation();
         resetFile();
@@ -301,7 +301,7 @@
         }
       });
 
-      // Feedback pendant l'analyse (l'appel IA peut prendre quelques secondes)
+      // Feedback during analysis (the AI call can take a few seconds)
       document.getElementById('scan-form').addEventListener('submit', function () {
         submit.disabled = true;
         submitLabel.textContent = 'Analyse en cours…';

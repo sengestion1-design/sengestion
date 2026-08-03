@@ -60,7 +60,7 @@
 
   </div>
 
-  {# ── Filtres ── #}
+  {# ── Filters ── #}
   <div class="card" style="margin-bottom:24px;">
     <form method="get" action="{{ url_for('expenses.index') }}"
           style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
@@ -93,7 +93,7 @@
     </form>
   </div>
 
-  {# ── Tableau des dépenses ── #}
+  {# ── Expenses table ── #}
   <div class="card" style="padding:0; overflow:hidden;">
     {% if expenses %}
     <div class="table-wrap">
