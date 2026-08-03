@@ -1,6 +1,6 @@
 #!/bin/sh
-# Point d'entrée du conteneur SenGestion :
-# 1. attend que MySQL soit prêt, 2. crée les tables + admin, 3. lance gunicorn.
+# SenGestion container entry point:
+# 1. wait for MySQL to be ready, 2. create tables + admin, 3. start gunicorn.
 set -e
 
 echo "Attente de MySQL (${DB_HOST}:${DB_PORT})..."
