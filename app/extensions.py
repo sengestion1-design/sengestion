@@ -1,4 +1,4 @@
-"""Extensions partagées de l'application (initialisées dans la factory)."""
+"""Shared application extensions (initialized in the factory)."""
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -6,11 +6,11 @@ from flask_wtf import CSRFProtect
 from flask_mail import Mail
 from pymongo import MongoClient
 
-# --- MySQL / relationnel ---
+# --- MySQL / relational ---
 db = SQLAlchemy()
 migrate = Migrate()
 
-# --- Auth & sécurité ---
+# --- Auth & security ---
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 login_manager.login_message = None
@@ -21,16 +21,16 @@ mail = Mail()
 
 
 class Mongo:
-    """Petit wrapper autour de PyMongo, initialisé dans la factory.
+    """Small wrapper around PyMongo, initialized in the factory.
 
-    Usage : from app.extensions import mongo ; mongo.db.logs.insert_one(...)
+    Usage: from app.extensions import mongo ; mongo.db.logs.insert_one(...)
     """
 
     client: MongoClient = None
     db = None
 
     def init_app(self, app):
-        # timeouts courts : si MongoDB est absent en dev, l'app ne bloque pas
+        # short timeouts: if MongoDB is absent in dev, the app does not block
         self.client = MongoClient(
             app.config["MONGO_URI"],
             serverSelectionTimeoutMS=800,

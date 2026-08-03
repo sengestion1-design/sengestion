@@ -1,11 +1,11 @@
-"""CompanySettings model (MySQL) — paramètres entreprise & email par gérant.
+"""CompanySettings model (MySQL) — per-manager company & email settings.
 
-Une ligne par utilisateur (relation 1-1 avec User). Alimente :
-- l'en-tête et le pied des PDF (devis/factures) : nom, adresse, logo, cachet, signature ;
-- la signature des emails envoyés aux contacts.
+One row per user (1-1 relationship with User). Feeds:
+- the header and footer of PDFs (quotes/invoices): name, address, logo, stamp, signature;
+- the signature of emails sent to contacts.
 
-Les chemins d'images (logo, signature, cachet) sont relatifs à /static
-(ex. "uploads/settings/u1-logo-xxxx.png").
+Image paths (logo, signature, stamp) are relative to /static
+(e.g. "uploads/settings/u1-logo-xxxx.png").
 """
 from datetime import datetime
 
@@ -17,38 +17,38 @@ class CompanySettings(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"),
-                        unique=True, nullable=False)          # 1-1 avec le gérant
+                        unique=True, nullable=False)          # 1-1 with the manager
 
-    # --- Identité entreprise ---
+    # --- Company identity ---
     company_name = db.Column(db.String(150))
     address = db.Column(db.Text)
     phone = db.Column(db.String(40))
     email = db.Column(db.String(150))
     website = db.Column(db.String(150))
-    ninea = db.Column(db.String(50))                          # identifiant fiscal SN
-    rccm = db.Column(db.String(50))                           # registre du commerce SN
-    rc = db.Column(db.String(50))                             # numéro RC
-    legal_form = db.Column(db.String(50))                     # forme juridique (SARL, SA…)
-    capital = db.Column(db.String(50))                        # capital social
+    ninea = db.Column(db.String(50))                          # SN tax identifier
+    rccm = db.Column(db.String(50))                           # SN trade register
+    rc = db.Column(db.String(50))                             # RC number
+    legal_form = db.Column(db.String(50))                     # legal form (SARL, SA…)
+    capital = db.Column(db.String(50))                        # share capital
 
-    # --- Images (chemins relatifs à /static) ---
+    # --- Images (paths relative to /static) ---
     logo = db.Column(db.String(255))
-    # Cachet portant la signature (un seul geste : on signe sur le cachet).
+    # Stamp bearing the signature (a single gesture: one signs on the stamp).
     stamp = db.Column(db.String(255))
 
-    # --- Mentions & pied de page PDF ---
-    footer_note = db.Column(db.Text)                          # ex. conditions de paiement
+    # --- PDF notices & footer ---
+    footer_note = db.Column(db.Text)                          # e.g. payment terms
 
-    # --- Réglages email ---
-    email_sender_name = db.Column(db.String(120))             # nom affiché à l'envoi
-    email_signature = db.Column(db.Text)                      # ajoutée en bas des emails
+    # --- Email settings ---
+    email_sender_name = db.Column(db.String(120))             # name displayed when sending
+    email_signature = db.Column(db.Text)                      # appended at the bottom of emails
 
     updated_at = db.Column(db.DateTime, default=datetime.utcnow,
                            onupdate=datetime.utcnow)
 
     @classmethod
     def get_or_create(cls, user_id: int) -> "CompanySettings":
-        """Retourne les paramètres du gérant, en créant une ligne vide au besoin."""
+        """Return the manager's settings, creating an empty row if needed."""
         s = cls.query.filter_by(user_id=user_id).first()
         if s is None:
             s = cls(user_id=user_id)

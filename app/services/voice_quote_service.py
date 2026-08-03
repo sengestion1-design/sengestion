@@ -1,13 +1,13 @@
-"""IA service — création de devis par commande vocale.
+"""AI service — quote creation by voice command.
 
-Le texte dicté par le gérant (transcrit côté navigateur via la Web Speech API)
-est envoyé à Claude, qui en extrait un devis structuré : nom du client + lignes
-(désignation, quantité, prix unitaire). Le résultat pré-remplit le formulaire de
-devis, que le gérant vérifie avant d'enregistrer.
+The text dictated by the manager (transcribed browser-side via the Web Speech API)
+is sent to Claude, which extracts a structured quote from it: customer name + line
+items (description, quantity, unit price). The result pre-fills the quote form,
+which the manager verifies before saving.
 
-Fonctionnalité IA "wow" (RNCP), isolée dans un service pour garder les routes
-minces. Toutes les erreurs (clé manquante, API, texte inexploitable) renvoient
-un résultat (ok=False, error=...) au lieu de lever une exception.
+"Wow" AI feature (RNCP), isolated in a service to keep the routes thin.
+All errors (missing key, API, unusable text) return a
+(ok=False, error=...) result instead of raising an exception.
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from flask import current_app
 
 
 def _prompt(transcript: str, customer_names: list[str]) -> str:
-    """Construit l'instruction envoyée à Claude."""
+    """Build the instruction sent to Claude."""
     names = ", ".join(customer_names) if customer_names else "(aucun client enregistré)"
     return (
         "Tu es un assistant qui transforme une commande vocale en devis structuré, "
@@ -43,11 +43,11 @@ def _prompt(transcript: str, customer_names: list[str]) -> str:
 
 
 def parse_voice_quote(transcript: str, customer_names: list[str] | None = None) -> dict:
-    """Transforme un texte dicté en devis structuré via Claude.
+    """Turn dictated text into a structured quote via Claude.
 
-    Retourne :
+    Returns:
       {"ok": True,  "customer_name": str, "items": [{description, quantity, unit_price}]}
-      {"ok": False, "error": "message utilisateur"}
+      {"ok": False, "error": "user-facing message"}
     """
     transcript = (transcript or "").strip()
     if not transcript:
@@ -72,11 +72,11 @@ def parse_voice_quote(transcript: str, customer_names: list[str] | None = None) 
             messages=[{"role": "user",
                        "content": _prompt(transcript, customer_names or [])}],
         )
-    except anthropic.APIError as exc:  # réseau / quota / API
+    except anthropic.APIError as exc:  # network / quota / API
         current_app.logger.warning("Claude voice error: %s", exc)
         return {"ok": False,
                 "error": "Le service IA est momentanément indisponible. Réessayez."}
-    except Exception as exc:  # noqa: BLE001 - garde-fou
+    except Exception as exc:  # noqa: BLE001 - safety net
         current_app.logger.warning("Claude voice unexpected error: %s", exc)
         return {"ok": False, "error": "Impossible d'interpréter la commande vocale."}
 
@@ -93,7 +93,7 @@ def parse_voice_quote(transcript: str, customer_names: list[str] | None = None) 
     except json.JSONDecodeError:
         return {"ok": False, "error": "Réponse IA illisible. Réessayez."}
 
-    # Normalisation défensive des lignes.
+    # Defensive normalization of the line items.
     items = []
     for it in (data.get("items") or []):
         desc = str(it.get("description", "")).strip()

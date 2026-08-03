@@ -1,6 +1,6 @@
-"""Initialisation de la base : crée les tables MySQL + un compte admin de test.
+"""Database initialization: creates the MySQL tables + a test admin account.
 
-Usage : python init_db.py
+Usage: python init_db.py
 """
 from app import create_app
 from app.extensions import db
@@ -15,7 +15,7 @@ with app.app_context():
     if not User.query.filter_by(email="admin@sengestion.sn").first():
         admin = User(name="Administrateur", email="admin@sengestion.sn",
                      role="admin", status="active", email_verified=True)
-        admin.set_password("admin1234")   # à changer !
+        admin.set_password("admin1234")   # change this!
         db.session.add(admin)
         db.session.commit()
         print("✅ Compte admin créé : admin@sengestion.sn / admin1234")

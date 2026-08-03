@@ -1,11 +1,11 @@
-"""Service de transcription audio (Whisper local).
+"""Audio transcription service (local Whisper).
 
-Transcrit un fichier audio (envoyé par le navigateur via MediaRecorder) en texte,
-avec le modèle Whisper d'OpenAI exécuté LOCALEMENT (pas d'API cloud, pas de coût).
-Compatible tous navigateurs (Safari, Chrome, mobile) contrairement à la Web
-Speech API. ffmpeg est requis (déjà présent) pour décoder l'audio du navigateur.
+Transcribes an audio file (sent by the browser via MediaRecorder) into text,
+using OpenAI's Whisper model run LOCALLY (no cloud API, no cost).
+Compatible with all browsers (Safari, Chrome, mobile) unlike the Web
+Speech API. ffmpeg is required (already present) to decode the browser audio.
 
-Le modèle est chargé une seule fois puis mis en cache (coûteux à charger).
+The model is loaded once then cached (expensive to load).
 """
 from __future__ import annotations
 
@@ -14,9 +14,9 @@ import tempfile
 
 from flask import current_app
 
-# Cache module-level du modèle Whisper (chargement long : une seule fois).
-# 'base' : ~10x plus rapide que 'small' sur CPU (~2-3s), qualité suffisante car
-# Claude corrige ensuite les noms via la liste des clients existants.
+# Module-level cache of the Whisper model (long load: only once).
+# 'base': ~10x faster than 'small' on CPU (~2-3s), sufficient quality since
+# Claude then corrects names using the list of existing customers.
 _MODEL = None
 _MODEL_NAME = "base"
 
@@ -30,36 +30,36 @@ def _get_model():
 
 
 def preload_model_async():
-    """Précharge le modèle Whisper en arrière-plan au démarrage de l'app,
-    pour que la première transcription soit rapide (pas de latence de chargement)."""
+    """Preload the Whisper model in the background at app startup,
+    so the first transcription is fast (no loading latency)."""
     import threading
 
     def _load():
         try:
             _get_model()
         except Exception:
-            pass  # best-effort : si ça échoue, le chargement se fera à la 1re requête
+            pass  # best-effort: if it fails, loading will happen on the 1st request
 
     threading.Thread(target=_load, daemon=True).start()
 
 
 def transcribe_audio(audio_bytes: bytes, filename: str = "audio.webm") -> dict:
-    """Transcrit un audio en texte français.
+    """Transcribe audio into French text.
 
-    Retourne :
+    Returns:
       {"ok": True,  "text": "..."}
-      {"ok": False, "error": "message utilisateur"}
+      {"ok": False, "error": "user-facing message"}
     """
     if not audio_bytes:
         return {"ok": False, "error": "Aucun audio reçu."}
 
     try:
-        import whisper  # noqa: F401  (vérifie la dépendance)
+        import whisper  # noqa: F401  (checks the dependency)
     except ImportError:
         return {"ok": False,
                 "error": "Module de transcription indisponible sur le serveur."}
 
-    # Écrire l'audio dans un fichier temporaire (Whisper/ffmpeg lit un chemin).
+    # Write the audio to a temporary file (Whisper/ffmpeg reads a path).
     ext = os.path.splitext(filename)[1] or ".webm"
     tmp_path = None
     try:
@@ -74,7 +74,7 @@ def transcribe_audio(audio_bytes: bytes, filename: str = "audio.webm") -> dict:
             return {"ok": False,
                     "error": "Aucune parole détectée. Parlez plus près du micro et réessayez."}
         return {"ok": True, "text": text}
-    except Exception as exc:  # noqa: BLE001 - garde-fou
+    except Exception as exc:  # noqa: BLE001 - safety net
         current_app.logger.warning("Transcription error: %s", exc, exc_info=True)
         return {"ok": False,
                 "error": "Impossible de transcrire l'audio. Réessayez ou saisissez manuellement."}

@@ -1,12 +1,12 @@
-"""Module Messages / Relances — envoi d'emails aux contacts.
+"""Messages / Reminders module — sending emails to contacts.
 
-Sécurité (OWASP contrôle d'accès) :
-- @login_required + @subscription_required sur toutes les routes.
-- Chaque message et chaque contact appartient au gérant : filtrage systématique
-  par user_id = current_user.id (jamais les données d'un autre gérant).
-- CSRF assuré globalement par Flask-WTF sur tous les POST.
-- Validation serveur (destinataire avec email, objet et corps requis).
-- Envois journalisés via log_action (MongoDB).
+Security (OWASP access control):
+- @login_required + @subscription_required on all routes.
+- Every message and contact belongs to the manager: systematic filtering
+  by user_id = current_user.id (never another manager's data).
+- CSRF handled globally by Flask-WTF on all POSTs.
+- Server-side validation (recipient with email, subject and body required).
+- Sends logged via log_action (MongoDB).
 """
 from datetime import datetime
 
@@ -25,7 +25,7 @@ from app.utils.access import subscription_required
 messages_bp = Blueprint("messages", __name__, url_prefix="/messages")
 
 
-# Modèles de message pré-écrits ({name} = prénom/nom du contact, remplacé côté JS).
+# Pre-written message templates ({name} = contact's first/last name, replaced on the JS side).
 MESSAGE_TEMPLATES = {
     "contact": {
         "label": "Prise de contact",
@@ -66,7 +66,7 @@ MESSAGE_TEMPLATES = {
 # ─────────────────────────── Helpers ───────────────────────────
 
 def _owned_contact_or_404(contact_id: int) -> Contact:
-    """Retourne le contact s'il appartient au gérant courant, sinon 404."""
+    """Return the contact if it belongs to the current manager, or 404."""
     contact = Contact.query.filter_by(
         id=contact_id, user_id=current_user.id
     ).first()
@@ -85,18 +85,18 @@ def _clean(value, maxlen):
 @login_required
 @subscription_required
 def index():
-    """Page Relances : historique de tous les messages envoyés par le gérant."""
+    """Reminders page: history of every message sent by the manager."""
     msgs = (Message.query
             .filter_by(user_id=current_user.id)
             .order_by(Message.created_at.desc())
             .all())
-    # Contacts (avec email) pour composer un nouveau message.
+    # Contacts (with an email) to compose a new message.
     contacts = (Contact.query
                 .filter_by(user_id=current_user.id)
                 .filter(Contact.email.isnot(None), Contact.email != "")
                 .order_by(Contact.name)
                 .all())
-    # Résoudre le nom du destinataire de chaque message.
+    # Resolve the recipient name of each message.
     contact_map = {c.id: c for c in Contact.query.filter_by(user_id=current_user.id).all()}
     return render_template("messages/index.html",
                            messages=msgs, contacts=contacts,
@@ -107,7 +107,7 @@ def index():
 @login_required
 @subscription_required
 def new():
-    """Formulaire de composition. ?contact_id=… pré-sélectionne un destinataire."""
+    """Compose form. ?contact_id=… pre-selects a recipient."""
     contact = None
     cid = request.args.get("contact_id", type=int)
     if cid:
@@ -126,7 +126,7 @@ def new():
 @login_required
 @subscription_required
 def send():
-    """Envoie l'email au contact et enregistre le message (envoyé/échec)."""
+    """Send the email to the contact and record the message (sent/failed)."""
     contact_id = request.form.get("contact_id", type=int)
     contact = _owned_contact_or_404(contact_id) if contact_id else None
     if contact is None or not contact.email:
@@ -139,12 +139,12 @@ def send():
         flash("L'objet et le message sont obligatoires.", "danger")
         return redirect(url_for("messages.new", contact_id=contact.id))
 
-    # Personnalisation {name} -> prénom si dispo, sinon nom.
+    # {name} personalization -> first name if available, else last name.
     display_name = contact.first_name or contact.name
     subject = subject.replace("{name}", display_name)
     body = body.replace("{name}", display_name)
 
-    # Signature email des paramètres de l'entreprise (si définie).
+    # Email signature from the company settings (if defined).
     from app.models.settings import CompanySettings
     cfg = CompanySettings.query.filter_by(user_id=current_user.id).first()
     if cfg and cfg.email_signature:
@@ -178,7 +178,7 @@ def send():
 @login_required
 @subscription_required
 def resend(message_id):
-    """Renvoie un message existant (relance)."""
+    """Resend an existing message (reminder)."""
     msg = Message.query.filter_by(id=message_id, user_id=current_user.id).first()
     if msg is None:
         abort(404)

@@ -1,10 +1,10 @@
-"""Pages légales publiques — conformité RGPD (REAC DWWM : mise en place
-des mentions légales liées au Règlement Général sur la Protection des Données).
+"""Public legal pages — GDPR compliance (REAC DWWM: setting up the legal
+notices required by the General Data Protection Regulation).
 
-Trois pages accessibles sans connexion :
-- /mentions-legales   : éditeur, hébergeur, propriété intellectuelle
-- /confidentialite    : politique de confidentialité (données, finalités, droits)
-- /cookies            : politique cookies (un seul cookie technique de session)
+Three pages accessible without login:
+- /mentions-legales   : publisher, host, intellectual property
+- /confidentialite    : privacy policy (data, purposes, rights)
+- /cookies            : cookie policy (a single technical session cookie)
 """
 from flask import Blueprint, render_template
 

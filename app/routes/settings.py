@@ -1,10 +1,10 @@
-"""Module Paramètres — identité entreprise, logo/signature/cachet, réglages email.
+"""Settings module — company identity, logo/signature/stamp, email settings.
 
-Sécurité :
+Security:
 - @login_required + @subscription_required.
-- Chaque gérant n'accède qu'à SES paramètres (relation 1-1 via user_id).
-- Uploads d'images normalisés (Pillow) + noms générés (uuid) → pas de path traversal.
-- CSRF global (Flask-WTF) sur le POST.
+- Each manager only accesses THEIR settings (1-1 relationship via user_id).
+- Normalized image uploads (Pillow) + generated names (uuid) → no path traversal.
+- Global CSRF (Flask-WTF) on the POST.
 """
 import io
 import os
@@ -22,7 +22,7 @@ from app.utils.access import subscription_required
 
 settings_bp = Blueprint("settings", __name__, url_prefix="/settings")
 
-# Champs image gérés (colonnes) : logo + cachet signé.
+# Managed image fields (columns): logo + signed stamp.
 _IMAGE_FIELDS = ("logo", "stamp")
 
 
@@ -31,11 +31,11 @@ def _clean(value, maxlen):
 
 
 def _save_setting_image(file, field: str) -> str | None:
-    """Normalise et enregistre une image de paramètre. Retourne le chemin
-    relatif à /static, ou None si pas de fichier / échec.
+    """Normalize and save a settings image. Returns the path relative
+    to /static, or None if no file / failure.
 
-    Le logo/la signature/le cachet gardent la transparence (PNG) — utile pour
-    superposer un cachet sur un PDF.
+    The logo/signature/stamp keep transparency (PNG) — useful for
+    overlaying a stamp on a PDF.
     """
     if file is None or not file.filename:
         return None
@@ -52,7 +52,7 @@ def _save_setting_image(file, field: str) -> str | None:
             return None
         img = Image.open(io.BytesIO(raw))
         img.load()
-        # On garde la transparence si présente (RGBA), sinon RGB.
+        # Keep transparency if present (RGBA), else RGB.
         fmt, ext = ("PNG", "png") if img.mode in ("RGBA", "LA", "P") else ("JPEG", "jpg")
         if fmt == "JPEG" and img.mode != "RGB":
             img = img.convert("RGB")
@@ -67,7 +67,7 @@ def _save_setting_image(file, field: str) -> str | None:
             fh.write(out.getvalue())
         return f"{rel_dir}/{fname}"
     except Exception:
-        current_app.logger.warning("Échec upload image paramètre (%s)", field, exc_info=True)
+        current_app.logger.warning("Failed to upload settings image (%s)", field, exc_info=True)
         return None
 
 
@@ -75,7 +75,7 @@ def _save_setting_image(file, field: str) -> str | None:
 @login_required
 @subscription_required
 def index():
-    """Affiche la page des paramètres de l'entreprise du gérant."""
+    """Display the manager's company settings page."""
     s = CompanySettings.get_or_create(current_user.id)
     return render_template("settings/index.html", s=s)
 
@@ -84,10 +84,10 @@ def index():
 @login_required
 @subscription_required
 def update():
-    """Enregistre les paramètres (texte + uploads d'images)."""
+    """Save the settings (text + image uploads)."""
     s = CompanySettings.get_or_create(current_user.id)
 
-    # --- Champs texte ---
+    # --- Text fields ---
     s.company_name = _clean(request.form.get("company_name"), 150)
     s.address = (request.form.get("address") or "").strip()
     s.phone = _clean(request.form.get("phone"), 40)
@@ -102,9 +102,9 @@ def update():
     s.email_sender_name = _clean(request.form.get("email_sender_name"), 120)
     s.email_signature = (request.form.get("email_signature") or "").strip()
 
-    # --- Images (uploadées seulement si un nouveau fichier est fourni) ---
+    # --- Images (uploaded only if a new file is provided) ---
     for field in _IMAGE_FIELDS:
-        # Suppression explicite demandée ?
+        # Explicit removal requested?
         if request.form.get(f"remove_{field}") == "1":
             old = getattr(s, field)
             if old and old.startswith("uploads/settings/") and ".." not in old:
@@ -116,7 +116,7 @@ def update():
             continue
         path = _save_setting_image(request.files.get(field), field)
         if path:
-            # remplacer l'ancienne image
+            # replace the old image
             old = getattr(s, field)
             if old and old.startswith("uploads/settings/") and ".." not in old:
                 try:

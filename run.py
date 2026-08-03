@@ -1,4 +1,4 @@
-"""Point d'entrée de l'application SenGestion."""
+"""SenGestion application entry point."""
 from app import create_app
 
 app = create_app("development")

@@ -1,4 +1,4 @@
-"""Route du tableau de bord (page protégée + abonnement requis)."""
+"""Dashboard route (protected page + subscription required)."""
 from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_required, current_user
 
@@ -13,7 +13,7 @@ dashboard_bp = Blueprint("dashboard", __name__)
 
 
 def _build_stats(user_id):
-    """KPIs affichés sur le tableau de bord (agrégats SQL)."""
+    """KPIs displayed on the dashboard (SQL aggregates)."""
     customers = db.session.query(Customer).filter_by(user_id=user_id).count()
     quotes = db.session.query(Quote).filter_by(user_id=user_id).count()
     invoices = db.session.query(Invoice).filter_by(user_id=user_id).count()
@@ -36,17 +36,17 @@ def _build_stats(user_id):
 @login_required
 @subscription_required
 def index():
-    # l'admin a son propre espace
+    # the admin has their own area
     if current_user.role == "admin":
         return redirect(url_for("admin.index"))
 
     try:
         stats = _build_stats(current_user.id)
     except Exception:
-        # tolérant : si un agrégat échoue, on affiche des zéros plutôt que planter
+        # tolerant: if an aggregate fails, display zeros rather than crashing
         stats = {"customers": 0, "quotes": 0, "invoices": 0, "balance": None}
 
-    # lecture NoSQL : dernières activités de l'utilisateur connecté (CP6)
+    # NoSQL read: latest activities of the logged-in user (CP6)
     recent_logs = get_recent(limit=10, user_id=current_user.id)
     for log in recent_logs:
         log["label"], log["readable_details"] = describe(log)
