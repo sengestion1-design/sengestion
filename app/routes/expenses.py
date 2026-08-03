@@ -1,4 +1,4 @@
-"""Charges & Expenses module — expenses + categories CRUD.
+"""Charges & Expenses module - expenses + categories CRUD.
 
 Security (OWASP access control):
 - @login_required + @subscription_required on all routes.
@@ -30,7 +30,7 @@ DEFAULT_CATEGORIES = [
 ]
 
 
-# ─────────────────────────── Helpers ───────────────────────────
+# --------------------------- Helpers ---------------------------
 
 def _ensure_default_categories():
     """Create the current manager's default categories if none exist yet.
@@ -89,7 +89,7 @@ def _owned_expense_or_404(expense_id):
     return expense
 
 
-# ─────────────────────────── Expenses ───────────────────────────
+# --------------------------- Expenses ---------------------------
 
 @expenses_bp.route("/")
 @login_required
@@ -371,7 +371,7 @@ def delete(expense_id):
     return redirect(url_for("expenses.index"))
 
 
-# ─────────────────────────── Categories ───────────────────────────
+# --------------------------- Categories ---------------------------
 
 @expenses_bp.route("/categories")
 @login_required

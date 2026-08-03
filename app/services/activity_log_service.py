@@ -1,4 +1,4 @@
-"""NoSQL data-access service (MongoDB) — competency CP6.
+"""NoSQL data-access service (MongoDB) - competency CP6.
 
 Activity logs are high-volume, semi-structured, relation-free data: an ideal
 NoSQL use case. Each user action (login, quote creation, etc.) is stored as a
@@ -19,7 +19,7 @@ COLLECTION = "activity_logs"
 
 
 def log_action(user_id, action: str, details: dict | None = None):
-    """CREATE — store a user action in MongoDB (best-effort)."""
+    """CREATE - store a user action in MongoDB (best-effort)."""
     doc = {
         "user_id": user_id,
         "action": action,
@@ -35,9 +35,9 @@ def log_action(user_id, action: str, details: dict | None = None):
 
 
 def get_recent(limit: int = 20, user_id: int | None = None) -> list[dict]:
-    """READ — latest actions, newest first (best-effort).
+    """READ - latest actions, newest first (best-effort).
 
-    When user_id is given, only that user's actions are returned — otherwise
+    When user_id is given, only that user's actions are returned - otherwise
     the dashboard would leak every account's activity to every viewer.
     """
     query = {"user_id": user_id} if user_id is not None else {}
@@ -88,7 +88,7 @@ def describe(log: dict) -> tuple[str, str]:
 
 
 def count_by_action(action: str) -> int:
-    """READ/aggregation — count occurrences of an action (best-effort)."""
+    """READ/aggregation - count occurrences of an action (best-effort)."""
     try:
         return mongo.db[COLLECTION].count_documents({"action": action})
     except Exception:  # noqa: BLE001

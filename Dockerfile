@@ -1,4 +1,4 @@
-# SenGestion — Flask application image
+# SenGestion - Flask application image
 FROM python:3.12-slim
 
 # ffmpeg: required by Whisper (voice transcription of quotes/invoices)

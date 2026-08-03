@@ -1,4 +1,4 @@
-"""Administrator area — manage managers' subscriptions.
+"""Administrator area - manage managers' subscriptions.
 
 Restricted to the 'admin' role. Lists all accounts, validates a yearly
 subscription, suspends or reactivates.

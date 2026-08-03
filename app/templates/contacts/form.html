@@ -47,7 +47,7 @@
   {# Layout: card on the left, form on the right (full width) #}
   <div class="contact-form-grid {{ 'has-card' if the_card else 'no-card' }}">
 
-    {# ─── Card column ─── #}
+    {# --- Card column --- #}
     {% if the_card %}
     <aside class="card scan-card-preview">
       <div class="scan-card-preview-label">
@@ -59,7 +59,7 @@
     </aside>
     {% endif %}
 
-    {# ─── Form column ─── #}
+    {# --- Form column --- #}
     <div class="card">
     <form method="post"
           action="{{ url_for('contacts.update', contact_id=contact.id) if editing else url_for('contacts.create') }}">
@@ -142,7 +142,7 @@
   </div>{# /contact-form-grid #}
 
   <style>
-    /* Scan info banner — pale yellow (brand), subtle, replaces the imposing gold banner */
+    /* Scan info banner - pale yellow (brand), subtle, replaces the imposing gold banner */
     .scan-info-banner {
       display: flex; align-items: center; gap: 10px;
       padding: 12px 16px; margin-bottom: 20px;
@@ -162,7 +162,7 @@
     .contact-form-grid.no-card  { grid-template-columns: 1fr; }
     .contact-form-grid .card { margin: 0; }
 
-    /* Business card — sticky, photo displayed large (fills the card) */
+    /* Business card - sticky, photo displayed large (fills the card) */
     .scan-card-preview { position: sticky; top: calc(var(--navbar-height) + var(--space-6)); }
     .scan-card-preview-label {
       font-size: var(--text-sm); color: rgba(2, 26, 61, 0.62);

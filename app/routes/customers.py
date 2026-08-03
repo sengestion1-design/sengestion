@@ -1,4 +1,4 @@
-"""Contacts & Customers module — CRUD routes.
+"""Contacts & Customers module - CRUD routes.
 
 Two blueprints:
   - customers_bp (/customers) : final customers (customer portfolio)
@@ -34,9 +34,9 @@ CONTACT_STATUSES = {
 }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 #  Helpers
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 def _clean(value: str | None, max_len: int) -> str | None:
     """Trim a form field and cap its length; empty string becomes None."""
     if value is None:
@@ -202,7 +202,7 @@ def _contacts_of_kind(kind: str):
     return query.order_by(Contact.created_at.desc()).all(), q
 
 
-# ── CONTACTS (address book) ──────────────────────────────────────────────────
+# -- CONTACTS (address book) --------------------------------------------------
 @contacts_bp.route("/")
 @login_required
 @subscription_required
@@ -213,7 +213,7 @@ def index():
                            statuses=CONTACT_STATUSES)
 
 
-# ── PROSPECTS (pipeline) ─────────────────────────────────────────────────────
+# -- PROSPECTS (pipeline) -----------------------------------------------------
 @contacts_bp.route("/prospects")
 @login_required
 @subscription_required
@@ -302,9 +302,9 @@ def promote(contact_id):
     return redirect(url_for("contacts.prospects"))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Business-card scan (AI — Claude Vision)
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
+#  Business-card scan (AI - Claude Vision)
+# ------------------------------------------------------------
 # Image extensions allowed at upload (defense in depth).
 _ALLOWED_IMG_EXT = {"jpg", "jpeg", "png", "webp", "gif"}
 
@@ -389,7 +389,7 @@ def scan_upload():
 
     # Normalization: EVERY image is converted to JPEG via Pillow.
     # This accepts iPhone photos (HEIC), uppercase extensions,
-    # files without an extension, etc. — and guarantees a format readable by the AI.
+    # files without an extension, etc. - and guarantees a format readable by the AI.
     image_bytes, filename, content_type = _normalize_image(raw_bytes, file.filename)
     if image_bytes is None:
         flash("Ce fichier n'est pas une image valide. "

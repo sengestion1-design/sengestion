@@ -1,4 +1,4 @@
-"""Email service (Gmail SMTP) — verification codes + messages to contacts."""
+"""Email service (Gmail SMTP) - verification codes + messages to contacts."""
 from flask import current_app
 from flask_mail import Message as MailMessage
 

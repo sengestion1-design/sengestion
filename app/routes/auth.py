@@ -1,4 +1,4 @@
-"""Authentication routes — security (CP3/CP7).
+"""Authentication routes - security (CP3/CP7).
 
 - Passwords hashed (never in clear text)
 - CSRF protection (Flask-WTF, enabled globally)

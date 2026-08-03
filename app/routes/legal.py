@@ -1,4 +1,4 @@
-"""Public legal pages — GDPR compliance (REAC DWWM: setting up the legal
+"""Public legal pages - GDPR compliance (REAC DWWM: setting up the legal
 notices required by the General Data Protection Regulation).
 
 Three pages accessible without login:

@@ -1,4 +1,4 @@
-"""Customer and Contact models (MySQL) — Contacts & Customers module."""
+"""Customer and Contact models (MySQL) - Contacts & Customers module."""
 from datetime import datetime
 
 from app.extensions import db

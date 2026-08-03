@@ -1,4 +1,4 @@
-"""Message model (MySQL) — Communication / Follow-up module."""
+"""Message model (MySQL) - Communication / Follow-up module."""
 from datetime import datetime
 
 from app.extensions import db

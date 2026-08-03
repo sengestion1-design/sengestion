@@ -1,4 +1,4 @@
-"""Quotes & Invoices module — full CRUD, line items, calculations, PDF, payments.
+"""Quotes & Invoices module - full CRUD, line items, calculations, PDF, payments.
 
 Two blueprints:
   - quotes_bp   (/quotes)   : quotes (creation with line items, PDF, conversion to invoice)
@@ -8,7 +8,7 @@ Security (OWASP access control):
 - @login_required + @subscription_required on ALL routes.
 - Every quote / invoice belongs to a manager: systematic filtering by
   user_id = current_user.id (a manager NEVER sees another's data).
-- CSRF handled globally by Flask-WTF (CSRFProtect) — token rendered in the forms.
+- CSRF handled globally by Flask-WTF (CSRFProtect) - token rendered in the forms.
 - Server-side input validation (owned customer, valid line items, amounts > 0).
 - Important actions logged via log_action (MongoDB, best-effort).
 
@@ -38,7 +38,7 @@ invoices_bp = Blueprint("invoices", __name__, url_prefix="/invoices")
 # Senegal VAT rate (configurable). 0.18 = 18%.
 TAX_RATE = Decimal("0.18")
 
-# Labels + badge colors per status — STRICT BRAND PALETTE (3 colors).
+# Labels + badge colors per status - STRICT BRAND PALETTE (3 colors).
 # Format: (label, background, text). Gold/pale yellow = background, text always navy.
 #   - positive (accepted / paid)  → pale yellow
 #   - in progress (sent/partial)  → gold background (brand)
@@ -64,9 +64,9 @@ PAYMENT_METHODS = {
 }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 #  Helpers
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 def _parse_decimal(raw, allow_zero=False):
     """Validate a decimal number. Returns Decimal(2) or None if invalid."""
     if raw is None:
@@ -282,9 +282,9 @@ def _amount_words(value):
     return (words[0].upper() + words[1:]) + " francs CFA"
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 #  QUOTES
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 @quotes_bp.route("/")
 @login_required
 @subscription_required
@@ -681,9 +681,9 @@ def to_invoice(quote_id):
     return redirect(url_for("invoices.show", invoice_id=invoice.id))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 #  INVOICES
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 @invoices_bp.route("/new")
 @login_required
 @subscription_required
@@ -1023,9 +1023,9 @@ def delete(invoice_id):
     return redirect(url_for("invoices.index"))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 #  PDF generation (reportlab)
-# ─────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
 def _build_document_pdf(title, number, doc_date, customer, items,
                         amount_excl, amount_incl, paid=None, due=None,
                         settings=None):
@@ -1049,7 +1049,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
 
-    # ── Title font: Palatino (brand). Fallback to Times if unavailable. ──
+    # -- Title font: Palatino (brand). Fallback to Times if unavailable. --
     # Try the font bundled in the project first, then the system one.
     def _register_palatino():
         candidates = [
@@ -1065,12 +1065,12 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                     return "Palatino", "Palatino-Bold"
                 except Exception:
                     continue
-        # Fallback: Times (built-in serif, close to Palatino — cf. CSS fallback)
+        # Fallback: Times (built-in serif, close to Palatino - cf. CSS fallback)
         return "Times-Roman", "Times-Bold"
 
     FONT_TITLE, FONT_TITLE_BOLD = _register_palatino()
 
-    # ── Body font: Arial (UI brand). Fallback to Helvetica if unavailable. ──
+    # -- Body font: Arial (UI brand). Fallback to Helvetica if unavailable. --
     def _register_arial():
         fdir = os.path.join(current_app.static_folder, "fonts")
         files = {
@@ -1103,7 +1103,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     FONT_BODY, FONT_BODY_BOLD, FONT_BODY_ITALIC = _register_arial()
 
-    # ── Palette — STRICT BRAND PALETTE, 3 colors (navy / gold / pale yellow) ──
+    # -- Palette - STRICT BRAND PALETTE, 3 colors (navy / gold / pale yellow) --
     # Neutrals are shades DERIVED from navy (not pure grays), to stay in the
     # brand spirit like the rest of the app (rgba(2,26,61,...)).
     MARINE = colors.HexColor("#021A3D")
@@ -1129,7 +1129,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         path = os.path.join(current_app.static_folder, rel)
         return path if os.path.exists(path) else None
 
-    # ── Issuer data ──
+    # -- Issuer data --
     brand_name = (settings.company_name if settings and settings.company_name else "SenGestion")
     addr = str(settings.address).replace("\n", ", ") if settings and settings.address else ""
     phone = settings.phone if settings else ""
@@ -1160,7 +1160,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         d_valid = (doc_date + timedelta(days=30)).strftime("%d/%m/%Y")
     is_devis = title.strip().upper().startswith("DEV")
 
-    # ── Styles (12 pt body text) ──
+    # -- Styles (12 pt body text) --
     st_eyebrow = ParagraphStyle("eb", fontName=FONT_BODY_BOLD, fontSize=9,
                                 textColor=INK_SOFT, leading=12)  # simulated letter-spacing
     st_label = ParagraphStyle("lbl", fontName=FONT_BODY_BOLD, fontSize=8.5,
@@ -1182,7 +1182,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     buffer = BytesIO()
 
-    # ── Header (cream background) + footer ──
+    # -- Header (cream background) + footer --
     def _decorate(canvas, doc_):
         canvas.saveState()
         # Cream header background
@@ -1202,7 +1202,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
                 img.drawOn(canvas, ML, PAGE_H - 20 * mm)
             except Exception:
                 pass
-        # Company name (brand title — Palatino, per brand guide)
+        # Company name (brand title - Palatino, per brand guide)
         canvas.setFillColor(MARINE)
         canvas.setFont(FONT_TITLE_BOLD, 20)          # Palatino 20 pt
         canvas.drawString(ML + 34 * mm, PAGE_H - 15 * mm, brand_name)
@@ -1241,7 +1241,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         if is_devis and d_valid:
             canvas.drawRightString(PAGE_W - MR, PAGE_H - 36 * mm, f"Valide jusqu'au {d_valid}")
 
-        # ── Footer ──
+        # -- Footer --
         canvas.setFillColor(HAIRLINE)
         canvas.rect(ML, 15 * mm, CONTENT_W, 0.6, fill=1, stroke=0)
         canvas.setFillColor(INK_SOFT)
@@ -1259,7 +1259,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     )
     story = []
 
-    # ── DESTINATAIRE eyebrow ──
+    # -- DESTINATAIRE eyebrow --
     def _eyebrow(text):
         # Clean typographic letter-spacing (charSpace): spaces the letters WITHOUT
         # conflating word spaces. A normal space still separates words properly.
@@ -1279,7 +1279,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(_eyebrow("DESTINATAIRE"))
     story.append(Spacer(1, 2 * mm))
 
-    # ── CLIENT card (bordered) | OBJET card (colored background) ──
+    # -- CLIENT card (bordered) | OBJET card (colored background) --
     cust_name = customer.name if customer else "-"
     cust_extra = []
     if customer:
@@ -1327,7 +1327,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(dest)
     story.append(Spacer(1, 4.5 * mm))
 
-    # ── Eyebrow + line-items table ──
+    # -- Eyebrow + line-items table --
     story.append(_eyebrow("DÉTAIL DES PRESTATIONS"))
     story.append(Spacer(1, 2.5 * mm))
 
@@ -1359,7 +1359,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(table)
     story.append(Spacer(1, 2.5 * mm))
 
-    # ── Boxed totals block (right-aligned) ──
+    # -- Boxed totals block (right-aligned) --
     tva = (Decimal(str(amount_incl or 0)) - Decimal(str(amount_excl or 0)))
     tva_pct = 0 if (amount_excl in (None, 0) or tva == 0) else int(TAX_RATE * 100)
     st_tl = ParagraphStyle("tl", fontName=FONT_BODY, fontSize=12, textColor=INK_SOFT, leading=16)
@@ -1415,7 +1415,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(box)
     story.append(Spacer(1, 2.5 * mm))
 
-    # ── CONDITIONS (side bar) ──
+    # -- CONDITIONS (side bar) --
     story.append(_eyebrow("CONDITIONS"))
     story.append(Spacer(1, 2 * mm))
     cond_txt = (str(settings.footer_note) if settings and settings.footer_note
@@ -1431,7 +1431,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(cond)
     story.append(Spacer(1, 3 * mm))
 
-    # ── Bottom block: signature (QUOTE) or stamp only (INVOICE) ──
+    # -- Bottom block: signature (QUOTE) or stamp only (INVOICE) --
     # On an INVOICE, nothing for the customer to sign (no "Bon pour accord", no
     # signature QR): only the stamp is shown (no redundant section title,
     # the "CACHET & SIGNATURE" label under the image is enough).
@@ -1480,7 +1480,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
 
     story.append(Spacer(1, 3 * mm))
 
-    # ── "Sign online" QR: only on the QUOTE (an invoice is not signed) ──
+    # -- "Sign online" QR: only on the QUOTE (an invoice is not signed) --
     if is_devis:
         try:
             import qrcode

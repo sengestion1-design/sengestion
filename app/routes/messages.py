@@ -1,4 +1,4 @@
-"""Messages / Reminders module — sending emails to contacts.
+"""Messages / Reminders module - sending emails to contacts.
 
 Security (OWASP access control):
 - @login_required + @subscription_required on all routes.
@@ -63,7 +63,7 @@ MESSAGE_TEMPLATES = {
 }
 
 
-# ─────────────────────────── Helpers ───────────────────────────
+# --------------------------- Helpers ---------------------------
 
 def _owned_contact_or_404(contact_id: int) -> Contact:
     """Return the contact if it belongs to the current manager, or 404."""
@@ -79,7 +79,7 @@ def _clean(value, maxlen):
     return (value or "").strip()[:maxlen]
 
 
-# ─────────────────────────── Routes ───────────────────────────
+# --------------------------- Routes ---------------------------
 
 @messages_bp.route("/")
 @login_required

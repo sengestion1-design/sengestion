@@ -1,4 +1,4 @@
-# SenGestion — full orchestration: Flask app + MySQL + MongoDB
+# SenGestion - full orchestration: Flask app + MySQL + MongoDB
 # Start:  docker compose up -d --build
 # Stop:   docker compose down          (data persists in the volumes)
 

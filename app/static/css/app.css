@@ -1,9 +1,9 @@
 /* =============================================================================
-   SenGestion — UI Components v3.0  ·  Minimaliste Premium
+   SenGestion - UI Components v3.0  ·  Minimaliste Premium
    Brand: Navy #021A3D | Gold #F2B10E | Pale yellow #E8E7A2
    RGAA rule: gold = BACKGROUND only. Text on gold = navy. NEVER gold/yellow text on light.
-   STRICT palette: 3 colors only. No semantic colors (green/red) — navy/gold/pale yellow shades.
-   Direction: Linear · Stripe · Notion — sober, confident, spacious.
+   STRICT palette: 3 colors only. No semantic colors (green/red) - navy/gold/pale yellow shades.
+   Direction: Linear · Stripe · Notion - sober, confident, spacious.
    Architecture: Layout → Navbar → Sidebar → Cards → Buttons → Forms
                   → Alerts → Tables → Badges → Auth → Pagination → Modals
                   → Utilities → Responsive
@@ -13,7 +13,7 @@
 
 
 /* =============================================================================
-   1. MAIN LAYOUT — App Shell
+   1. MAIN LAYOUT - App Shell
    ============================================================================= */
 
 .app-layout {
@@ -100,7 +100,7 @@
 
 
 /* =============================================================================
-   2. NAVBAR — Compact navy bar (minimalist premium mockup)
+   2. NAVBAR - Compact navy bar (minimalist premium mockup)
    ============================================================================= */
 
 .navbar {
@@ -137,7 +137,7 @@
 
 .navbar-spacer { flex: 1; }
 
-/* Free-trial badge — solid gold, navy text (brand: gold = background) */
+/* Free-trial badge - solid gold, navy text (brand: gold = background) */
 .navbar-badge {
   background: var(--or);
   color: var(--marine);
@@ -225,7 +225,7 @@
 
 
 /* =============================================================================
-   3. SIDEBAR — WHITE (mockup: active item = pale yellow + gold bar)
+   3. SIDEBAR - WHITE (mockup: active item = pale yellow + gold bar)
    ============================================================================= */
 
 .sidebar {
@@ -294,7 +294,7 @@
 }
 .sidebar-item:hover .sidebar-icon { opacity: 1; }
 
-/* Active item — solid pale yellow + gold bar (strict palette) */
+/* Active item - solid pale yellow + gold bar (strict palette) */
 .sidebar-item.active {
   background: var(--or);
   color: var(--marine);
@@ -323,7 +323,7 @@
 .sidebar-item:hover .sidebar-icon { transform: scale(1.08); }
 .sidebar-icon i { width: 18px; height: 18px; }
 
-/* Counter badge (solid navy, gold text — sharp contrast on the sidebar's pale yellow background) */
+/* Counter badge (solid navy, gold text - sharp contrast on the sidebar's pale yellow background) */
 .sidebar-badge {
   margin-left: auto;
   background: var(--marine);
@@ -368,14 +368,14 @@
 
 
 /* =============================================================================
-   4. CARDS — Clean, little shadow, generous padding
+   4. CARDS - Clean, little shadow, generous padding
    ============================================================================= */
 
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  /* Near-zero shadow — the card stands out through its thin border */
+  /* Near-zero shadow - the card stands out through its thin border */
   box-shadow: var(--shadow-xs);
   padding: var(--space-8);
   transition: box-shadow  var(--duration-base) var(--ease-out),
@@ -420,7 +420,7 @@
   gap: var(--space-3);
 }
 
-/* KPI / Stat card — minimalist */
+/* KPI / Stat card - minimalist */
 .stat-card {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -443,7 +443,7 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-btn);
-  /* Very light neutral background — no garish color */
+  /* Very light neutral background - no garish color */
   background: var(--bg-soft);
   color: var(--marine);
   display: flex;
@@ -452,7 +452,7 @@
   margin-bottom: var(--space-2);
 }
 
-/* Big Palatino number — the typography does all the work */
+/* Big Palatino number - the typography does all the work */
 .stat-card-value {
   font-family: var(--font-display);
   font-size: var(--text-3xl);
@@ -479,7 +479,7 @@
 .stat-card-delta.up   { color: var(--success); }
 .stat-card-delta.down { color: var(--danger);  }
 
-/* Accent card (gold background) — sparing use, only 1 per screen */
+/* Accent card (gold background) - sparing use, only 1 per screen */
 .card-accent {
   background: var(--or);
   border-color: var(--or-600);
@@ -502,7 +502,7 @@
 
 
 /* =============================================================================
-   5. BUTTONS — Sober, clear hierarchy
+   5. BUTTONS - Sober, clear hierarchy
    ============================================================================= */
 
 .btn {
@@ -566,9 +566,9 @@
 .btn-icon.btn-sm { padding: 6px; }
 .btn-icon.btn-lg { padding: 12px; }
 
-/* ── Variants ── */
+/* -- Variants -- */
 
-/* Primary: navy background — main action, austere */
+/* Primary: navy background - main action, austere */
 .btn-primary {
   background: var(--marine);
   color: var(--jaune-pale);
@@ -582,7 +582,7 @@
 }
 .btn-primary:active { background: var(--marine); }
 
-/* Accent: gold background — ONLY ONE per screen, priority action */
+/* Accent: gold background - ONLY ONE per screen, priority action */
 .btn-accent {
   background: var(--or);
   color: var(--marine);   /* navy on gold → 9.09:1 ✓ */
@@ -681,7 +681,7 @@
   gap: 4px;
 }
 
-/* Fields — thin border, no shadow */
+/* Fields - thin border, no shadow */
 .form-input,
 .form-select,
 .form-textarea {
@@ -691,7 +691,7 @@
   font-size: var(--text-base);
   color: var(--ink);
   background: var(--surface);
-  /* Softened navy border (brand) — visible but not heavy */
+  /* Softened navy border (brand) - visible but not heavy */
   border: 1px solid rgba(2, 26, 61, 0.35);
   border-radius: var(--radius-input);
   padding: 11px 14px;
@@ -742,7 +742,7 @@
   opacity: 0.70;
 }
 
-/* Select — chevron custom */
+/* Select - chevron custom */
 .form-select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23021A3D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -914,7 +914,7 @@
    8. BANNERS
    ============================================================================= */
 
-/* Accent banner: GOLD background, NAVY text — 9.09:1 ✓ */
+/* Accent banner: GOLD background, NAVY text - 9.09:1 ✓ */
 .banner-accent {
   background: var(--or);
   color: var(--marine);
@@ -960,14 +960,14 @@
 
 
 /* =============================================================================
-   9. TABLES — Airy, subtle header
+   9. TABLES - Airy, subtle header
    ============================================================================= */
 
 .table-wrap {
   width: 100%;
   overflow-x: auto;
   border-radius: var(--radius-card);
-  /* No shadow — the border is enough */
+  /* No shadow - the border is enough */
   box-shadow: none;
   border: 1px solid var(--line);
   background: var(--surface);
@@ -981,7 +981,7 @@
   white-space: nowrap;
 }
 
-/* Headers — subtle, no solid navy background */
+/* Headers - subtle, no solid navy background */
 .table thead th {
   background: var(--bg-soft);
   color: var(--muted);
@@ -1000,7 +1000,7 @@
 .table thead th:first-child { border-radius: var(--radius-card) 0 0 0; }
 .table thead th:last-child  { border-radius: 0 var(--radius-card) 0 0; }
 
-/* Cells — more height */
+/* Cells - more height */
 .table tbody td {
   padding: 13px 16px;
   border-bottom: 1px solid var(--line);
@@ -1069,7 +1069,7 @@
   color: var(--jaune-pale);
 }
 
-/* Accent badge: gold BACKGROUND, navy text — 9.09:1 ✓ */
+/* Accent badge: gold BACKGROUND, navy text - 9.09:1 ✓ */
 .badge-accent {
   background: var(--or);
   color: var(--marine);
@@ -1083,7 +1083,7 @@
 
 
 /* =============================================================================
-   11. AUTH — Login / sign-up pages
+   11. AUTH - Login / sign-up pages
    ============================================================================= */
 
 .auth-wrap {
@@ -1114,7 +1114,7 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  /* Light shadow — this is a critical page, the elevation is justified */
+  /* Light shadow - this is a critical page, the elevation is justified */
   box-shadow: var(--shadow-lg);
   padding: var(--space-12) var(--space-10);
   position: relative;
@@ -2096,13 +2096,13 @@
    15. RESPONSIVE
    ============================================================================= */
 
-/* ── Mobile: < 640px ── */
+/* -- Mobile: < 640px -- */
 @media (max-width: 639px) {
 
   .navbar-burger { display: flex; }
   .navbar-tagline { display: none; }
   /* The logo has a negative margin to hug the edge when it is the
-     first element — but on mobile the menu button (☰) precedes it,
+     first element - but on mobile the menu button (☰) precedes it,
      so we cancel that margin to restore normal spacing. */
   .navbar-logo { margin-left: 0; }
 
@@ -2146,7 +2146,7 @@
   }
 }
 
-/* ── Tablet: 640px – 1023px ── */
+/* -- Tablet: 640px - 1023px -- */
 @media (min-width: 640px) and (max-width: 1023px) {
 
   .navbar-burger  { display: flex; }
@@ -2167,7 +2167,7 @@
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ── Desktop: ≥ 1024px ── */
+/* -- Desktop: ≥ 1024px -- */
 @media (min-width: 1024px) {
 
   .navbar-burger  { display: none; }
@@ -2179,12 +2179,12 @@
   .main-content { margin-left: var(--sidebar-width); }
 }
 
-/* ── Large: ≥ 1280px ── */
+/* -- Large: ≥ 1280px -- */
 @media (min-width: 1280px) {
   .grid-4 { grid-template-columns: repeat(4, 1fr); }
 }
 
-/* ── Reduced-motion preference ── */
+/* -- Reduced-motion preference -- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -2193,14 +2193,14 @@
 }
 
 /* =============================================================================
-   FIX — Fixed navbar offset
+   FIX - Fixed navbar offset
    ============================================================================= */
 body:has(.navbar) #main-content {
   padding-top: var(--navbar-height);
 }
 
 /* =============================================================================
-   CLEAN REDESIGN — complementary classes (dashboard v2)
+   CLEAN REDESIGN - complementary classes (dashboard v2)
    ============================================================================= */
 
 /* Navbar user name */
@@ -2219,7 +2219,7 @@ body:has(.navbar) #main-content {
   width: auto;
 }
 
-/* KPI grid — responsive, airy */
+/* KPI grid - responsive, airy */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -2355,7 +2355,7 @@ body:has(.navbar) #main-content {
 .td-clamp   { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* =============================================================================
-   CLEAN REDESIGN — module classes (Expert 3)
+   CLEAN REDESIGN - module classes (Expert 3)
    ============================================================================= */
 
 /* Back link */
@@ -2379,7 +2379,7 @@ body:has(.navbar) #main-content {
 }
 .detail-value { font-size: var(--text-base); color: var(--marine); font-weight: 500; }
 
-/* Stat card — BEM __ variant (used by the modules): alias of the dashboard style */
+/* Stat card - BEM __ variant (used by the modules): alias of the dashboard style */
 .stat-card__header { display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--space-3); }
 .stat-card__label { font-size: var(--text-sm); color: var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:.04em; }
 .stat-card__icon { width:34px; height:34px; border-radius:8px; background: var(--jaune-pale); color: var(--marine); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -2428,15 +2428,15 @@ body:has(.navbar) #main-content {
 /* Auth: logo */
 .auth-logo { height: 48px; width: auto; display: block; margin: 0 auto var(--space-4); }
 
-/* Empty state — description */
+/* Empty state - description */
 .empty-state-desc { font-size: var(--text-base); color: var(--muted); margin-top: var(--space-2); }
 
 
 /* =============================================================================
-   16. "MINIMALISTE PREMIUM" DASHBOARD — components ported from maquette-1
+   16. "MINIMALISTE PREMIUM" DASHBOARD - components ported from maquette-1
    ============================================================================= */
 
-/* Free-trial banner — solid gold, navy text */
+/* Free-trial banner - solid gold, navy text */
 .trial-banner {
   background: var(--or);
   border-radius: var(--radius-card);
@@ -2680,7 +2680,7 @@ body:has(.navbar) #main-content {
   .kpi-grid, .shortcuts-grid, .kpi-grid-2 { grid-template-columns: 1fr; }
   .trial-banner { flex-direction: column; align-items: flex-start; }
   /* Narrow navbar: the trial badge and the user name/role overflow
-     on small screens (long text with white-space:nowrap) — we hide them and
+     on small screens (long text with white-space:nowrap) - we hide them and
      keep only the logo, the avatar and the logout button. */
   .navbar { padding: 0 var(--space-3); gap: var(--space-2); }
   .navbar-badge { display: none; }
