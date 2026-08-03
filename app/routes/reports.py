@@ -1,4 +1,4 @@
-"""Route du module Rapports (KPIs filtrables par période)."""
+"""Reports module route (KPIs filterable by period)."""
 import csv
 import io
 from calendar import month_abbr
@@ -16,10 +16,10 @@ reports_bp = Blueprint("reports", __name__, url_prefix="/rapports")
 
 
 def _period_bounds(period, year, month):
-    """Bornes de dates (start, end) selon la période choisie."""
+    """Date bounds (start, end) for the chosen period."""
     if period == "year":
         return date(year, 1, 1), date(year, 12, 31)
-    # mois par défaut
+    # month by default
     if month == 12:
         end = date(year, 12, 31)
     else:
@@ -71,7 +71,7 @@ def _build_report(user_id, period, year, month):
 
 
 def _month_range(end_year, end_month, count=6):
-    """Liste de (year, month) des `count` derniers mois, du plus ancien au plus recent."""
+    """List of (year, month) for the last `count` months, oldest first."""
     months = []
     y, m = end_year, end_month
     for _ in range(count):
@@ -84,7 +84,7 @@ def _month_range(end_year, end_month, count=6):
 
 
 def _build_trend(user_id, end_year, end_month):
-    """Chiffre d'affaires facture et depenses des 6 derniers mois."""
+    """Invoiced revenue and expenses over the last 6 months."""
     labels, revenue, expenses = [], [], []
     for y, m in _month_range(end_year, end_month, 6):
         start, end = _period_bounds("month", y, m)
@@ -104,7 +104,7 @@ def _build_trend(user_id, end_year, end_month):
 
 
 def _build_expense_breakdown(user_id, start, end):
-    """Repartition des depenses par categorie sur la periode."""
+    """Expense breakdown by category over the period."""
     rows = db.session.query(
         ExpenseCategory.name, db.func.coalesce(db.func.sum(Expense.amount), 0)
     ).join(Expense, Expense.category_id == ExpenseCategory.id) \

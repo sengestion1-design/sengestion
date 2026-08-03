@@ -1,12 +1,12 @@
-"""Module Charges & Dépenses — CRUD dépenses + catégories.
+"""Charges & Expenses module — expenses + categories CRUD.
 
-Sécurité (OWASP contrôle d'accès) :
-- @login_required + @subscription_required sur toutes les routes.
-- Chaque dépense appartient à un gérant : filtrage systématique par
-  user_id = current_user.id (jamais les données d'un autre gérant).
-- CSRF assuré globalement par Flask-WTF (CSRFProtect) sur tous les POST.
-- Validation des entrées côté serveur (montant numérique > 0, libellé requis).
-- Actions importantes journalisées via log_action (MongoDB).
+Security (OWASP access control):
+- @login_required + @subscription_required on all routes.
+- Every expense belongs to a manager: systematic filtering by
+  user_id = current_user.id (never another manager's data).
+- CSRF handled globally by Flask-WTF (CSRFProtect) on all POSTs.
+- Server-side input validation (numeric amount > 0, label required).
+- Important actions logged via log_action (MongoDB).
 """
 from datetime import datetime, date
 from decimal import Decimal, InvalidOperation
@@ -24,7 +24,7 @@ from app.utils.access import subscription_required
 
 expenses_bp = Blueprint("expenses", __name__, url_prefix="/expenses")
 
-# Catégories créées automatiquement au premier accès si la table est vide.
+# Categories created automatically on first access if the table is empty.
 DEFAULT_CATEGORIES = [
     "Carburant", "Fournitures", "Loyer", "Salaires", "Transport", "Autre",
 ]
@@ -33,9 +33,9 @@ DEFAULT_CATEGORIES = [
 # ─────────────────────────── Helpers ───────────────────────────
 
 def _ensure_default_categories():
-    """Crée les catégories par défaut du gérant courant si aucune n'existe encore.
+    """Create the current manager's default categories if none exist yet.
 
-    Les catégories sont propres à chaque gérant (isolation OWASP).
+    Categories are specific to each manager (OWASP isolation).
     """
     if ExpenseCategory.query.filter_by(user_id=current_user.id).count() == 0:
         for name in DEFAULT_CATEGORIES:
@@ -44,7 +44,7 @@ def _ensure_default_categories():
 
 
 def _owned_category_or_404(category_id):
-    """Retourne une catégorie du gérant courant, sinon 404."""
+    """Return a category owned by the current manager, or 404."""
     cat = ExpenseCategory.query.filter_by(
         id=category_id, user_id=current_user.id
     ).first()
@@ -54,7 +54,7 @@ def _owned_category_or_404(category_id):
 
 
 def _parse_amount(raw):
-    """Valide un montant : numérique et strictement positif. Renvoie Decimal ou None."""
+    """Validate an amount: numeric and strictly positive. Returns Decimal or None."""
     if raw is None:
         return None
     raw = str(raw).strip().replace(" ", "").replace(",", ".")
@@ -70,7 +70,7 @@ def _parse_amount(raw):
 
 
 def _parse_date(raw):
-    """Parse une date YYYY-MM-DD ; renvoie la date du jour si vide/invalide."""
+    """Parse a YYYY-MM-DD date; returns today's date if empty/invalid."""
     if raw:
         try:
             return datetime.strptime(raw.strip(), "%Y-%m-%d").date()
@@ -80,7 +80,7 @@ def _parse_date(raw):
 
 
 def _owned_expense_or_404(expense_id):
-    """Récupère une dépense appartenant au gérant courant, sinon 404."""
+    """Fetch an expense owned by the current manager, or 404."""
     expense = Expense.query.filter_by(
         id=expense_id, user_id=current_user.id
     ).first()
@@ -89,13 +89,13 @@ def _owned_expense_or_404(expense_id):
     return expense
 
 
-# ─────────────────────────── Dépenses ───────────────────────────
+# ─────────────────────────── Expenses ───────────────────────────
 
 @expenses_bp.route("/")
 @login_required
 @subscription_required
 def index():
-    """Liste des dépenses du gérant, filtrable par catégorie et par mois."""
+    """List the manager's expenses, filterable by category and by month."""
     _ensure_default_categories()
 
     category_id = request.args.get("category", type=int)
@@ -114,7 +114,7 @@ def index():
                 extract("month", Expense.expense_date) == int(month_s),
             )
         except (ValueError, AttributeError):
-            month = None  # filtre ignoré si format invalide
+            month = None  # filter ignored if the format is invalid
 
     expenses = query.order_by(
         Expense.expense_date.desc(), Expense.id.desc()
@@ -138,7 +138,7 @@ def index():
 @login_required
 @subscription_required
 def new():
-    """Formulaire de création d'une dépense."""
+    """Expense creation form."""
     _ensure_default_categories()
     categories = ExpenseCategory.query.filter_by(user_id=current_user.id).order_by(ExpenseCategory.name).all()
     return render_template(
@@ -150,7 +150,7 @@ def new():
 
 
 def _save_receipt(jpeg_bytes, user_id):
-    """Enregistre le reçu (JPEG) sous /static/uploads/recus/, retourne le chemin relatif."""
+    """Save the receipt (JPEG) under /static/uploads/recus/, return the relative path."""
     import os
     import uuid
     from flask import current_app
@@ -163,7 +163,7 @@ def _save_receipt(jpeg_bytes, user_id):
             fh.write(jpeg_bytes)
         return f"{rel_dir}/{fname}"
     except Exception:
-        current_app.logger.warning("Échec sauvegarde reçu", exc_info=True)
+        current_app.logger.warning("Failed to save receipt", exc_info=True)
         return None
 
 
@@ -171,7 +171,7 @@ def _save_receipt(jpeg_bytes, user_id):
 @login_required
 @subscription_required
 def scan():
-    """Page d'import d'un reçu/facture de charge à analyser."""
+    """Upload page for an expense receipt/invoice to analyze."""
     return render_template("expenses/scan.html")
 
 
@@ -179,7 +179,7 @@ def scan():
 @login_required
 @subscription_required
 def scan_upload():
-    """Reçoit le reçu (image/PDF), le lit via Claude Vision, pré-remplit le formulaire."""
+    """Receive the receipt (image/PDF), read it via Claude Vision, pre-fill the form."""
     from app.services.receipt_scan_service import scan_receipt
 
     file = request.files.get("receipt")
@@ -196,7 +196,7 @@ def scan_upload():
         flash(result.get("error", "Le reçu n'a pas pu être analysé."), "danger")
         return redirect(url_for("expenses.scan"))
 
-    # Sauvegarde du reçu (image normalisée) pour le rattacher à la dépense.
+    # Save the receipt (normalized image) to attach it to the expense.
     receipt_ref = _save_receipt(result["image"], current_user.id)
 
     fields = result["fields"]
@@ -204,7 +204,7 @@ def scan_upload():
     categories = ExpenseCategory.query.filter_by(
         user_id=current_user.id).order_by(ExpenseCategory.name).all()
 
-    # Matcher la catégorie proposée par l'IA avec celles du gérant.
+    # Match the category suggested by the AI with the manager's categories.
     matched_cat = None
     wanted = (fields.get("category") or "").strip().lower()
     for c in categories:
@@ -236,7 +236,7 @@ def scan_upload():
 @login_required
 @subscription_required
 def create():
-    """Enregistre une nouvelle dépense (validation serveur)."""
+    """Save a new expense (server-side validation)."""
     label = (request.form.get("label") or "").strip()
     amount = _parse_amount(request.form.get("amount"))
     expense_date = _parse_date(request.form.get("expense_date"))
@@ -264,7 +264,7 @@ def create():
             form=request.form,
         ), 400
 
-    # Reçu scanné : ne garder que les chemins qu'on a nous-mêmes générés (anti-injection).
+    # Scanned receipt: only keep paths we generated ourselves (anti-injection).
     receipt_ref = request.form.get("receipt_ref") or None
     if receipt_ref and (not receipt_ref.startswith("uploads/recus/") or ".." in receipt_ref):
         receipt_ref = None
@@ -293,7 +293,7 @@ def create():
 @login_required
 @subscription_required
 def edit(expense_id):
-    """Formulaire d'édition d'une dépense du gérant."""
+    """Edit form for one of the manager's expenses."""
     expense = _owned_expense_or_404(expense_id)
     categories = ExpenseCategory.query.filter_by(user_id=current_user.id).order_by(ExpenseCategory.name).all()
     return render_template(
@@ -308,7 +308,7 @@ def edit(expense_id):
 @login_required
 @subscription_required
 def update(expense_id):
-    """Met à jour une dépense existante (validation serveur)."""
+    """Update an existing expense (server-side validation)."""
     expense = _owned_expense_or_404(expense_id)
 
     label = (request.form.get("label") or "").strip()
@@ -357,7 +357,7 @@ def update(expense_id):
 @login_required
 @subscription_required
 def delete(expense_id):
-    """Supprime une dépense du gérant courant."""
+    """Delete an expense owned by the current manager."""
     expense = _owned_expense_or_404(expense_id)
     label = expense.label
     db.session.delete(expense)
@@ -371,16 +371,16 @@ def delete(expense_id):
     return redirect(url_for("expenses.index"))
 
 
-# ─────────────────────────── Catégories ───────────────────────────
+# ─────────────────────────── Categories ───────────────────────────
 
 @expenses_bp.route("/categories")
 @login_required
 @subscription_required
 def categories():
-    """Gestion des catégories de dépenses (partagées entre gérants)."""
+    """Expense category management (each manager owns their own categories)."""
     _ensure_default_categories()
     items = ExpenseCategory.query.filter_by(user_id=current_user.id).order_by(ExpenseCategory.name).all()
-    # nb de dépenses du gérant courant par catégorie (pour info suppression)
+    # current manager's expense count per category (deletion info)
     usage = {}
     for cat in items:
         usage[cat.id] = Expense.query.filter_by(
@@ -397,7 +397,7 @@ def categories():
 @login_required
 @subscription_required
 def create_category():
-    """Crée une nouvelle catégorie."""
+    """Create a new category."""
     name = (request.form.get("name") or "").strip()
     if not name:
         flash("Le nom de la catégorie est obligatoire.", "danger")
@@ -427,7 +427,7 @@ def create_category():
 @login_required
 @subscription_required
 def delete_category(category_id):
-    """Supprime une catégorie du gérant (interdit si elle a des dépenses)."""
+    """Delete one of the manager's categories (forbidden if it has expenses)."""
     category = _owned_category_or_404(category_id)
 
     used = Expense.query.filter_by(

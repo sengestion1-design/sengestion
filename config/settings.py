@@ -1,8 +1,8 @@
-"""Configuration de l'application SenGestion.
+"""SenGestion application configuration.
 
-Deux bases de données :
-- MySQL (relationnel) : cœur métier — compétence CP5 + partie SQL de CP6.
-- MongoDB (NoSQL)    : logs d'activité & données IA — partie NoSQL de CP6.
+Two databases:
+- MySQL (relational) : business core — competency CP5 + SQL part of CP6.
+- MongoDB (NoSQL)    : activity logs & AI data — NoSQL part of CP6.
 """
 import os
 from dotenv import load_dotenv
@@ -27,10 +27,10 @@ class Config:
     MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
     MONGO_DB = os.getenv("MONGO_DB", "sengestion_nosql")
 
-    # --- Sécurité / uploads ---
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 Mo
+    # --- Security / uploads ---
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
     WTF_CSRF_ENABLED = True
-    WTF_CSRF_TIME_LIMIT = 60 * 60 * 24  # 24h — évite l'expiration si la page reste ouverte longtemps (démo)
+    WTF_CSRF_TIME_LIMIT = 60 * 60 * 24  # 24h — avoids expiry if the page stays open a long time (demo)
 
     # --- Email (Gmail SMTP) ---
     MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
@@ -40,9 +40,9 @@ class Config:
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "sengestion1@gmail.com")
 
-    # --- IA (Claude Vision — scan de carte de visite / reçu) ---
+    # --- AI (Claude Vision — business-card / receipt scan) ---
     ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-    # Modèle Vision utilisé pour l'extraction (surchargeable via .env)
+    # Vision model used for extraction (overridable via .env)
     ANTHROPIC_VISION_MODEL = os.getenv("ANTHROPIC_VISION_MODEL", "claude-sonnet-5")
 
 
@@ -58,8 +58,8 @@ class ProductionConfig(Config):
 
 
 class DockerConfig(ProductionConfig):
-    """Exécution en conteneur pour la démo locale : debug désactivé,
-    mais cookies non-Secure car l'app est servie en HTTP sur localhost."""
+    """Container execution for the local demo: debug disabled,
+    but non-Secure cookies since the app is served over HTTP on localhost."""
     SESSION_COOKIE_SECURE = False
 
 

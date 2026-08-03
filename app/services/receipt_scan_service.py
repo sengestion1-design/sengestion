@@ -1,12 +1,12 @@
-"""IA service — lecture d'un reçu / facture de charge (Claude Vision).
+"""AI service — reading an expense receipt / invoice (Claude Vision).
 
-Une facture de dépense (photo JPG/PNG/HEIC ou PDF) est envoyée à Claude Vision,
-qui en extrait les informations comptables : libellé (fournisseur/objet), montant
-TTC et date. Le résultat pré-remplit le formulaire de dépense, que le gérant
-vérifie avant d'enregistrer.
+An expense invoice (JPG/PNG/HEIC photo or PDF) is sent to Claude Vision,
+which extracts the accounting information: label (supplier/purpose), total
+amount incl. tax and date. The result pre-fills the expense form, which the
+manager verifies before saving.
 
-Les PDF sont d'abord convertis en image (1re page) via pdftoppm (poppler).
-Toutes les erreurs renvoient (ok=False, error=...) au lieu de lever.
+PDFs are first converted to an image (1st page) via pdftoppm (poppler).
+All errors return (ok=False, error=...) instead of raising.
 """
 from __future__ import annotations
 
@@ -40,15 +40,15 @@ _PROMPT = (
 
 
 def _to_jpeg_bytes(raw: bytes, filename: str, content_type: str | None):
-    """Normalise l'entrée en JPEG. Gère image (HEIC inclus) ET PDF (1re page).
+    """Normalize the input to JPEG. Handles images (HEIC included) AND PDFs (1st page).
 
-    Retourne (jpeg_bytes, "image/jpeg") ou (None, None) si non exploitable.
+    Returns (jpeg_bytes, "image/jpeg") or (None, None) if unusable.
     """
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
     is_pdf = ext == "pdf" or (content_type or "").lower() == "application/pdf"
 
     if is_pdf:
-        # Convertir la 1re page du PDF en PNG via pdftoppm, puis en JPEG.
+        # Convert the PDF's 1st page to PNG via pdftoppm, then to JPEG.
         tmp_pdf = tmp_prefix = None
         try:
             with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tf:
@@ -62,7 +62,7 @@ def _to_jpeg_bytes(raw: bytes, filename: str, content_type: str | None):
             )
             png_path = tmp_prefix + "-1.png"
             if not os.path.exists(png_path):
-                # certains poppler nomment sans le -1
+                # some poppler builds name the file without the -1
                 png_path = tmp_prefix + ".png"
             if not os.path.exists(png_path):
                 return None, None
@@ -73,7 +73,7 @@ def _to_jpeg_bytes(raw: bytes, filename: str, content_type: str | None):
             img.save(out, format="JPEG", quality=88)
             return out.getvalue(), "image/jpeg"
         except Exception:
-            current_app.logger.warning("Conversion PDF reçu échouée", exc_info=True)
+            current_app.logger.warning("Receipt PDF conversion failed", exc_info=True)
             return None, None
         finally:
             for p in (tmp_pdf, (tmp_prefix + "-1.png") if tmp_prefix else None,
@@ -84,7 +84,7 @@ def _to_jpeg_bytes(raw: bytes, filename: str, content_type: str | None):
                     except OSError:
                         pass
 
-    # Image : normaliser en JPEG via Pillow (gère HEIC iPhone si pillow-heif).
+    # Image: normalize to JPEG via Pillow (handles iPhone HEIC if pillow-heif).
     try:
         from PIL import Image
         import io
@@ -111,11 +111,11 @@ def _to_jpeg_bytes(raw: bytes, filename: str, content_type: str | None):
 
 def scan_receipt(raw_bytes: bytes, filename: str = "",
                  content_type: str | None = None) -> dict:
-    """Lit un reçu/facture et extrait libellé, montant, date, catégorie.
+    """Read a receipt/invoice and extract label, amount, date, category.
 
-    Retourne :
+    Returns:
       {"ok": True,  "fields": {label, amount, date, category}, "image": jpeg_bytes}
-      {"ok": False, "error": "message utilisateur"}
+      {"ok": False, "error": "user-facing message"}
     """
     if not raw_bytes:
         return {"ok": False, "error": "Aucun fichier reçu."}
@@ -165,7 +165,7 @@ def scan_receipt(raw_bytes: bytes, filename: str = "",
     except json.JSONDecodeError:
         return {"ok": False, "error": "Lecture IA illisible. Réessayez."}
 
-    # Normaliser
+    # Normalize
     label = str(data.get("label", "")).strip()[:255]
     try:
         amount = int(float(str(data.get("amount", 0)).replace(" ", "").replace(",", ".") or 0))

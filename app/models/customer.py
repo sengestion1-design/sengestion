@@ -34,8 +34,8 @@ class Contact(db.Model):
     role = db.Column(db.String(100))                             # job title
     email = db.Column(db.String(150))
     phone = db.Column(db.String(20))
-    # kind : "contact" = carnet d'adresses (pas de démarche) ;
-    #        "prospect" = piste commerciale suivie dans le pipeline.
+    # kind : "contact" = address book (no active outreach);
+    #        "prospect" = sales lead tracked in the pipeline.
     kind = db.Column(
         db.Enum("contact", "prospect"),
         default="contact", nullable=False,
@@ -45,7 +45,7 @@ class Contact(db.Model):
         default="new", nullable=False,
     )
     source = db.Column(db.Enum("business_card_scan", "manual"), default="manual")
-    # Chemin relatif de la photo de carte scannée (ex. "uploads/cartes/xxx.jpg"), sous /static.
+    # Relative path of the scanned card photo (e.g. "uploads/cartes/xxx.jpg"), under /static.
     card_image = db.Column(db.String(255))
     customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"))  # if converted
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

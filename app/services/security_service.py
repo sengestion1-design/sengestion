@@ -1,15 +1,15 @@
-"""Anti-brute-force (recommandations OWASP / ANSSI).
+"""Anti-brute-force (OWASP / ANSSI recommendations).
 
-Compte les échecs d'authentification dans MongoDB (collection `auth_failures`)
-et bloque temporairement après trop de tentatives :
+Counts authentication failures in MongoDB (`auth_failures` collection)
+and temporarily blocks after too many attempts:
 
-- kind "login" : mots de passe erronés sur /login (5 échecs -> blocage 15 min)
-- kind "otp"   : codes à 6 chiffres erronés sur /verify et /reset-password
-                 (5 échecs -> blocage 15 min, sinon le code est force-brutable)
+- kind "login" : wrong passwords on /login (5 failures -> 15-min block)
+- kind "otp"   : wrong 6-digit codes on /verify and /reset-password
+                 (5 failures -> 15-min block, otherwise the code is brute-forceable)
 
-Best-effort comme le reste de la couche Mongo : si MongoDB est indisponible
-(dev), on n'empêche pas la connexion (fail-open) mais on trace un warning.
-En production MongoDB est toujours disponible.
+Best-effort like the rest of the Mongo layer: if MongoDB is unavailable
+(dev), login is not prevented (fail-open) but a warning is traced.
+In production MongoDB is always available.
 """
 from datetime import datetime, timedelta
 
@@ -23,7 +23,7 @@ WINDOW_MINUTES = 15
 
 
 def record_failure(kind: str, identifier: str):
-    """Enregistre un échec (horodaté + IP) pour l'identifiant donné."""
+    """Record a failure (timestamped + IP) for the given identifier."""
     doc = {
         "kind": kind,
         "identifier": identifier,
@@ -33,11 +33,11 @@ def record_failure(kind: str, identifier: str):
     try:
         mongo.db[COLLECTION].insert_one(doc)
     except Exception as exc:  # noqa: BLE001
-        current_app.logger.warning("MongoDB record_failure indisponible: %s", exc)
+        current_app.logger.warning("MongoDB record_failure unavailable: %s", exc)
 
 
 def is_blocked(kind: str, identifier: str) -> bool:
-    """Vrai si l'identifiant a atteint MAX_ATTEMPTS échecs dans la fenêtre."""
+    """True if the identifier reached MAX_ATTEMPTS failures within the window."""
     since = datetime.utcnow() - timedelta(minutes=WINDOW_MINUTES)
     try:
         n = mongo.db[COLLECTION].count_documents(
@@ -45,16 +45,16 @@ def is_blocked(kind: str, identifier: str) -> bool:
         )
         return n >= MAX_ATTEMPTS
     except Exception as exc:  # noqa: BLE001
-        current_app.logger.warning("MongoDB is_blocked indisponible: %s", exc)
+        current_app.logger.warning("MongoDB is_blocked unavailable: %s", exc)
         return False
 
 
 def clear_failures(kind: str, identifier: str):
-    """Remet le compteur à zéro (après une authentification réussie)."""
+    """Reset the counter to zero (after a successful authentication)."""
     try:
         mongo.db[COLLECTION].delete_many({"kind": kind, "identifier": identifier})
     except Exception as exc:  # noqa: BLE001
-        current_app.logger.warning("MongoDB clear_failures indisponible: %s", exc)
+        current_app.logger.warning("MongoDB clear_failures unavailable: %s", exc)
 
 
 BLOCKED_MESSAGE = (

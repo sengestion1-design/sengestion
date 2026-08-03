@@ -1,10 +1,10 @@
-"""Email service (Gmail SMTP) — codes de vérification + messages aux contacts."""
+"""Email service (Gmail SMTP) — verification codes + messages to contacts."""
 from flask import current_app
 from flask_mail import Message as MailMessage
 
 from app.extensions import mail
 
-# Charte graphique SenGestion (strictement 3 couleurs)
+# SenGestion brand palette (strictly 3 colors)
 _MARINE = "#021A3D"
 _OR = "#F2B10E"
 _JAUNE_PALE = "#E8E7A2"
@@ -12,10 +12,10 @@ _LOGO_URL = "https://sengestion.sen-compta.com/static/img/logo.png"
 
 
 def _branded_html(title: str, name: str, intro: str, code: str, outro: str) -> str:
-    """Template HTML des emails transactionnels (code à 6 chiffres).
+    """HTML template for transactional emails (6-digit code).
 
-    Tableau + styles inline : seul markup fiable dans les clients mail
-    (Gmail, Outlook…). Couleurs limitées à la charte, or/jaune en fond.
+    Table + inline styles: the only reliable markup in mail clients
+    (Gmail, Outlook…). Colors limited to the brand palette, gold/yellow as background.
     """
     return f"""\
 <!doctype html>
@@ -89,15 +89,15 @@ def _branded_html(title: str, name: str, intro: str, code: str, outro: str) -> s
 
 
 def send_email(to_email: str, subject: str, body: str, html: str | None = None) -> bool:
-    """Envoi email générique (message à un contact, relance…).
+    """Generic email send (message to a contact, reminder…).
 
-    `body` (texte brut) sert de repli pour les clients mail sans HTML.
-    Retourne True si l'envoi réussit. En développement sans mot de passe SMTP,
-    le message est affiché en console et considéré comme envoyé (test offline).
+    `body` (plain text) serves as a fallback for mail clients without HTML.
+    Returns True if the send succeeds. In development without an SMTP password,
+    the message is printed to the console and considered sent (offline testing).
     """
     if not current_app.config.get("MAIL_PASSWORD"):
         current_app.logger.warning(
-            "[DEV] SMTP non configuré — email simulé pour %s : %s", to_email, subject
+            "[DEV] SMTP not configured — simulated email for %s: %s", to_email, subject
         )
         print(f"\n[DEV] Email à {to_email}\nObjet : {subject}\n{body}\n")
         return True
@@ -107,7 +107,7 @@ def send_email(to_email: str, subject: str, body: str, html: str | None = None) 
         mail.send(msg)
         return True
     except Exception as exc:  # noqa: BLE001
-        current_app.logger.error("Échec envoi email à %s : %s", to_email, exc)
+        current_app.logger.error("Failed to send email to %s: %s", to_email, exc)
         return False
 
 
@@ -137,10 +137,10 @@ def send_verification_code(to_email: str, name: str, code: str) -> bool:
               "ignorez simplement cet email.",
     )
 
-    # Développement : pas de mot de passe SMTP -> on affiche le code en console
+    # Development: no SMTP password -> print the code to the console
     if not current_app.config.get("MAIL_PASSWORD"):
         current_app.logger.warning(
-            "[DEV] SMTP non configuré — code de vérification pour %s : %s", to_email, code
+            "[DEV] SMTP not configured — verification code for %s: %s", to_email, code
         )
         print(f"\n[DEV] Code de vérification pour {to_email} : {code}\n")
         return True
@@ -150,12 +150,12 @@ def send_verification_code(to_email: str, name: str, code: str) -> bool:
         mail.send(msg)
         return True
     except Exception as exc:  # noqa: BLE001
-        current_app.logger.error("Échec envoi email à %s : %s", to_email, exc)
+        current_app.logger.error("Failed to send email to %s: %s", to_email, exc)
         return False
 
 
 def send_password_reset_code(to_email: str, name: str, code: str) -> bool:
-    """Envoie le code à 6 chiffres de réinitialisation du mot de passe."""
+    """Send the 6-digit password reset code."""
     subject = "SenGestion — Réinitialisation du mot de passe"
     body = (
         f"Bonjour {name},\n\n"
