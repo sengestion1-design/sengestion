@@ -62,6 +62,6 @@ app/
 │   ├── routes/            # contrôleurs (blueprints) — CP7
 │   ├── services/          # logique métier + accès NoSQL — CP6
 │   ├── templates/         # vues Jinja2 — CP3
-│   └── static/css/        # tokens.css (charte RGAA) + app.css
+│   └── static/css/        # tokens.css (charte RGAA) + styles.css
 └── requirements.txt
 ```
