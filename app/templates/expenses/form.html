@@ -1,7 +1,7 @@
 {% extends "layouts/app.html" %}
 {% set active = 'expenses' %}
 {% set editing = expense is not none %}
-{% block title %}{{ 'Modifier' if editing else 'Nouvelle' }} dépense — SenGestion{% endblock %}
+{% block title %}{{ 'Modifier' if editing else 'Nouvelle' }} dépense - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -86,7 +86,7 @@
       <div class="form-group">
         <label class="form-label" for="category_id">Catégorie</label>
         <select class="form-input" id="category_id" name="category_id">
-          <option value="">— Sans catégorie —</option>
+          <option value="">- Sans catégorie -</option>
           {% for cat in categories %}
           <option value="{{ cat.id }}" {{ 'selected' if v_cat == cat.id }}>{{ cat.name }}</option>
           {% endfor %}

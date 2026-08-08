@@ -80,7 +80,7 @@ def describe(log: dict) -> tuple[str, str]:
     elif action == "voice_transcribe":
         detail = "Audio transcrit avec succès" if details.get("ok") else "Échec de la transcription"
     elif not details:
-        detail = "—"
+        detail = "-"
     else:
         detail = ", ".join(f"{k} : {v}" for k, v in details.items())
 

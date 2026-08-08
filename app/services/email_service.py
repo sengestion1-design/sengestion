@@ -97,7 +97,7 @@ def send_email(to_email: str, subject: str, body: str, html: str | None = None) 
     """
     if not current_app.config.get("MAIL_PASSWORD"):
         current_app.logger.warning(
-            "[DEV] SMTP not configured — simulated email for %s: %s", to_email, subject
+            "[DEV] SMTP not configured - simulated email for %s: %s", to_email, subject
         )
         print(f"\n[DEV] Email à {to_email}\nObjet : {subject}\n{body}\n")
         return True
@@ -117,14 +117,14 @@ def send_verification_code(to_email: str, name: str, code: str) -> bool:
     Returns True on success. In development, if no SMTP password is set,
     the code is printed to the console so the flow can be tested offline.
     """
-    subject = "SenGestion — Code de vérification"
+    subject = "SenGestion - Code de vérification"
     body = (
         f"Bonjour {name},\n\n"
         f"Merci de votre inscription sur SenGestion.\n"
         f"Votre code de vérification est : {code}\n\n"
         f"Ce code est valable 15 minutes.\n"
         f"Si vous n'êtes pas à l'origine de cette inscription, ignorez cet email.\n\n"
-        f"— L'équipe SenGestion"
+        f"- L'équipe SenGestion"
     )
 
     html = _branded_html(
@@ -140,7 +140,7 @@ def send_verification_code(to_email: str, name: str, code: str) -> bool:
     # Development: no SMTP password -> print the code to the console
     if not current_app.config.get("MAIL_PASSWORD"):
         current_app.logger.warning(
-            "[DEV] SMTP not configured — verification code for %s: %s", to_email, code
+            "[DEV] SMTP not configured - verification code for %s: %s", to_email, code
         )
         print(f"\n[DEV] Code de vérification pour {to_email} : {code}\n")
         return True
@@ -156,7 +156,7 @@ def send_verification_code(to_email: str, name: str, code: str) -> bool:
 
 def send_password_reset_code(to_email: str, name: str, code: str) -> bool:
     """Send the 6-digit password reset code."""
-    subject = "SenGestion — Réinitialisation du mot de passe"
+    subject = "SenGestion - Réinitialisation du mot de passe"
     body = (
         f"Bonjour {name},\n\n"
         f"Vous avez demandé à réinitialiser votre mot de passe SenGestion.\n"
@@ -164,7 +164,7 @@ def send_password_reset_code(to_email: str, name: str, code: str) -> bool:
         f"Ce code est valable 15 minutes.\n"
         f"Si vous n'êtes pas à l'origine de cette demande, ignorez cet email : "
         f"votre mot de passe reste inchangé.\n\n"
-        f"— L'équipe SenGestion"
+        f"- L'équipe SenGestion"
     )
     html = _branded_html(
         title="R&eacute;initialisation de votre mot de passe",

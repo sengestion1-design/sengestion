@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'messages' %}
-{% block title %}Nouveau message — SenGestion{% endblock %}
+{% block title %}Nouveau message - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -23,12 +23,12 @@
       <div class="form-group">
         <label class="form-label" for="contact_id">Destinataire <span class="required">*</span></label>
         <select id="contact_id" name="contact_id" class="form-input" required>
-          <option value="">— Choisir un contact —</option>
+          <option value="">- Choisir un contact -</option>
           {% for c in contacts %}
           <option value="{{ c.id }}"
                   data-name="{{ c.first_name or c.name }}"
                   {{ 'selected' if contact and contact.id == c.id }}>
-            {{ c.first_name ~ ' ' if c.first_name }}{{ c.name }}{% if c.company %} — {{ c.company }}{% endif %} ({{ c.email }})
+            {{ c.first_name ~ ' ' if c.first_name }}{{ c.name }}{% if c.company %} - {{ c.company }}{% endif %} ({{ c.email }})
           </option>
           {% endfor %}
         </select>

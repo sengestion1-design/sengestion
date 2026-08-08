@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'contacts' %}
-{% block title %}Contacts — SenGestion{% endblock %}
+{% block title %}Contacts - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -75,11 +75,11 @@
                     style="margin-left:6px;">IA</span>
               {% endif %}
             </td>
-            <td>{{ ct.company or '—' }}</td>
-            <td>{{ ct.role or '—' }}</td>
+            <td>{{ ct.company or '-' }}</td>
+            <td>{{ ct.role or '-' }}</td>
             <td style="color:var(--muted); font-size:15px;">
               {{ ct.email or '' }}{% if ct.email and ct.phone %}<br>{% endif %}{{ ct.phone or '' }}
-              {% if not ct.email and not ct.phone %}—{% endif %}
+              {% if not ct.email and not ct.phone %}-{% endif %}
             </td>
             <td class="col-actions">
               {# Switch from the address book to the sales pipeline #}

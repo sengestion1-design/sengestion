@@ -1,6 +1,6 @@
-# SenGestion — SaaS de gestion pour PME
+# SenGestion - SaaS de gestion pour PME
 
-Projet de fin de formation — Titre professionnel **Développeur Web et Web Mobile (DWWM)**.
+Projet de fin de formation - Titre professionnel **Développeur Web et Web Mobile (DWWM)**.
 
 ## Architecture
 
@@ -14,7 +14,7 @@ Application **Flask (Python)** en architecture **MVC**, avec **deux bases de don
 ## Stack technique
 
 - **Back-end** : Python, Flask, SQLAlchemy (MySQL), PyMongo (MongoDB)
-- **Front-end** : HTML5, CSS3, JavaScript, Jinja2 — responsive, accessible **RGAA**
+- **Front-end** : HTML5, CSS3, JavaScript, Jinja2 - responsive, accessible **RGAA**
 - **Sécurité** : Flask-Login (auth), hachage des mots de passe (werkzeug), protection **CSRF**, requêtes paramétrées
 - **Migrations** : Flask-Migrate
 - **Déploiement** : Docker (à venir), variables d'environnement (`.env`)
@@ -58,10 +58,10 @@ app/
 ├── app/
 │   ├── __init__.py        # application factory
 │   ├── extensions.py      # db, mongo, login, csrf
-│   ├── models/            # entités MySQL (SQLAlchemy) — CP5
-│   ├── routes/            # contrôleurs (blueprints) — CP7
-│   ├── services/          # logique métier + accès NoSQL — CP6
-│   ├── templates/         # vues Jinja2 — CP3
+│   ├── models/            # entités MySQL (SQLAlchemy) - CP5
+│   ├── routes/            # contrôleurs (blueprints) - CP7
+│   ├── services/          # logique métier + accès NoSQL - CP6
+│   ├── templates/         # vues Jinja2 - CP3
 │   └── static/css/        # tokens.css (charte RGAA) + styles.css
 └── requirements.txt
 ```

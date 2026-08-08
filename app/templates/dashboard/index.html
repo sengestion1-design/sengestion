@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'dashboard' %}
-{% block title %}Tableau de bord — SenGestion{% endblock %}
+{% block title %}Tableau de bord - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -25,7 +25,7 @@
     <div class="page-header-left">
       <div class="page-eyebrow">Vue d'ensemble</div>
       <h1 class="page-title">Tableau de bord</h1>
-      <p class="page-subtitle">Votre activité commerciale — {{ user.company or 'SenGestion' }}</p>
+      <p class="page-subtitle">Votre activité commerciale - {{ user.company or 'SenGestion' }}</p>
     </div>
     <a class="btn btn-primary" href="{{ url_for('quotes.new') }}">
       <i data-lucide="plus" aria-hidden="true"></i>
@@ -63,8 +63,8 @@
     <div class="kpi-card kpi-card--accent">
       <div class="kpi-icon-wrap"><i data-lucide="trending-up"></i></div>
       <div class="kpi-label">Trésorerie nette</div>
-      <div class="kpi-value">{{ '{:,.0f}'.format(stats.balance).replace(',', ' ') if stats and stats.balance is not none else '—' }}</div>
-      <div class="kpi-unit">FCFA — solde estimé</div>
+      <div class="kpi-value">{{ '{:,.0f}'.format(stats.balance).replace(',', ' ') if stats and stats.balance is not none else '-' }}</div>
+      <div class="kpi-unit">FCFA - solde estimé</div>
     </div>
 
   </div>
@@ -145,7 +145,7 @@
             <td class="td-primary">{{ log.label }}</td>
             <td class="td-muted td-clamp">{{ log.readable_details }}</td>
             <td class="td-muted td-nowrap">
-              {{ log.created_at.strftime('%d/%m/%Y %H:%M') if log.created_at else '—' }}
+              {{ log.created_at.strftime('%d/%m/%Y %H:%M') if log.created_at else '-' }}
             </td>
           </tr>
           {% endfor %}

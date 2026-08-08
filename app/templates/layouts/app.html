@@ -19,7 +19,7 @@
   <div class="navbar-spacer"></div>
 
   {% if current_user.status == 'trial' %}
-  <span class="navbar-badge">Essai gratuit — {{ current_user.days_left }} jour{{ 's' if current_user.days_left > 1 else '' }} restant{{ 's' if current_user.days_left > 1 else '' }}</span>
+  <span class="navbar-badge">Essai gratuit - {{ current_user.days_left }} jour{{ 's' if current_user.days_left > 1 else '' }} restant{{ 's' if current_user.days_left > 1 else '' }}</span>
   {% endif %}
 
   <div class="navbar-user" title="{{ current_user.name }}">

@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'quotes' %}
-{% block title %}Devis {{ quote.number }} — SenGestion{% endblock %}
+{% block title %}Devis {{ quote.number }} - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -46,7 +46,7 @@
     <dl class="detail-grid">
       <div>
         <dt class="detail-label">Client</dt>
-        <dd class="detail-value" style="font-weight:600;">{{ quote.customer.name if quote.customer else '—' }}</dd>
+        <dd class="detail-value" style="font-weight:600;">{{ quote.customer.name if quote.customer else '-' }}</dd>
         {% if quote.customer and quote.customer.company %}
         <dd class="detail-value" style="color:var(--muted); margin-top:2px;">{{ quote.customer.company }}</dd>
         {% endif %}
@@ -54,13 +54,13 @@
       <div>
         <dt class="detail-label">Date</dt>
         <dd class="detail-value" style="font-weight:600;">
-          {{ quote.quote_date.strftime('%d/%m/%Y') if quote.quote_date else '—' }}
+          {{ quote.quote_date.strftime('%d/%m/%Y') if quote.quote_date else '-' }}
         </dd>
       </div>
       <div>
         <dt class="detail-label">Statut</dt>
         <dd class="detail-value">
-          {% set meta = statuses.get(quote.status, ('—', '#FFFFFF', '#021A3D')) %}
+          {% set meta = statuses.get(quote.status, ('-', '#FFFFFF', '#021A3D')) %}
           <span class="badge"
                 style="background:{{ meta[1] }}; color:{{ meta[2] }}; padding:4px 12px;
                        border:1px solid #021A3D; border-radius:999px; display:inline-block; font-weight:600;">{{ meta[0] }}</span>

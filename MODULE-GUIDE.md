@@ -1,4 +1,4 @@
-# Guide de développement d'un module — SenGestion
+# Guide de développement d'un module - SenGestion
 
 > À suivre par chaque agent développeur de module. Cohérence = note du jury.
 
@@ -24,7 +24,7 @@
   ```jinja
   {% extends "layouts/app.html" %}
   {% set active = 'customers' %}   {# identifiant du menu actif #}
-  {% block title %}… — SenGestion{% endblock %}
+  {% block title %}… - SenGestion{% endblock %}
   {% block page %} … {% endblock %}
   ```
 - `active` possibles : `dashboard`, `customers`, `quotes`, `expenses`, `reports`, `messages`.

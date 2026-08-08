@@ -1,71 +1,71 @@
 /* =============================================================================
    SenGestion - Design Tokens v3.0  ·  Minimaliste Premium
-   Official STRICT palette: Navy #021A3D · Gold #F2B10E · Pale yellow #E8E7A2
-   Absolute rule: gold & pale yellow = BACKGROUND/accent only. Text on light = navy.
-   Statuses distinguished by navy/gold/pale yellow shades (like the reference mockup).
+   Palette: Navy #021A3D · Gold #F2B10E · Pale yellow #E8E7A2
+   Rule: gold & pale yellow used for background/accent only. Text on light background = navy.
+   Statuses distinguished by navy/gold/pale yellow shades (see reference mockup).
    ============================================================================= */
 
 :root {
 
-  /* -- Brand colors (imposed palette) -- */
+  /* -- Brand colors -- */
   --marine:          #021A3D;   /* Dark background, main text, nav */
-  --marine-700:      #021A3D;   /* Navy hover (interactive dark background) - brand */
-  --marine-500:      #021A3D;   /* Intermediate shade - brand (no invented blue) */
-  --marine-100:      #E8E7A2;   /* Light background = pale yellow (strict palette, no more invented gray) */
+  --marine-700:      #021A3D;   /* Navy on hover (dark interactive background) */
+  --marine-500:      #021A3D;   /* Intermediate shade */
+  --marine-100:      #E8E7A2;   /* Light background = pale yellow */
 
-  --or:              #F2B10E;   /* Accent: BACKGROUND & buttons ONLY */
-  --or-600:          #F2B10E;   /* Accent button hover - same gold (opacity handled in JS/CSS) */
-  --or-500:          #F2B10E;   /* Accent button active - same gold */
-  --or-text:         #021A3D;   /* Text on light background = navy (never gold text) */
-  --or-text-hover:   #021A3D;   /* Link hover = navy */
+  --or:              #F2B10E;   /* Accent: background & buttons only */
+  --or-600:          #F2B10E;   /* Gold on button hover (opacity handled in JS/CSS) */
+  --or-500:          #F2B10E;   /* Gold on button active state */
+  --or-text:         #021A3D;   /* Text on light background = navy */
+  --or-text-hover:   #021A3D;   /* Link on hover = navy */
 
   --jaune-pale:      #E8E7A2;   /* Soft background, subtle banners */
   --jaune-pale-dark: #d4d38a;   /* Border on pale yellow background */
 
-  /* -- Application surfaces & backgrounds -- */
-  --bg:              #F8F9FB;   /* Global background - neutral gray */
-  --bg-soft:         #F9FAFB;   /* Alternate background (even table rows) - brand background gray */
+  /* -- Surfaces & application backgrounds -- */
+  --bg:              #F8F9FB;   /* Global background */
+  --bg-soft:         #F9FAFB;   /* Alternate background (even table rows) */
   --surface:         #FFFFFF;   /* Cards, modals, inputs */
-  --surface-hover:   #F9FAFB;   /* White surface hover - brand background gray */
+  --surface-hover:   #F9FAFB;   /* Hover on white surfaces */
 
   /* -- Text (navy on light background → 13-15:1, always ≥ 4.5:1) -- */
   --ink:             #021A3D;   /* Main text */
-  --muted:           #021A3D;   /* Secondary text = navy (strict palette: text on light = navy) */
-  --placeholder:     #021A3D;   /* Input placeholders = navy (strict palette), differentiated by italics */
+  --muted:           #021A3D;   /* Secondary text */
+  --placeholder:     #021A3D;   /* Placeholders, differentiated with italics */
 
-  /* -- Semantic states (all RGAA-compliant on light background) -- */
-  --success:         #021A3D;   /* Success text = navy (brand) */
-  --success-soft:    #E8E7A2;   /* Success background = pale yellow (brand) */
-  --success-border:  #d4d38a;   /* Success border = dark pale yellow (brand) */
+  /* -- Semantic states (RGAA-compliant on light background) -- */
+  --success:         #021A3D;   /* Success text = navy */
+  --success-soft:    #E8E7A2;   /* Success background = pale yellow */
+  --success-border:  #d4d38a;   /* Success border = dark pale yellow */
 
-  --danger:          #021A3D;   /* Danger text = navy (NO red) */
-  --danger-soft:     #FFFFFF;   /* Danger background = white + navy border (strict palette) */
-  --danger-border:   #021A3D;   /* Danger border = navy (strict palette) */
+  --danger:          #021A3D;   /* Danger text = navy (no red) */
+  --danger-soft:     #FFFFFF;   /* Danger background = white + navy border */
+  --danger-border:   #021A3D;   /* Danger border = navy */
 
-  --warning:         #021A3D;   /* Warning text = navy (brand) */
-  --warning-soft:    #E8E7A2;   /* Warning background = pale yellow (brand) */
-  --warning-border:  #d4d38a;   /* Warning border = dark pale yellow (brand) */
+  --warning:         #021A3D;   /* Warning text = navy */
+  --warning-soft:    #E8E7A2;   /* Warning background = pale yellow */
+  --warning-border:  #d4d38a;   /* Warning border = dark pale yellow */
 
   --info:            #021A3D;   /* Info text = navy */
-  --info-soft:       #FFFFFF;   /* Info background = white + navy border (strict palette) */
-  --info-border:     #021A3D;   /* Info border = navy (strict palette) */
+  --info-soft:       #FFFFFF;   /* Info background = white + navy border */
+  --info-border:     #021A3D;   /* Info border = navy */
 
-  /* -- Borders & separators - thinner, lighter -- */
+  /* -- Borders & separators -- */
   --line:            #E2E6EA;   /* Standard neutral border */
-  --line-strong:     #D9DCDB;   /* Pronounced border - brand border gray */
+  --line-strong:     #D9DCDB;   /* Emphasized border */
 
-  /* -- Typography (imposed brand: Palatino titles, Arial UI) -- */
+  /* -- Typography (Palatino for titles, Arial for UI) -- */
   --font-display: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   --font-sans:    Arial, Helvetica, sans-serif;
 
-  /* Type scale (imposed brand: body text 12 pt = 16 px, titles 24 pt = 32 px) */
-  --text-xs:    16px;  /* forced to 12 pt (brand: 12 pt text everywhere) */
-  --text-sm:    16px;  /* forced to 12 pt (brand) */
-  --text-base:  16px;  /* 12 pt - BODY TEXT (brand) */
+  /* Type scale (body text 12 pt = 16 px, titles 24 pt = 32 px) */
+  --text-xs:    16px;  /* 12 pt */
+  --text-sm:    16px;  /* 12 pt */
+  --text-base:  16px;  /* 12 pt - body text */
   --text-lg:    20px;  /* 15 pt - h3 */
   --text-xl:    24px;  /* 18 pt */
   --text-2xl:   28px;  /* 21 pt - h2 */
-  --text-3xl:   32px;  /* 24 pt - h1 / titles (brand) */
+  --text-3xl:   32px;  /* 24 pt - h1 / titles */
 
   --leading-tight:  1.25;
   --leading-base:   1.60;   /* Slightly airier */
@@ -150,7 +150,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* -- Titles - Palatino (brand) -- */
+/* -- Titles - Palatino -- */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   color: var(--marine);

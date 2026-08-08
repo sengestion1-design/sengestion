@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'invoices' %}
-{% block title %}Facture par la voix — SenGestion{% endblock %}
+{% block title %}Facture par la voix - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -174,7 +174,7 @@
               transcriptBox.textContent = data.text;
               transcriptInput.value = data.text;
               submitBtn.disabled = false;
-              status.textContent = 'Transcription terminée — vérifiez puis générez';
+              status.textContent = 'Transcription terminée - vérifiez puis générez';
             } else {
               status.textContent = data.error || "Transcription impossible. Réessayez.";
             }
