@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'invoices' %}
-{% block title %}Facture {{ invoice.number }} — SenGestion{% endblock %}
+{% block title %}Facture {{ invoice.number }} - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -29,18 +29,18 @@
     <dl class="detail-grid">
       <div>
         <dt class="detail-label">Client</dt>
-        <dd class="detail-value" style="font-weight:600;">{{ invoice.customer.name if invoice.customer else '—' }}</dd>
+        <dd class="detail-value" style="font-weight:600;">{{ invoice.customer.name if invoice.customer else '-' }}</dd>
       </div>
       <div>
         <dt class="detail-label">Date</dt>
         <dd class="detail-value" style="font-weight:600;">
-          {{ invoice.invoice_date.strftime('%d/%m/%Y') if invoice.invoice_date else '—' }}
+          {{ invoice.invoice_date.strftime('%d/%m/%Y') if invoice.invoice_date else '-' }}
         </dd>
       </div>
       <div>
         <dt class="detail-label">Statut</dt>
         <dd class="detail-value">
-          {% set meta = statuses.get(invoice.status, ('—', '#FFFFFF', '#021A3D')) %}
+          {% set meta = statuses.get(invoice.status, ('-', '#FFFFFF', '#021A3D')) %}
           <span class="badge"
                 style="background:{{ meta[1] }}; color:{{ meta[2] }}; padding:4px 12px;
                        border:1px solid #021A3D; border-radius:999px; display:inline-block; font-weight:600;">{{ meta[0] }}</span>
@@ -155,7 +155,7 @@
           {% for p in payments %}
           <tr>
             <td style="color:var(--muted); white-space:nowrap;">
-              {{ p.payment_date.strftime('%d/%m/%Y') if p.payment_date else '—' }}
+              {{ p.payment_date.strftime('%d/%m/%Y') if p.payment_date else '-' }}
             </td>
             <td>
               <span class="badge badge-pale">{{ methods.get(p.method, p.method) }}</span>

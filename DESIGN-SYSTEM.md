@@ -1,6 +1,6 @@
-# SenGestion — Design System (contrainte partagée pour tous les agents)
+# SenGestion - Design System (contrainte partagée pour tous les agents)
 
-> ⚠️ CHARTE GRAPHIQUE IMPOSÉE (examen RNCP) — à respecter STRICTEMENT.
+> ⚠️ CHARTE GRAPHIQUE IMPOSÉE (examen RNCP) - à respecter STRICTEMENT.
 > Aucune liberté sur les couleurs et la typographie. Le raffinement passe par
 > la mise en page, l'espacement, la hiérarchie et les micro-détails.
 

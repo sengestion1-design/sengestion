@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'quotes' %}
-{% block title %}Devis — SenGestion{% endblock %}
+{% block title %}Devis - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -90,9 +90,9 @@
                 {{ q.number }}
               </a>
             </td>
-            <td>{{ q.customer.name if q.customer else '—' }}</td>
+            <td>{{ q.customer.name if q.customer else '-' }}</td>
             <td>
-              {% set meta = statuses.get(q.status, ('—', '#FFFFFF', '#021A3D')) %}
+              {% set meta = statuses.get(q.status, ('-', '#FFFFFF', '#021A3D')) %}
               <span class="badge"
                     style="background:{{ meta[1] }}; color:{{ meta[2] }}; padding:4px 12px;
                            border:1px solid #021A3D; border-radius:999px; display:inline-block; font-weight:600;">
@@ -100,7 +100,7 @@
               </span>
             </td>
             <td style="color:var(--muted); white-space:nowrap;">
-              {{ q.quote_date.strftime('%d/%m/%Y') if q.quote_date else '—' }}
+              {{ q.quote_date.strftime('%d/%m/%Y') if q.quote_date else '-' }}
             </td>
             <td style="font-weight:700; text-align:right; white-space:nowrap;">{{ fmt(q.amount_incl_tax) }}</td>
             <td class="col-actions">

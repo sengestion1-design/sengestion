@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'quotes' %}
-{% block title %}{{ 'Modifier le devis' if quote else 'Nouveau devis' }} — SenGestion{% endblock %}
+{% block title %}{{ 'Modifier le devis' if quote else 'Nouveau devis' }} - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -33,11 +33,11 @@
         <div class="form-group" style="margin-bottom:0;">
           <label class="form-label" for="customer_id">Client <span class="required" aria-hidden="true">*</span></label>
           <select class="form-input" id="customer_id" name="customer_id" required>
-            <option value="">— Sélectionner un client —</option>
+            <option value="">- Sélectionner un client -</option>
             {% for c in customers %}
             {% set current_cid = (form.customer_id if form else (quote.customer_id if quote else None)) %}
             <option value="{{ c.id }}" {{ 'selected' if current_cid and (current_cid|string) == (c.id|string) }}>
-              {{ c.name }}{% if c.company %} — {{ c.company }}{% endif %}
+              {{ c.name }}{% if c.company %} - {{ c.company }}{% endif %}
             </option>
             {% endfor %}
           </select>

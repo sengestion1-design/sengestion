@@ -280,7 +280,7 @@ DESCRIPTIONS = {
 }
 
 
-# Entités (description) — en français, comme Julie
+# Entités (description) - en français, comme Julie
 ENTITIES = [
     ("Utilisateur (users)", "gérants abonnés et administrateurs (nom, entreprise, e-mail, rôle, statut d'abonnement, vérification e-mail)."),
     ("Client (customers)", "clients facturables d'un gérant (nom, entreprise, coordonnées, adresse)."),
@@ -295,7 +295,7 @@ ENTITIES = [
     ("Message (messages)", "e-mails de relance envoyés aux contacts ou clients (sujet, corps, statut)."),
 ]
 
-# Associations (phrases avec cardinalités) — en français, comme Julie
+# Associations (phrases avec cardinalités) - en français, comme Julie
 ASSOCIATIONS = [
     "Un gérant (utilisateur) possède 0 à plusieurs clients, contacts, devis, factures et dépenses ; chacun appartient à un seul gérant.",
     "Un contact peut être converti en 1 client (ou aucun) ; un client provient d'au plus un contact.",
@@ -308,7 +308,7 @@ ASSOCIATIONS = [
     "Seuls les administrateurs peuvent valider les abonnements et gérer les comptes des gérants.",
 ]
 
-# Règles de gestion (business rules) — en français, comme Julie
+# Règles de gestion (business rules) - en français, comme Julie
 BUSINESS_RULES = [
     ("Comptes &amp; abonnement", [
         "Un utilisateur doit vérifier son e-mail (code à 6 chiffres) avant de pouvoir se connecter.",
@@ -402,7 +402,7 @@ def main():
 
     DOC = f"""
     <div class="cover">
-      <div class="t1">Data Model — MERISE</div>
+      <div class="t1">Data Model - MERISE</div>
       <div class="t2">SenGestion · MySQL (CP5) + NoSQL MongoDB (CP6) · {nb_tables} tables · generated from code</div>
     </div>
     <h2>Règles de gestion</h2>
@@ -415,16 +415,16 @@ def main():
     <h2>Associations entre les entités</h2>
     {assoc_html}
 
-    <h2>CDM — Schéma conceptuel des données</h2>
+    <h2>CDM - Schéma conceptuel des données</h2>
     <p class="lead">Entités, associations et cardinalités. <b style="color:{OR}">PK</b> = clé primaire · <b style="color:#8F6600">FK</b> = clé étrangère.</p>
     <div class="fig"><img src="data:image/png;base64,{mcd_b64}" style="width:100%;max-width:800px"/></div>
 
     <h2>Data dictionary</h2>
     <p class="lead">Every field of the relational schema, with its SQL type and description.</p>
     {dict_html}
-    <h2>PDM — Physical Data Model (MySQL)</h2>
+    <h2>PDM - Physical Data Model (MySQL)</h2>
     <div class="tables">{tables_html}</div>
-    <h2>NoSQL data (MongoDB) — CP6</h2>
+    <h2>NoSQL data (MongoDB) - CP6</h2>
     <table class="nosql">
       <tr><th>Collection</th><th>Content</th></tr>
       <tr><td><b>activity_logs</b></td><td>Action log (login, creation…)</td></tr>
@@ -434,7 +434,7 @@ def main():
     <div class="just"><b>Architecture:</b> MySQL for relational data requiring strong integrity
     (quote→customer, invoice→quote, ACID consistency) · MongoDB for semi-structured,
     high-volume or variable-shape data (logs, AI outputs). SQL = structure &amp; reliability · NoSQL = flexibility &amp; volume.</div>
-    <div class="footer">Schema automatically generated from the SQLAlchemy models — always in sync with the code.</div>
+    <div class="footer">Schema automatically generated from the SQLAlchemy models - always in sync with the code.</div>
     """
 
     CSS = f"""

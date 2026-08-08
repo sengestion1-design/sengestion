@@ -4,7 +4,7 @@
 {% set editing = contact is not none %}
 {% set noun = 'prospect' if the_kind == 'prospect' else 'contact' %}
 {% set back_ep = 'contacts.prospects' if the_kind == 'prospect' else 'contacts.index' %}
-{% block title %}{{ ('Modifier le ' if editing else 'Nouveau ') ~ noun }} — SenGestion{% endblock %}
+{% block title %}{{ ('Modifier le ' if editing else 'Nouveau ') ~ noun }} - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -40,7 +40,7 @@
   {% if from_scan %}
   <div class="scan-info-banner" role="status">
     <i data-lucide="sparkles" aria-hidden="true"></i>
-    <span>Champs pré-remplis automatiquement à partir de la carte scannée — vérifiez-les avant d'enregistrer.</span>
+    <span>Champs pré-remplis automatiquement à partir de la carte scannée - vérifiez-les avant d'enregistrer.</span>
   </div>
   {% endif %}
 

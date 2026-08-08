@@ -3,7 +3,7 @@
 {% set active = 'prospects' if the_kind == 'prospect' else 'contacts' %}
 {% set noun = 'prospect' if the_kind == 'prospect' else 'contact' %}
 {% set back_ep = 'contacts.prospects' if the_kind == 'prospect' else 'contacts.index' %}
-{% block title %}{{ contact.first_name ~ ' ' if contact.first_name }}{{ contact.name }} — SenGestion{% endblock %}
+{% block title %}{{ contact.first_name ~ ' ' if contact.first_name }}{{ contact.name }} - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -11,7 +11,7 @@
     <div>
       <h1 class="page-title">{{ contact.first_name ~ ' ' if contact.first_name }}{{ contact.name }}</h1>
       <p class="page-subtitle">
-        {% if contact.company %}{{ contact.company }}{% if contact.role %} — {{ contact.role }}{% endif %}
+        {% if contact.company %}{{ contact.company }}{% if contact.role %} - {{ contact.role }}{% endif %}
         {% else %}Fiche {{ noun }}{% endif %}
       </p>
     </div>
@@ -69,24 +69,24 @@
 
       <dl class="contact-show-list">
         <div class="contact-show-row">
-          <dt>Prénom</dt><dd>{{ contact.first_name or '—' }}</dd>
+          <dt>Prénom</dt><dd>{{ contact.first_name or '-' }}</dd>
         </div>
         <div class="contact-show-row">
           <dt>Nom</dt><dd>{{ contact.name }}</dd>
         </div>
         <div class="contact-show-row">
-          <dt>Entreprise</dt><dd>{{ contact.company or '—' }}</dd>
+          <dt>Entreprise</dt><dd>{{ contact.company or '-' }}</dd>
         </div>
         <div class="contact-show-row">
-          <dt>Fonction</dt><dd>{{ contact.role or '—' }}</dd>
+          <dt>Fonction</dt><dd>{{ contact.role or '-' }}</dd>
         </div>
         <div class="contact-show-row">
           <dt>Email</dt>
-          <dd>{% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% else %}—{% endif %}</dd>
+          <dd>{% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% else %}-{% endif %}</dd>
         </div>
         <div class="contact-show-row">
           <dt>Téléphone</dt>
-          <dd>{% if contact.phone %}<a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>{% else %}—{% endif %}</dd>
+          <dd>{% if contact.phone %}<a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>{% else %}-{% endif %}</dd>
         </div>
       </dl>
 

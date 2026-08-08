@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'customers' %}
-{% block title %}Clients — SenGestion{% endblock %}
+{% block title %}Clients - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -54,9 +54,9 @@
                 {{ c.name }}
               </a>
             </td>
-            <td>{{ c.company or '—' }}</td>
-            <td>{{ c.email or '—' }}</td>
-            <td>{{ c.phone or '—' }}</td>
+            <td>{{ c.company or '-' }}</td>
+            <td>{{ c.email or '-' }}</td>
+            <td>{{ c.phone or '-' }}</td>
             <td class="col-actions">
               <a href="{{ url_for('customers.show', customer_id=c.id) }}"
                  class="btn btn-ghost btn-sm" aria-label="Voir {{ c.name }}">

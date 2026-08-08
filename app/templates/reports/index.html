@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'reports' %}
-{% block title %}Rapports — SenGestion{% endblock %}
+{% block title %}Rapports - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -10,8 +10,8 @@
       <div class="page-eyebrow">Analyse</div>
       <h1 class="page-title">Rapports</h1>
       <p class="page-subtitle">
-        Période du {{ report.period_start.strftime('%d/%m/%Y') if report else '—' }}
-        au {{ report.period_end.strftime('%d/%m/%Y') if report else '—' }}
+        Période du {{ report.period_start.strftime('%d/%m/%Y') if report else '-' }}
+        au {{ report.period_end.strftime('%d/%m/%Y') if report else '-' }}
       </p>
     </div>
   </div>
@@ -96,7 +96,7 @@
       <div class="kpi-icon-wrap"><i data-lucide="wallet"></i></div>
       <div class="kpi-label">Solde net</div>
       <div class="kpi-value">{{ '{:,.0f}'.format(report.net_balance).replace(',', ' ') }}</div>
-      <div class="kpi-unit">FCFA — encaissé moins dépenses</div>
+      <div class="kpi-unit">FCFA - encaissé moins dépenses</div>
     </div>
 
   </div>

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# start-projet.sh — Démarre tout l'environnement du projet final SenGestion
+# start-projet.sh - Démarre tout l'environnement du projet final SenGestion
 # --------------------------------------------------------------------------
 # Lance dans l'ordre :
-#   1. MongoDB   (logs IA / NoSQL — CP6)      -> port 27017
-#   2. MySQL     (données métier — XAMPP)     -> port 3306   [demande sudo]
+#   1. MongoDB   (logs IA / NoSQL - CP6)      -> port 27017
+#   2. MySQL     (données métier - XAMPP)     -> port 3306   [demande sudo]
 #   3. Serveur Flask (run.py)                 -> http://localhost:5002
 #
 # Usage :  ./start-projet.sh          (démarre tout)
@@ -69,12 +69,12 @@ fi
 #  START
 # ==========================================================================
 echo -e "${B}╔══════════════════════════════════════════════╗${N}"
-echo -e "${B}║   SenGestion — Démarrage de l'environnement   ║${N}"
+echo -e "${B}║   SenGestion - Démarrage de l'environnement   ║${N}"
 echo -e "${B}╚══════════════════════════════════════════════╝${N}"
 echo ""
 
 # --- 1. MongoDB ------------------------------------------------------------
-info "1/3 — MongoDB (logs IA / NoSQL)…"
+info "1/3 - MongoDB (logs IA / NoSQL)…"
 if port_open "$MONGO_PORT"; then
   ok "MongoDB tourne déjà (port $MONGO_PORT)."
 elif [ ! -x "$MONGO_BIN" ]; then
@@ -87,15 +87,15 @@ else
   # attendre l'ouverture du port (max ~5s)
   for i in {1..10}; do port_open "$MONGO_PORT" && break; sleep 0.5; done
   if port_open "$MONGO_PORT"; then ok "MongoDB démarré (port $MONGO_PORT)."
-  else err "MongoDB n'a pas démarré — voir $MONGO_LOG"; exit 1; fi
+  else err "MongoDB n'a pas démarré - voir $MONGO_LOG"; exit 1; fi
 fi
 
 # --- 2. MySQL (XAMPP) ------------------------------------------------------
-info "2/3 — MySQL (données métier — XAMPP)…"
+info "2/3 - MySQL (données métier - XAMPP)…"
 if mysql_up; then
   ok "MySQL tourne déjà et répond (port $MYSQL_PORT)."
 else
-  warn "Démarrage de MySQL — mot de passe administrateur requis :"
+  warn "Démarrage de MySQL - mot de passe administrateur requis :"
   # Nettoie les .pid périmés (cause du 'A mysqld process already exists' après crash)
   sudo rm -f /Applications/XAMPP/xamppfiles/var/mysql/*.pid 2>/dev/null
   sudo "$MYSQL_CTL" start >/dev/null 2>&1
@@ -106,7 +106,7 @@ else
 fi
 
 # --- 3. Serveur Flask ------------------------------------------------------
-info "3/3 — Serveur Flask…"
+info "3/3 - Serveur Flask…"
 if port_open "$FLASK_PORT"; then
   warn "Un serveur tourne déjà sur le port $FLASK_PORT. Redémarrage…"
   pkill -f "run.py" 2>/dev/null

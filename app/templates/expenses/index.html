@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'expenses' %}
-{% block title %}Charges &amp; Dépenses — SenGestion{% endblock %}
+{% block title %}Charges &amp; Dépenses - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -115,11 +115,11 @@
               {% if e.category %}
               <span class="badge badge-pale">{{ e.category.name }}</span>
               {% else %}
-              <span style="color:var(--muted);">—</span>
+              <span style="color:var(--muted);">-</span>
               {% endif %}
             </td>
             <td style="color:var(--muted); white-space:nowrap;">
-              {{ e.expense_date.strftime('%d/%m/%Y') if e.expense_date else '—' }}
+              {{ e.expense_date.strftime('%d/%m/%Y') if e.expense_date else '-' }}
             </td>
             <td style="font-weight:700; color:var(--marine); text-align:right; white-space:nowrap;">
               {{ "{:,.0f}".format(e.amount).replace(",", " ") }}

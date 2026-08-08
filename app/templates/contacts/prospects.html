@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'prospects' %}
-{% block title %}Prospects — SenGestion{% endblock %}
+{% block title %}Prospects - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -47,13 +47,13 @@
         </thead>
         <tbody>
           {% for ct in contacts %}
-          {% set label, badge = statuses.get(ct.status, ('—', 'badge-neutral')) %}
+          {% set label, badge = statuses.get(ct.status, ('-', 'badge-neutral')) %}
           <tr>
             <td style="font-weight:600; color:var(--marine);">
               {{ ct.first_name ~ ' ' if ct.first_name }}{{ ct.name }}
             </td>
-            <td>{{ ct.company or '—' }}</td>
-            <td>{{ ct.role or '—' }}</td>
+            <td>{{ ct.company or '-' }}</td>
+            <td>{{ ct.role or '-' }}</td>
             <td>
               <span class="badge {{ badge }}">{{ label }}</span>
               {% if ct.is_converted %}

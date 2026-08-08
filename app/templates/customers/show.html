@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'customers' %}
-{% block title %}{{ customer.name }} — SenGestion{% endblock %}
+{% block title %}{{ customer.name }} - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -27,29 +27,29 @@
     <dl class="detail-grid">
       <div>
         <dt class="detail-label">Entreprise</dt>
-        <dd class="detail-value">{{ customer.company or '—' }}</dd>
+        <dd class="detail-value">{{ customer.company or '-' }}</dd>
       </div>
       <div>
         <dt class="detail-label">Email</dt>
         <dd class="detail-value">
-          {% if customer.email %}<a href="mailto:{{ customer.email }}">{{ customer.email }}</a>{% else %}—{% endif %}
+          {% if customer.email %}<a href="mailto:{{ customer.email }}">{{ customer.email }}</a>{% else %}-{% endif %}
         </dd>
       </div>
       <div>
         <dt class="detail-label">Téléphone</dt>
         <dd class="detail-value">
-          {% if customer.phone %}<a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>{% else %}—{% endif %}
+          {% if customer.phone %}<a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>{% else %}-{% endif %}
         </dd>
       </div>
       <div>
         <dt class="detail-label">Client depuis</dt>
         <dd class="detail-value">
-          {{ customer.created_at.strftime('%d/%m/%Y') if customer.created_at else '—' }}
+          {{ customer.created_at.strftime('%d/%m/%Y') if customer.created_at else '-' }}
         </dd>
       </div>
       <div style="grid-column:1/-1;">
         <dt class="detail-label">Adresse</dt>
-        <dd class="detail-value" style="white-space:pre-line;">{{ customer.address or '—' }}</dd>
+        <dd class="detail-value" style="white-space:pre-line;">{{ customer.address or '-' }}</dd>
       </div>
     </dl>
   </div>
@@ -71,8 +71,8 @@
         <tbody>
           {% for q in quotes %}
           <tr>
-            <td style="font-weight:600; color:var(--marine);">{{ q.number or '—' }}</td>
-            <td>{{ q.quote_date.strftime('%d/%m/%Y') if q.quote_date else '—' }}</td>
+            <td style="font-weight:600; color:var(--marine);">{{ q.number or '-' }}</td>
+            <td>{{ q.quote_date.strftime('%d/%m/%Y') if q.quote_date else '-' }}</td>
             <td><span class="badge badge-neutral">{{ q.status }}</span></td>
             <td style="text-align:right;">{{ '{:,.0f}'.format(q.amount_incl_tax or 0)|replace(',', ' ') }} FCFA</td>
           </tr>
@@ -104,8 +104,8 @@
         <tbody>
           {% for inv in invoices %}
           <tr>
-            <td style="font-weight:600; color:var(--marine);">{{ inv.number or '—' }}</td>
-            <td>{{ inv.invoice_date.strftime('%d/%m/%Y') if inv.invoice_date else '—' }}</td>
+            <td style="font-weight:600; color:var(--marine);">{{ inv.number or '-' }}</td>
+            <td>{{ inv.invoice_date.strftime('%d/%m/%Y') if inv.invoice_date else '-' }}</td>
             <td><span class="badge badge-neutral">{{ inv.status }}</span></td>
             <td style="text-align:right;">{{ '{:,.0f}'.format(inv.amount_incl_tax or 0)|replace(',', ' ') }} FCFA</td>
           </tr>

@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 {% set active = 'messages' %}
-{% block title %}Relances — SenGestion{% endblock %}
+{% block title %}Relances - SenGestion{% endblock %}
 
 {% block page %}
 
@@ -34,9 +34,9 @@
           {% set ct = contact_map.get(m.contact_id) %}
           <tr>
             <td style="font-weight:600; color:var(--marine);">
-              {% if ct %}{{ ct.first_name ~ ' ' if ct.first_name }}{{ ct.name }}{% else %}—{% endif %}
+              {% if ct %}{{ ct.first_name ~ ' ' if ct.first_name }}{{ ct.name }}{% else %}-{% endif %}
             </td>
-            <td>{{ m.subject or '—' }}</td>
+            <td>{{ m.subject or '-' }}</td>
             <td>
               {% if m.status == 'sent' %}
                 <span class="badge badge-pale" title="Envoyé">
@@ -51,7 +51,7 @@
               {% endif %}
             </td>
             <td style="color:var(--muted); font-size:15px;">
-              {{ (m.sent_at or m.created_at).strftime('%d/%m/%Y %H:%M') if (m.sent_at or m.created_at) else '—' }}
+              {{ (m.sent_at or m.created_at).strftime('%d/%m/%Y %H:%M') if (m.sent_at or m.created_at) else '-' }}
             </td>
             <td class="col-actions">
               {% if ct %}
