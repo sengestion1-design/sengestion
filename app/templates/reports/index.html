@@ -4,7 +4,7 @@
 
 {% block page %}
 
-  {# -- Page header -- #}
+  {# ── En-tête de page ── #}
   <div class="page-header">
     <div class="page-header-left">
       <div class="page-eyebrow">Analyse</div>
@@ -16,7 +16,7 @@
     </div>
   </div>
 
-  {# -- Filters -- #}
+  {# ── Filtres ── #}
   <div class="card" style="margin-bottom:24px;">
     <form method="get" action="{{ url_for('reports.index') }}"
           style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
@@ -54,18 +54,12 @@
         <button type="submit" class="btn btn-primary">
           <i data-lucide="filter" style="width:16px;height:16px;vertical-align:-3px;"></i> Filtrer
         </button>
-        {% if report %}
-        <a class="btn btn-secondary"
-           href="{{ url_for('reports.export_csv', period=period, year=year, month=month) }}">
-          <i data-lucide="download" style="width:16px;height:16px;vertical-align:-3px;"></i> Exporter CSV
-        </a>
-        {% endif %}
       </div>
     </form>
   </div>
 
   {% if report %}
-  {# -- KPI tiles -- #}
+  {# ── KPI tiles ── #}
   <div class="kpi-grid">
 
     <div class="kpi-card">
@@ -101,23 +95,7 @@
 
   </div>
 
-  {# -- Charts -- #}
-  <div class="charts-grid" style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-bottom:24px;">
-    <div class="card">
-      <div class="table-header-title" style="margin-bottom:12px;">Évolution sur 6 mois</div>
-      <canvas id="chart-trend" role="img" aria-label="Graphique d'évolution du chiffre d'affaires et des dépenses sur 6 mois" height="220"></canvas>
-    </div>
-    <div class="card">
-      <div class="table-header-title" style="margin-bottom:12px;">Dépenses par catégorie</div>
-      {% if breakdown and breakdown.labels %}
-      <canvas id="chart-breakdown" role="img" aria-label="Graphique de répartition des dépenses par catégorie" height="220"></canvas>
-      {% else %}
-      <p class="page-subtitle">Aucune dépense sur la période.</p>
-      {% endif %}
-    </div>
-  </div>
-
-  {# -- Detail -- #}
+  {# ── Détail ── #}
   <div class="table-wrap">
     <div class="table-header">
       <div class="table-header-title">Détail de la période</div>
@@ -141,13 +119,6 @@
       </table>
     </div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
-          integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt"
-          crossorigin="anonymous"></script>
-  <script src="{{ url_for('static', filename='js/reports-charts.js') }}"
-          data-trend='{{ trend | tojson }}'
-          data-breakdown='{{ breakdown | tojson }}'></script>
 
   {% else %}
   <div class="empty-state">

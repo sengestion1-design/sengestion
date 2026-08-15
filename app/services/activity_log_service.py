@@ -54,15 +54,64 @@ def get_recent(limit: int = 20, user_id: int | None = None) -> list[dict]:
 
 
 ACTION_LABELS = {
+    # Compte
     "login": "Connexion",
+    "login_failed": "Échec de connexion",
     "logout": "Déconnexion",
     "register": "Inscription",
+    "email_verified": "E-mail vérifié",
+    "password_reset_requested": "Réinitialisation demandée",
+    "password_reset_done": "Mot de passe réinitialisé",
+    "update_settings": "Paramètres mis à jour",
+    # Contacts et clients
+    "create_contact": "Contact ajouté",
+    "update_contact": "Contact modifié",
+    "delete_contact": "Contact supprimé",
+    "promote_contact": "Contact promu prospect",
+    "convert_contact": "Contact converti en client",
+    "scan_business_card": "Carte de visite scannée (IA)",
     "create_customer": "Client ajouté",
+    "update_customer": "Client modifié",
+    "delete_customer": "Client supprimé",
+    # Devis et factures
+    "create_quote": "Devis créé",
+    "update_quote": "Devis modifié",
+    "delete_quote": "Devis supprimé",
+    "voice_quote": "Devis créé par dictée vocale",
+    "convert_quote_to_invoice": "Devis converti en facture",
+    "public_quote_view": "Devis consulté par le client (lien QR)",
+    "public_quote_signed": "Devis signé par le client",
+    "create_invoice": "Facture créée",
+    "delete_invoice": "Facture supprimée",
     "voice_invoice": "Facture créée par dictée vocale",
     "voice_transcribe": "Dictée vocale transcrite",
+    "add_payment": "Paiement encaissé",
+    "delete_payment": "Paiement supprimé",
+    # Dépenses
+    "create_expense": "Dépense enregistrée",
+    "update_expense": "Dépense modifiée",
+    "delete_expense": "Dépense supprimée",
+    "create_expense_category": "Catégorie de dépense créée",
+    "delete_expense_category": "Catégorie de dépense supprimée",
+    "scan_receipt": "Reçu scanné (IA)",
+    # Messages
+    "send_message": "Message envoyé",
+    "resend_message": "Message renvoyé",
+    # Abonnement / administration
     "validate_subscription": "Abonnement validé",
     "suspend_account": "Compte suspendu",
+    "submit_payment_proof": "Preuve de paiement envoyée",
+    "approve_payment_proof": "Preuve de paiement validée",
+    "reject_payment_proof": "Preuve de paiement rejetée",
 }
+
+
+def _fmt_fcfa(value) -> str:
+    """53100.00 -> « 53 100 FCFA » (échoue en silence sur valeur non numérique)."""
+    try:
+        return "{:,.0f}".format(float(value)).replace(",", " ") + " FCFA"
+    except (TypeError, ValueError):
+        return str(value)
 
 
 def describe(log: dict) -> tuple[str, str]:
@@ -71,7 +120,7 @@ def describe(log: dict) -> tuple[str, str]:
     label = ACTION_LABELS.get(action, action.replace("_", " ").capitalize())
     details = log.get("details") or {}
 
-    if action in ("login", "register") and details.get("email"):
+    if action in ("login", "register", "login_failed") and details.get("email"):
         detail = details["email"]
     elif action == "create_customer" and details.get("name"):
         detail = f"{details['name']} (client #{details.get('customer_id', '?')})"
@@ -79,10 +128,35 @@ def describe(log: dict) -> tuple[str, str]:
         detail = "Enregistrement traité avec succès" if details.get("ok") else "Échec du traitement"
     elif action == "voice_transcribe":
         detail = "Audio transcrit avec succès" if details.get("ok") else "Échec de la transcription"
+    elif action == "public_quote_signed":
+        signer = details.get("signer_name", "?")
+        detail = f"{details.get('number', '')} - bon pour accord de {signer}".strip(" -")
+    elif details.get("number"):
+        # documents (devis, factures, paiements) : numéro + montant lisibles
+        parts = [str(details["number"])]
+        for key in ("amount_incl_tax", "amount"):
+            if details.get(key) is not None:
+                parts.append(_fmt_fcfa(details[key]))
+                break
+        if details.get("customer"):
+            parts.append(str(details["customer"]))
+        detail = " - ".join(parts)
+    elif details.get("name"):
+        detail = str(details["name"])
+    elif details.get("label"):
+        parts = [str(details["label"])]
+        if details.get("amount") is not None:
+            parts.append(_fmt_fcfa(details["amount"]))
+        detail = " - ".join(parts)
+    elif details.get("email"):
+        detail = str(details["email"])
+    elif details.get("subject"):
+        detail = str(details["subject"])
     elif not details:
         detail = "-"
     else:
-        detail = ", ".join(f"{k} : {v}" for k, v in details.items())
+        # dernier recours : valeurs seules, sans les noms techniques de champs
+        detail = ", ".join(str(v) for v in details.values() if v not in (None, ""))
 
     return label, detail
 

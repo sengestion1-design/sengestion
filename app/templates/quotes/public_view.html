@@ -1,0 +1,117 @@
+{% extends "layouts/base.html" %}
+
+{#
+  Page publique de consultation + signature electronique d'un devis.
+  Accessible sans connexion via le lien signe imprime en QR code sur le PDF.
+  Charte stricte : marine #021A3D / or #F2B10E / jaune pale #E8E7A2.
+#}
+
+{% block title %}Devis {{ quote.number }} - {{ settings.company_name if settings and settings.company_name else 'SenGestion' }}{% endblock %}
+
+{% block content %}
+<style>
+  .pub-page { min-height: 100vh; background: #f4f6f8; padding-bottom: 48px; }
+  .pub-hero { background: var(--marine, #021A3D); padding: 22px 20px; text-align: center; }
+  .pub-hero img { height: 48px; }
+  .pub-hero-bar { height: 5px; background: var(--or, #F2B10E); }
+  .pub-card { max-width: 760px; margin: 28px auto 0; background: #fff; border: 1px solid #e2e6ea;
+              border-radius: 14px; padding: 34px 38px; }
+  .pub-card h1 { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+                 color: var(--marine, #021A3D); font-size: 26px; margin: 0 0 4px; }
+  .pub-muted { color: #5a6b80; font-size: 13px; margin: 0 0 22px; }
+  .pub-badge { display: inline-block; padding: 5px 14px; border-radius: 999px; font-size: 13px;
+               font-weight: 700; border: 1px solid var(--marine, #021A3D); color: var(--marine, #021A3D); }
+  .pub-badge.ok { background: var(--jaune-pale, #E8E7A2); }
+  .pub-table { width: 100%; border-collapse: collapse; margin: 18px 0 8px; font-size: 14px; }
+  .pub-table th { background: var(--marine, #021A3D); color: #fff; text-align: left; padding: 10px 12px; }
+  .pub-table th.num, .pub-table td.num { text-align: right; white-space: nowrap; }
+  .pub-table td { border-bottom: 1px solid #e2e6ea; padding: 10px 12px; color: var(--marine, #021A3D); }
+  .pub-totals { margin: 10px 0 0; width: 100%; max-width: 320px; margin-left: auto; font-size: 14px; }
+  .pub-totals td { padding: 7px 12px; color: var(--marine, #021A3D); }
+  .pub-totals tr.ttc td { background: var(--marine, #021A3D); color: #fff; font-weight: 700; }
+  .pub-sign { margin-top: 28px; background: var(--jaune-pale, #E8E7A2); border-radius: 12px; padding: 22px 24px; }
+  .pub-sign h2 { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+                 color: var(--marine, #021A3D); font-size: 19px; margin: 0 0 12px; }
+  .pub-sign label { display: block; color: var(--marine, #021A3D); font-size: 14px; margin-bottom: 6px; font-weight: 600; }
+  .pub-sign input[type=text] { width: 100%; max-width: 380px; padding: 10px 12px; border: 1px solid var(--marine, #021A3D);
+                               border-radius: 8px; font-size: 15px; margin-bottom: 12px; background: #fff; }
+  .pub-sign .chk { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--marine, #021A3D);
+                   margin-bottom: 16px; font-weight: 400; }
+  .pub-actions { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .pub-flash { max-width: 760px; margin: 16px auto 0; padding: 12px 18px; border-radius: 10px;
+               border: 1px solid var(--marine, #021A3D); background: var(--jaune-pale, #E8E7A2);
+               color: var(--marine, #021A3D); font-size: 14px; }
+  @media (max-width: 640px) { .pub-card { margin: 18px 12px 0; padding: 24px 18px; } }
+</style>
+
+<div class="pub-page">
+  <div class="pub-hero">
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion">
+  </div>
+  <div class="pub-hero-bar"></div>
+
+  {% with messages = get_flashed_messages() %}
+    {% for m in messages %}<div class="pub-flash">{{ m }}</div>{% endfor %}
+  {% endwith %}
+
+  <div class="pub-card">
+    <h1>Devis {{ quote.number }}</h1>
+    <p class="pub-muted">
+      {{ settings.company_name if settings and settings.company_name else 'SenGestion' }}
+      &middot; émis le {{ quote.quote_date.strftime('%d/%m/%Y') if quote.quote_date else '-' }}
+      &middot; destinataire : {{ quote.customer.name if quote.customer else '-' }}
+    </p>
+
+    {% if quote.status == 'accepted' %}
+      <span class="pub-badge ok">&#10003; Devis signé - bon pour accord</span>
+    {% else %}
+      <span class="pub-badge">En attente de signature</span>
+    {% endif %}
+
+    <table class="pub-table">
+      <thead>
+        <tr><th>Désignation</th><th class="num">Qté</th><th class="num">P.U.</th><th class="num">Total HT</th></tr>
+      </thead>
+      <tbody>
+        {% for it in quote.items %}
+        <tr>
+          <td>{{ it.description }}</td>
+          <td class="num">{{ it.quantity }}</td>
+          <td class="num">{{ fmt(it.unit_price) }} FCFA</td>
+          <td class="num">{{ fmt(it.amount) }} FCFA</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <table class="pub-totals">
+      <tr><td>Sous-total HT</td><td style="text-align:right;">{{ fmt(quote.amount_excl_tax) }} FCFA</td></tr>
+      <tr class="ttc"><td>TOTAL TTC</td><td style="text-align:right;">{{ fmt(quote.amount_incl_tax) }} FCFA</td></tr>
+    </table>
+
+    {% if quote.status != 'accepted' %}
+    <div class="pub-sign">
+      <h2>Signature électronique - Bon pour accord</h2>
+      <form method="post" action="{{ url_for('quotes.public_sign', token=token) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="signer_name">Votre nom complet</label>
+        <input type="text" id="signer_name" name="signer_name" required minlength="3"
+               placeholder="Prénom et nom" autocomplete="name">
+        <label class="chk">
+          <input type="checkbox" name="approved" required>
+          <span>Lu et approuvé - j'accepte ce devis. Ma signature électronique est horodatée
+          et enregistrée comme preuve d'accord.</span>
+        </label>
+        <button type="submit" class="btn btn-accent">Signer le devis</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <div class="pub-actions">
+      <a href="{{ url_for('quotes.public_pdf', token=token) }}" target="_blank" class="btn btn-secondary">
+        Télécharger le PDF
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

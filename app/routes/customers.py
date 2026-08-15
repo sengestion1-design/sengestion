@@ -176,6 +176,22 @@ def delete(customer_id):
     """Delete a customer (owned by the current manager)."""
     customer = _get_owned_customer(customer_id)
     name = customer.name
+
+    if Quote.query.filter_by(customer_id=customer.id).first() or \
+            Invoice.query.filter_by(customer_id=customer.id).first():
+        flash(
+            f"Impossible de supprimer « {name} » : des devis ou factures lui sont "
+            f"rattachés. Supprimez-les d'abord.",
+            "danger",
+        )
+        return redirect(url_for("customers.show", customer_id=customer.id))
+
+    # Detach linked contacts (address book entries converted to this customer)
+    # instead of blocking on the foreign key: the contact itself is not deleted.
+    Contact.query.filter_by(customer_id=customer.id, user_id=current_user.id).update(
+        {"customer_id": None}
+    )
+
     db.session.delete(customer)
     db.session.commit()
     log_action(current_user.id, "delete_customer",
@@ -218,10 +234,14 @@ def index():
 @login_required
 @subscription_required
 def prospects():
-    """List the current manager's prospects (kind=prospect, sales pipeline)."""
+    """List the current manager's prospects (kind=prospect, sales pipeline).
+
+    ?view=kanban displays the pipeline as a 4-column drag & drop board.
+    """
     contacts, q = _contacts_of_kind("prospect")
+    view = "kanban" if request.args.get("view") == "kanban" else "liste"
     return render_template("contacts/prospects.html", contacts=contacts, q=q,
-                           statuses=CONTACT_STATUSES)
+                           statuses=CONTACT_STATUSES, view=view)
 
 
 @contacts_bp.route("/new")
@@ -282,6 +302,30 @@ def create():
     label = "Prospect" if kind == "prospect" else "Contact"
     flash(f"{label} « {contact.name} » créé avec succès.", "success")
     return redirect(url_for("contacts.prospects" if kind == "prospect" else "contacts.index"))
+
+
+@contacts_bp.route("/<int:contact_id>/status", methods=["POST"])
+@login_required
+@subscription_required
+def update_status(contact_id):
+    """AJAX: move a prospect to another pipeline stage (kanban drag & drop).
+
+    CSRF is enforced globally by Flask-WTF (X-CSRFToken header on fetch).
+    """
+    contact = _get_owned_contact(contact_id)
+    new_status = (request.form.get("status") or "").strip()
+    if contact.kind != "prospect":
+        return {"ok": False, "error": "Ce contact n'est pas un prospect."}, 400
+    if new_status not in CONTACT_STATUSES:
+        return {"ok": False, "error": "Statut inconnu."}, 400
+    old_status = contact.status
+    contact.status = new_status
+    db.session.commit()
+    log_action(current_user.id, "update_contact", {
+        "contact_id": contact.id, "name": contact.name,
+        "pipeline": f"{old_status} -> {new_status}",
+    })
+    return {"ok": True, "status": new_status}
 
 
 @contacts_bp.route("/<int:contact_id>/promote", methods=["POST"])

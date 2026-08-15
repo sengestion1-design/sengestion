@@ -9,7 +9,7 @@
       <div class="page-eyebrow">Intelligence artificielle</div>
       <h1 class="page-title">Scanner une carte de visite</h1>
       <p class="page-subtitle">
-        Photographiez ou importez une carte : l'IA extrait le nom, l'entreprise, l'email et le téléphone.
+        Photographiez ou importez une carte : l'IA remplit automatiquement le formulaire contact (nom, entreprise, email, téléphone).
       </p>
     </div>
     <a href="{{ url_for('contacts.index') }}" class="btn btn-secondary">
@@ -32,7 +32,14 @@
           <div class="scan-drop-inner" id="scan-placeholder">
             <span class="scan-drop-icon"><i data-lucide="scan-line"></i></span>
             <p class="scan-drop-title">Déposez une image ici ou cliquez pour choisir</p>
-            <p class="scan-drop-sub">JPG, PNG, WebP ou photo iPhone (HEIC) - carte bien éclairée et nette</p>
+            <p class="scan-drop-sub">Déposez la carte : l'analyse démarre toute seule et ouvre le formulaire pré-rempli</p>
+            <div class="scan-chips">
+              <span class="scan-chip"><i data-lucide="file-image"></i> JPG</span>
+              <span class="scan-chip"><i data-lucide="file-image"></i> PNG</span>
+              <span class="scan-chip"><i data-lucide="file-image"></i> WebP</span>
+              <span class="scan-chip"><i data-lucide="smartphone"></i> HEIC iPhone</span>
+              <span class="scan-chip"><i data-lucide="hard-drive"></i> Max 16 Mo</span>
+            </div>
           </div>
 
           {# "card added" state: preview + confirmation (hidden initially) #}
@@ -50,6 +57,13 @@
               </span>
               <span class="scan-filename" id="scan-filename"></span>
               <button type="button" class="scan-change" id="scan-change">Changer d'image</button>
+            </div>
+            <div class="scan-analyzing" id="scan-analyzing" style="display:none;">
+              <span class="scan-spinner" aria-hidden="true"></span>
+              <div>
+                <strong>Analyse en cours…</strong>
+                <p>L'IA lit la carte - le formulaire contact va s'ouvrir pré-rempli.</p>
+              </div>
             </div>
           </div>
         </label>
@@ -175,6 +189,31 @@
     }
     .scan-change:hover { color: var(--marine); }
 
+    .scan-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
+    .scan-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 999px;
+      background: #fff; border: 1px solid var(--line-strong);
+      color: var(--marine); font-size: var(--text-sm); font-weight: var(--weight-bold);
+    }
+    .scan-chip i { width: 14px; height: 14px; }
+
+    .scan-analyzing {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px; border-radius: var(--radius-btn);
+      background: var(--jaune-pale); color: var(--marine);
+      font-size: var(--text-sm); text-align: left;
+    }
+    .scan-analyzing strong { font-size: var(--text-base); }
+    .scan-analyzing p { margin: 2px 0 0; color: var(--marine); }
+    .scan-spinner {
+      flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+      border: 3px solid rgba(2, 26, 61, 0.2); border-top-color: var(--marine);
+      animation: scan-spin 0.8s linear infinite;
+    }
+    @keyframes scan-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .scan-spinner { animation: none; } }
+
     .scan-actions { display: flex; gap: 12px; margin-top: 24px; align-items: center; flex-wrap: wrap; }
     #scan-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -263,6 +302,24 @@
         submitLabel.textContent = 'Analyser cette carte';
 
         if (window.lucide) lucide.createIcons();
+
+        // Analyse automatique : un court délai laisse l'aperçu s'afficher,
+        // puis le formulaire part tout seul (le POST ouvre le formulaire
+        // contact pré-rempli par l'IA).
+        setTimeout(startAnalysis, 600);
+      }
+
+      var analyzing = false;
+      function startAnalysis() {
+        if (analyzing || !input.files || !input.files[0]) return;
+        analyzing = true;
+        submit.disabled = true;
+        submitLabel.textContent = 'Analyse en cours…';
+        changeBtn.disabled = true;
+        changeBtn.style.opacity = '0.4';
+        var box = document.getElementById('scan-analyzing');
+        if (box) box.style.display = 'flex';
+        document.getElementById('scan-form').submit();
       }
 
       function resetFile() {

@@ -31,10 +31,14 @@
         </thead>
         <tbody>
           {% for m in messages %}
-          {% set ct = contact_map.get(m.contact_id) %}
+          {% set ct = contact_map.get(m.contact_id) if m.contact_id else None %}
+          {% set cu = customer_map.get(m.customer_id) if m.customer_id else None %}
+          {% set recipient = ct or cu %}
           <tr>
             <td style="font-weight:600; color:var(--marine);">
-              {% if ct %}{{ ct.first_name ~ ' ' if ct.first_name }}{{ ct.name }}{% else %}-{% endif %}
+              {% if ct %}{{ ct.first_name ~ ' ' if ct.first_name }}{{ ct.name }}
+              {% elif cu %}{{ cu.name }} <span class="badge badge-pale" style="font-size:11px;">Client</span>
+              {% else %}-{% endif %}
             </td>
             <td>{{ m.subject or '-' }}</td>
             <td>
@@ -54,10 +58,10 @@
               {{ (m.sent_at or m.created_at).strftime('%d/%m/%Y %H:%M') if (m.sent_at or m.created_at) else '-' }}
             </td>
             <td class="col-actions">
-              {% if ct %}
+              {% if recipient %}
               <form method="post" action="{{ url_for('messages.resend', message_id=m.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Renvoyer ce message à {{ ct.name }} ?');">
+                    onsubmit="return confirm('Renvoyer ce message à {{ recipient.name }} ?');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-secondary btn-sm" aria-label="Renvoyer">
                   <i data-lucide="rotate-cw" style="width:15px;height:15px;vertical-align:-3px;"></i>

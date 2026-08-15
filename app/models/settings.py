@@ -43,6 +43,21 @@ class CompanySettings(db.Model):
     email_sender_name = db.Column(db.String(120))             # name displayed when sending
     email_signature = db.Column(db.Text)                      # appended at the bottom of emails
 
+    # --- Manager's own SMTP account (optional) ---
+    # When configured, emails to contacts/clients are sent FROM this address
+    # via this account, instead of the shared SenGestion mailbox - so replies
+    # land directly in the manager's own inbox. Password stored encrypted
+    # (Fernet, see app.services.crypto_service), never in clear text.
+    smtp_host = db.Column(db.String(150))
+    smtp_port = db.Column(db.Integer)
+    smtp_use_tls = db.Column(db.Boolean, default=True)
+    smtp_email = db.Column(db.String(150))
+    smtp_password_encrypted = db.Column(db.Text)
+
+    @property
+    def has_custom_smtp(self) -> bool:
+        return bool(self.smtp_host and self.smtp_email and self.smtp_password_encrypted)
+
     updated_at = db.Column(db.DateTime, default=datetime.utcnow,
                            onupdate=datetime.utcnow)
 

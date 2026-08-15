@@ -10,11 +10,11 @@
       <p class="page-subtitle">Suivez vos encaissements et le solde de chaque facture</p>
     </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <a href="{{ url_for('quotes.index') }}" class="btn btn-primary">
+      <a href="{{ url_for('quotes.index') }}" class="btn btn-secondary">
         <i data-lucide="file-text" style="width:16px;height:16px;vertical-align:-3px;"></i> Devis
       </a>
-      <a href="{{ url_for('invoices.voice') }}" class="btn btn-secondary">
-        <i data-lucide="mic" style="width:16px;height:16px;vertical-align:-3px;"></i> Facture vocale
+      <a href="{{ url_for('invoices.voice') }}" class="btn btn-voice">
+        <span class="mic-wrap"><i data-lucide="mic"></i></span> Facture vocale
       </a>
       <a href="{{ url_for('invoices.new') }}" class="btn btn-accent">
         <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i> Nouvelle facture
@@ -127,6 +127,16 @@
                 <i data-lucide="file-down" style="width:15px;height:15px;vertical-align:-3px;"></i>
                 PDF
               </a>
+              <form method="post" action="{{ url_for('invoices.delete', invoice_id=inv.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Supprimer définitivement la facture {{ inv.number }} ? Les paiements associés seront aussi supprimés.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-ghost btn-sm"
+                        aria-label="Supprimer la facture {{ inv.number }}"
+                        title="Supprimer">
+                  <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+                </button>
+              </form>
             </td>
           </tr>
           {% endfor %}

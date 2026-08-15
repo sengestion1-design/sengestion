@@ -10,15 +10,28 @@
       <h1 class="page-title">Prospects</h1>
       <p class="page-subtitle">Vos pistes commerciales en cours de suivi ({{ contacts|length }})</p>
     </div>
-    <a href="{{ url_for('contacts.new', kind='prospect') }}" class="btn btn-accent">
-      <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i>
-      Nouveau prospect
-    </a>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <div class="view-toggle" role="group" aria-label="Mode d'affichage">
+        <a href="{{ url_for('contacts.prospects', q=q or None) }}"
+           class="view-toggle-btn {{ 'is-active' if view == 'liste' }}">
+          <i data-lucide="list" style="width:15px;height:15px;vertical-align:-3px;"></i> Liste
+        </a>
+        <a href="{{ url_for('contacts.prospects', view='kanban', q=q or None) }}"
+           class="view-toggle-btn {{ 'is-active' if view == 'kanban' }}">
+          <i data-lucide="kanban" style="width:15px;height:15px;vertical-align:-3px;"></i> Kanban
+        </a>
+      </div>
+      <a href="{{ url_for('contacts.new', kind='prospect') }}" class="btn btn-accent">
+        <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i>
+        Nouveau prospect
+      </a>
+    </div>
   </div>
 
-  {# -- Search bar -- #}
+  {# ── Barre de recherche ── #}
   <form method="get" action="{{ url_for('contacts.prospects') }}"
         style="display:flex; gap:10px; align-items:center; margin-bottom:28px; max-width:540px;">
+    {% if view == 'kanban' %}<input type="hidden" name="view" value="kanban">{% endif %}
     <label class="sr-only" for="q">Rechercher</label>
     <input type="search" id="q" name="q" class="form-input"
            value="{{ q }}" placeholder="Rechercher par nom ou entreprise…"
@@ -33,6 +46,98 @@
   </form>
 
   {% if contacts %}
+  {% if view == 'kanban' %}
+  <div class="kanban" id="kanban"
+       data-status-url="{{ url_for('contacts.update_status', contact_id=0) }}"
+       data-csrf="{{ csrf_token() }}">
+    {% for skey, meta in statuses.items() %}
+    {% set col = contacts | selectattr('status', 'equalto', skey) | list %}
+    <section class="kanban-col" data-status="{{ skey }}" aria-label="Colonne {{ meta[0] }}">
+      <header class="kanban-col-head">
+        <span class="badge {{ meta[1] }}">{{ meta[0] }}</span>
+        <span class="kanban-count" data-count>{{ col | length }}</span>
+      </header>
+      <div class="kanban-cards" data-cards>
+        {% for ct in col %}
+        <article class="kanban-card" draggable="{{ 'false' if ct.is_converted else 'true' }}"
+                 data-id="{{ ct.id }}" data-name="{{ ct.name }}">
+          <div class="kanban-card-name">{{ ct.first_name ~ ' ' if ct.first_name }}{{ ct.name }}</div>
+          {% if ct.company %}<div class="kanban-card-sub">{{ ct.company }}</div>{% endif %}
+          <div class="kanban-card-foot">
+            {% if ct.is_converted %}
+            <span class="badge badge-marine">Client</span>
+            {% endif %}
+            <a href="{{ url_for('contacts.show', contact_id=ct.id) }}" class="kanban-card-link">Voir</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+  </div>
+
+  <script defer>
+    (function () {
+      var board = document.getElementById('kanban');
+      if (!board) return;
+      var csrf = board.dataset.csrf;
+      var urlTpl = board.dataset.statusUrl;   /* .../contacts/0/status */
+      var dragged = null;
+
+      board.addEventListener('dragstart', function (e) {
+        var card = e.target.closest('.kanban-card');
+        if (!card) return;
+        dragged = card;
+        card.classList.add('is-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      board.addEventListener('dragend', function () {
+        if (dragged) dragged.classList.remove('is-dragging');
+        board.querySelectorAll('.kanban-col.is-over')
+             .forEach(function (c) { c.classList.remove('is-over'); });
+        dragged = null;
+      });
+      board.querySelectorAll('.kanban-col').forEach(function (col) {
+        col.addEventListener('dragover', function (e) {
+          if (!dragged) return;
+          e.preventDefault();
+          col.classList.add('is-over');
+        });
+        col.addEventListener('dragleave', function () { col.classList.remove('is-over'); });
+        col.addEventListener('drop', function (e) {
+          e.preventDefault();
+          col.classList.remove('is-over');
+          if (!dragged) return;
+          var card = dragged;
+          var from = card.closest('.kanban-col');
+          var to = col;
+          if (from === to) return;
+          var url = urlTpl.replace('/0/', '/' + card.dataset.id + '/');
+          var body = new URLSearchParams({ status: to.dataset.status });
+          fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrf,
+                       'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+          }).then(function (r) { return r.json(); })
+            .then(function (js) {
+              if (!js.ok) throw new Error(js.error || 'refus');
+              to.querySelector('[data-cards]').appendChild(card);
+              [from, to].forEach(function (c) {
+                c.querySelector('[data-count]').textContent =
+                  c.querySelectorAll('.kanban-card').length;
+              });
+            })
+            .catch(function () {
+              alert('Le changement de statut a échoué. La page va se recharger.');
+              location.reload();
+            });
+        });
+      });
+    })();
+  </script>
+
+  {% else %}
   <div class="card" style="padding:0; overflow:hidden;">
     <div class="table-wrap">
       <table class="table">
@@ -100,6 +205,7 @@
       </table>
     </div>
   </div>
+  {% endif %}
 
   {% else %}
   <div class="empty-state">

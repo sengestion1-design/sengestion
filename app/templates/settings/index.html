@@ -126,6 +126,72 @@
                   placeholder="Cordialement,&#10;Fatou Ndiaye&#10;SENTECH SARL - +221 …">{{ s.email_signature or '' }}</textarea>
         <p class="form-hint">Ajoutée automatiquement en bas de vos messages aux contacts.</p>
       </div>
+
+      <hr style="border:none; border-top:1px solid var(--line); margin:20px 0;">
+
+      <h3 style="font-size:var(--text-base); color:var(--marine); margin:0 0 6px;">
+        Envoyer depuis ma propre adresse email
+      </h3>
+      <p class="settings-hint">
+        Par défaut, vos messages partent via le serveur SenGestion et vos clients répondent
+        à SenGestion. Configurez ici votre compte email pour que les messages partent
+        directement de votre adresse : vos clients vous répondent alors chez vous.
+      </p>
+
+      {% if s.has_custom_smtp %}
+        <div class="banner-accent" style="margin:12px 0; text-align:left;">
+          <p style="margin:0;">
+            Envoi actif depuis <strong>{{ s.smtp_email }}</strong>.
+            Laissez le mot de passe vide pour le conserver, ou cochez « Retirer » pour
+            revenir à l'envoi via SenGestion.
+          </p>
+        </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label class="form-label" for="smtp_host">Serveur SMTP</label>
+        <input type="text" id="smtp_host" name="smtp_host" class="form-input"
+               maxlength="150" value="{{ s.smtp_host or '' }}"
+               placeholder="Ex. smtp.gmail.com">
+        <p class="form-hint">Pour Gmail : smtp.gmail.com, port 587, avec un mot de passe d'application (pas votre mot de passe habituel).</p>
+      </div>
+      <div style="display:flex; gap:16px;">
+        <div class="form-group" style="flex:1;">
+          <label class="form-label" for="smtp_port">Port</label>
+          <input type="number" id="smtp_port" name="smtp_port" class="form-input"
+                 value="{{ s.smtp_port or 587 }}">
+        </div>
+        <div class="form-group" style="flex:2; display:flex; align-items:flex-end; padding-bottom:10px;">
+          <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+            <input type="checkbox" name="smtp_use_tls" value="1" {{ 'checked' if s.smtp_use_tls != False else '' }}>
+            Connexion sécurisée (TLS)
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="smtp_email">Votre adresse email</label>
+        <input type="email" id="smtp_email" name="smtp_email" class="form-input"
+               maxlength="150" value="{{ s.smtp_email or '' }}"
+               placeholder="fatou@sentech.sn">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="smtp_password">Mot de passe d'application</label>
+        <input type="password" id="smtp_password" name="smtp_password" class="form-input"
+               placeholder="{{ '••••••••  (laisser vide pour conserver)' if s.has_custom_smtp else '' }}">
+        <p class="form-hint">
+          Pour Gmail, ce n'est pas votre mot de passe habituel : générez-en un dédié sur
+          <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a>
+          (la validation en 2 étapes doit être activée sur le compte Google).
+        </p>
+      </div>
+      {% if s.has_custom_smtp %}
+      <div class="form-group">
+        <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+          <input type="checkbox" name="smtp_remove" value="1">
+          Retirer ma configuration email et revenir à l'envoi via SenGestion
+        </label>
+      </div>
+      {% endif %}
     </section>
 
     <div class="settings-actions" style="display:flex; gap:12px;">

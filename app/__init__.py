@@ -26,7 +26,7 @@ def create_app(env="default"):
     mail.init_app(app)               # Gmail SMTP
 
     # --- Models (imported so Flask-Migrate can see them) ---
-    from app.models import user, customer, quote, expense, message  # noqa: F401
+    from app.models import user, customer, quote, expense, message, payment_proof  # noqa: F401
 
     # --- Blueprints (routes) ---
     from app.routes.auth import auth_bp
@@ -78,6 +78,24 @@ def create_app(env="default"):
                 ver = 0
             return url_for("static", filename=filename, v=ver)
         return {"static_v": static_v}
+
+    # Access guard on payment proofs (financial documents): although stored
+    # under static/ (persisted Docker volume), they must NEVER be publicly
+    # served. Only the owner manager or an admin may read them; everyone
+    # else gets a 404 (the existence of the file is not revealed).
+    @app.before_request
+    def _protect_payment_proofs():
+        from flask import abort, request
+        from flask_login import current_user
+        prefix = "/static/uploads/paiements/"
+        if not request.path.startswith(prefix):
+            return
+        if not current_user.is_authenticated:
+            abort(404)
+        fname = request.path.rsplit("/", 1)[-1]
+        is_owner = fname.startswith(f"u{current_user.id}-")
+        if not (current_user.role == "admin" or is_owner):
+            abort(404)
 
     # Sidebar counters (unpaid invoices, pending reminders).
     @app.context_processor

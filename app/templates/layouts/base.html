@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}SenGestion{% endblock %}</title>
 
-  <!-- SG favicon (official logo) - multi-resolution .ico + PNG -->
+  <!-- Favicon SG (logo officiel) - .ico multi-résolutions + PNG -->
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
 
-  <!-- Stylesheets (versioned: auto-reload on every change) -->
+  <!-- Feuilles de style (versionnées : rechargement auto à chaque modif) -->
   <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
   <link rel="stylesheet" href="{{ static_v('css/styles.css') }}">
 
-  <!-- Lucide Icons v1.23.0 - pinned version + verified SRI hash (security) -->
+  <!-- Lucide Icons v1.23.0 - version épinglée + hash SRI vérifié (sécurité) -->
   <script
     src="https://cdn.jsdelivr.net/npm/lucide@1.23.0/dist/umd/lucide.min.js"
     integrity="sha384-ouAVEJVCMsf8Svzn+BwqbaBhxBEA0xgeVBhHnxmWd+Wqyv18yhWCQwGegFD/OHLq"
@@ -34,7 +34,7 @@
   <!-- ═══════════════════════ MAIN ═══════════════════════ -->
   <main id="main-content">
 
-    <!-- Flash messages (layouts that handle flash themselves override this block) -->
+    <!-- Flash messages (les layouts qui gèrent eux-mêmes les flash surchargent ce bloc) -->
     {% block flash %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -62,8 +62,8 @@
 
   </main>
 
-  <!-- Cookie banner (informational: only technical cookies, exempt
-       from consent - CNIL guidelines). Remembered in local storage. -->
+  <!-- Bandeau cookies (informatif : uniquement des cookies techniques, exemptés
+       de consentement - lignes directrices CNIL). Mémorisé en stockage local. -->
   <div id="cookie-notice"
        style="position:fixed; left:0; right:0; bottom:0; z-index:9999; background:#021A3D;
               padding:14px 20px; display:none; flex-wrap:wrap; gap:12px; align-items:center;
@@ -84,7 +84,7 @@
       var KEY = 'sg_cookie_notice', banner = document.getElementById('cookie-notice');
       try {
         var seen = localStorage.getItem(KEY);
-        // shows again after 12 months
+        // ré-affiche après 12 mois
         if (!seen || Date.now() - Number(seen) > 365 * 24 * 3600 * 1000) banner.style.display = 'flex';
       } catch (e) { banner.style.display = 'flex'; }
       document.getElementById('cookie-notice-ok').addEventListener('click', function () {

@@ -21,19 +21,32 @@
 
       {# Recipient #}
       <div class="form-group">
-        <label class="form-label" for="contact_id">Destinataire <span class="required">*</span></label>
-        <select id="contact_id" name="contact_id" class="form-input" required>
-          <option value="">- Choisir un contact -</option>
-          {% for c in contacts %}
-          <option value="{{ c.id }}"
-                  data-name="{{ c.first_name or c.name }}"
-                  {{ 'selected' if contact and contact.id == c.id }}>
-            {{ c.first_name ~ ' ' if c.first_name }}{{ c.name }}{% if c.company %} - {{ c.company }}{% endif %} ({{ c.email }})
-          </option>
-          {% endfor %}
+        <label class="form-label" for="recipient">Destinataire <span class="required">*</span></label>
+        <select id="recipient" name="recipient" class="form-input" required>
+          <option value="">- Choisir un destinataire -</option>
+          {% if contacts %}
+          <optgroup label="Contacts">
+            {% for c in contacts %}
+            <option value="contact-{{ c.id }}"
+                    data-name="{{ c.first_name or c.name }}"
+                    {{ 'selected' if contact and contact.id == c.id }}>
+              {{ c.first_name ~ ' ' if c.first_name }}{{ c.name }}{% if c.company %} - {{ c.company }}{% endif %} ({{ c.email }})
+            </option>
+            {% endfor %}
+          </optgroup>
+          {% endif %}
+          {% if customers %}
+          <optgroup label="Clients">
+            {% for c in customers %}
+            <option value="customer-{{ c.id }}" data-name="{{ c.name }}">
+              {{ c.name }}{% if c.company %} - {{ c.company }}{% endif %} ({{ c.email }})
+            </option>
+            {% endfor %}
+          </optgroup>
+          {% endif %}
         </select>
-        {% if not contacts %}
-        <p class="form-hint">Aucun contact avec adresse email. Ajoutez un email à vos contacts d'abord.</p>
+        {% if not contacts and not customers %}
+        <p class="form-hint">Aucun contact ou client avec adresse email. Ajoutez un email à une fiche d'abord.</p>
         {% endif %}
       </div>
 
@@ -93,7 +106,7 @@
 
   <script defer>
     (function () {
-      var select  = document.getElementById('contact_id');
+      var select  = document.getElementById('recipient');
       var subject = document.getElementById('subject');
       var body    = document.getElementById('body');
 

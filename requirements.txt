@@ -11,7 +11,9 @@ Werkzeug==3.0.3
 email-validator==2.2.0
 gunicorn==22.0.0
 reportlab==4.2.2
+qrcode==8.0
 anthropic==0.104.1
 Pillow==12.2.0
 pillow-heif==1.5.0
 openai-whisper==20250625
+cryptography==48.0.1

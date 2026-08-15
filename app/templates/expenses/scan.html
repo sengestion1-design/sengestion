@@ -20,25 +20,25 @@
 
   <div class="scan-grid">
 
-    {# --- Left column: drop zone --- #}
+    {# ─── Colonne gauche : zone de dépôt ─── #}
     <div class="card scan-card">
       <form method="post" action="{{ url_for('expenses.scan_upload') }}"
             enctype="multipart/form-data" id="scan-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        {# Drop / selection zone #}
+        {# Zone de dépôt / sélection #}
         <label for="card-input" class="scan-drop" id="scan-drop">
-          {# Initial state: invitation to drop a file #}
+          {# État initial : invitation à déposer #}
           <div class="scan-drop-inner" id="scan-placeholder">
             <span class="scan-drop-icon"><i data-lucide="scan-line"></i></span>
             <p class="scan-drop-title">Déposez le reçu (image ou PDF) ici ou cliquez pour choisir</p>
-            <p class="scan-drop-sub">Photo (JPG, PNG, HEIC) ou PDF - carte bien éclairée et nette</p>
+            <p class="scan-drop-sub">Photo (JPG, PNG, HEIC) ou PDF - reçu bien éclairé et net</p>
           </div>
 
-          {# "card added" state: preview + confirmation (hidden initially) #}
+          {# État "carte ajoutée" : aperçu + confirmation (masqué au départ) #}
           <div class="scan-preview-wrap" id="scan-preview-wrap" style="display:none;">
             <img id="scan-preview" class="scan-preview" alt="Aperçu de la carte" style="display:none;">
-            {# Fallback thumbnail when the preview cannot be displayed (iPhone HEIC) #}
+            {# Vignette de remplacement quand l'aperçu n'est pas affichable (HEIC iPhone) #}
             <div class="scan-fileicon" id="scan-fileicon" style="display:none;">
               <i data-lucide="file-image"></i>
               <span>Aperçu indisponible pour ce format,<br>mais la carte sera bien analysée.</span>
@@ -66,7 +66,7 @@
       </form>
     </div>
 
-    {# --- Right column: instructions --- #}
+    {# ─── Colonne droite : mode d'emploi ─── #}
     <aside class="scan-aside card">
       <h2 class="scan-aside-title">
         <i data-lucide="sparkles" style="width:18px;height:18px;vertical-align:-3px;"></i>
@@ -110,7 +110,7 @@
   </div>
 
   <style>
-    /* Full-width grid: drop zone (2fr) + instructions (1fr) */
+    /* Grille pleine largeur : dépôt (2fr) + mode d'emploi (1fr) */
     .scan-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -134,7 +134,7 @@
       transition: border-color var(--duration-fast), background var(--duration-fast);
     }
     .scan-drop:hover, .scan-drop.is-drag { border-color: var(--or); background: var(--jaune-pale); }
-    /* When a card is loaded: solid border + white background to see the image clearly */
+    /* Quand une carte est chargée : bordure pleine + fond blanc pour bien voir l'image */
     .scan-drop.has-file { border-style: solid; border-color: var(--or); background: #fff; cursor: default; }
     .scan-drop-icon {
       display: inline-flex; align-items: center; justify-content: center;
@@ -145,14 +145,14 @@
     .scan-drop-title { font-size: var(--text-lg); font-weight: var(--weight-bold); color: var(--marine); }
     .scan-drop-sub { font-size: var(--text-sm); color: var(--muted); margin-top: 6px; }
 
-    /* Preview of the added card */
+    /* Aperçu de la carte ajoutée */
     .scan-preview-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
     .scan-preview {
       max-height: 360px; max-width: 100%; width: auto;
       border-radius: var(--radius-btn);
       box-shadow: 0 4px 16px rgba(2, 26, 61, 0.12);
     }
-    /* Fallback thumbnail (HEIC not displayable by the browser) */
+    /* Vignette de remplacement (HEIC non affichable par le navigateur) */
     .scan-fileicon {
       display: flex; flex-direction: column; align-items: center; gap: 12px;
       padding: 32px 24px; text-align: center;
@@ -178,7 +178,7 @@
     .scan-actions { display: flex; gap: 12px; margin-top: 24px; align-items: center; flex-wrap: wrap; }
     #scan-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Side panel - instructions */
+    /* Panneau latéral - mode d'emploi */
     .scan-aside { margin: 0; }
     .scan-aside-title {
       font-family: var(--font-display);
@@ -207,7 +207,7 @@
     }
     .scan-privacy { font-size: var(--text-sm); color: var(--muted); margin-top: 18px; }
 
-    /* Responsive: a single column below 1024px */
+    /* Responsive : une seule colonne sous 1024px */
     @media (max-width: 1024px) {
       .scan-grid { grid-template-columns: 1fr; }
     }
@@ -231,22 +231,22 @@
         if (!file) return;
         filename.textContent = file.name || 'image';
 
-        // Switch to the "card added" state
+        // Basculer en état "carte ajoutée"
         placeholder.style.display = 'none';
         previewWrap.style.display = 'flex';
         drop.classList.add('has-file');
 
         var isHeic = /\.heic$|\.heif$/i.test(file.name) ||
                      /heic|heif/i.test(file.type || '') ||
-                     /\.pdf$/i.test(file.name) ||          // PDF: cannot be displayed in <img>
+                     /\.pdf$/i.test(file.name) ||          // PDF : pas affichable en <img>
                      /pdf/i.test(file.type || '');
 
         if (isHeic) {
-          // HEIC or PDF cannot be displayed in <img> → fallback thumbnail.
+          // HEIC ou PDF ne s'affichent pas en <img> → vignette de remplacement.
           preview.style.display = 'none';
           fileIcon.style.display = 'flex';
         } else {
-          // Actual image preview.
+          // Aperçu réel de l'image.
           fileIcon.style.display = 'none';
           var reader = new FileReader();
           reader.onload = function (e) {
@@ -260,7 +260,7 @@
           reader.readAsDataURL(file);
         }
 
-        // Enable the button and adjust its label
+        // Activer le bouton et adapter son libellé
         submit.disabled = false;
         submitLabel.textContent = 'Analyser ce reçu';
 
@@ -283,7 +283,7 @@
         if (input.files && input.files[0]) showFile(input.files[0]);
       });
 
-      // "Changer d'image" button - without reopening the drop box (stopPropagation)
+      // Bouton "Changer d'image" - sans rouvrir la boîte de dépôt (stopPropagation)
       changeBtn.addEventListener('click', function (e) {
         e.preventDefault(); e.stopPropagation();
         resetFile();
@@ -303,7 +303,7 @@
         }
       });
 
-      // Feedback during analysis (the AI call can take a few seconds)
+      // Feedback pendant l'analyse (l'appel IA peut prendre quelques secondes)
       document.getElementById('scan-form').addEventListener('submit', function () {
         submit.disabled = true;
         submitLabel.textContent = 'Analyse en cours…';

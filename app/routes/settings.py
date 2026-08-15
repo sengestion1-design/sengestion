@@ -18,6 +18,7 @@ from flask_login import login_required, current_user
 from app.extensions import db
 from app.models.settings import CompanySettings
 from app.services.activity_log_service import log_action
+from app.services.crypto_service import encrypt
 from app.utils.access import subscription_required
 
 settings_bp = Blueprint("settings", __name__, url_prefix="/settings")
@@ -101,6 +102,29 @@ def update():
     s.footer_note = (request.form.get("footer_note") or "").strip()
     s.email_sender_name = _clean(request.form.get("email_sender_name"), 120)
     s.email_signature = (request.form.get("email_signature") or "").strip()
+
+    # --- Manager's own SMTP account (optional) ---
+    if request.form.get("smtp_remove") == "1":
+        s.smtp_host = None
+        s.smtp_port = None
+        s.smtp_use_tls = True
+        s.smtp_email = None
+        s.smtp_password_encrypted = None
+    else:
+        smtp_host = _clean(request.form.get("smtp_host"), 150)
+        smtp_email = _clean(request.form.get("smtp_email"), 150)
+        smtp_password = (request.form.get("smtp_password") or "").strip()
+        smtp_port = request.form.get("smtp_port", type=int)
+
+        if smtp_host and smtp_email:
+            s.smtp_host = smtp_host
+            s.smtp_port = smtp_port or 587
+            s.smtp_use_tls = request.form.get("smtp_use_tls") == "1"
+            s.smtp_email = smtp_email
+            # Only overwrite the stored password if a new one was typed
+            # (the field is left blank when re-displaying the form).
+            if smtp_password:
+                s.smtp_password_encrypted = encrypt(smtp_password)
 
     # --- Images (uploaded only if a new file is provided) ---
     for field in _IMAGE_FIELDS:

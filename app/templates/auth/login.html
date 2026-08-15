@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<!-- ═══════════ Presentation hero ═══════════ -->
+<!-- ═══════════ Hero de présentation ═══════════ -->
 <section class="landing-hero">
 
   <div class="landing-nav">
@@ -72,7 +72,7 @@
 
 </section>
 
-<!-- ═══════════ "SenGestion au quotidien" (photos) ═══════════ -->
+<!-- ═══════════ SenGestion au quotidien (photos) ═══════════ -->
 <section class="landing-showcase" aria-label="SenGestion au quotidien">
   <div class="landing-showcase-grid">
     <img src="{{ url_for('static', filename='img/landing/vitrine-boutique.jpg') }}"
@@ -138,7 +138,7 @@
   </div>
 </section>
 
-<!-- ═══════════ Module detail modal (content injected via JS) ═══════════ -->
+<!-- ═══════════ Modale détail module (contenu injecté en JS) ═══════════ -->
 <div class="modal-backdrop" id="module-modal-backdrop" style="display:none;" role="presentation">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="module-modal-title">
     <div class="modal-header">
@@ -165,7 +165,7 @@
 </div>
 
 <script>
-  // Content of the module-detail modals - faithful to the application's real features.
+  // Contenu des modales "détail module" - fidèle aux fonctionnalités réelles de l'application.
   const MODULE_DETAILS = {
     dashboard: {
       icon: 'layout-dashboard',
@@ -257,18 +257,18 @@
       backdrop.style.display = 'flex';
       document.body.style.overflow = 'hidden';
       if (window.lucide) { lucide.createIcons(); }
-      // initial focus inside the modal (WCAG 2.4.3)
+      // focus initial dans la modale (WCAG 2.4.3)
       document.getElementById('module-modal-close').focus();
     }
 
     function closeModal() {
       backdrop.style.display = 'none';
       document.body.style.overflow = '';
-      // return focus to the card that opened the modal
+      // retour du focus à la carte qui a ouvert la modale
       if (lastTrigger) { lastTrigger.focus(); lastTrigger = null; }
     }
 
-    // traps keyboard focus inside the modal while it is open
+    // piège le focus clavier à l'intérieur de la modale tant qu'elle est ouverte
     document.addEventListener('keydown', function (e) {
       if (e.key !== 'Tab' || backdrop.style.display !== 'flex') return;
       const focusables = backdrop.querySelectorAll('button, a[href]');
@@ -296,7 +296,7 @@
   });
 </script>
 
-<!-- ═══════════ "Comment ça marche" section ═══════════ -->
+<!-- ═══════════ Comment ça marche ═══════════ -->
 <section class="landing-steps" aria-label="Comment ça marche">
   <div class="landing-steps-head">
     <h2>Comment ça marche</h2>
@@ -328,7 +328,7 @@
   </div>
 </section>
 
-<!-- ═══════════ "Pourquoi SenGestion" section ═══════════ -->
+<!-- ═══════════ Pourquoi SenGestion ═══════════ -->
 <section class="landing-why" aria-label="Pourquoi choisir SenGestion">
   <div class="landing-why-inner">
 
@@ -386,7 +386,7 @@
   </div>
 </section>
 
-<!-- ═══════════ Pricing ═══════════ -->
+<!-- ═══════════ Tarif ═══════════ -->
 <section class="landing-pricing" aria-label="Tarif">
   <div class="landing-pricing-head">
     <h2>Un tarif simple et transparent</h2>
@@ -412,7 +412,7 @@
   </div>
 </section>
 
-<!-- ═══════════ Login form ═══════════ -->
+<!-- ═══════════ Formulaire de connexion ═══════════ -->
 <section class="landing-login" id="connexion">
   <div class="auth-wrap" style="min-height:auto; padding:0;">
     <div class="auth-card">
@@ -456,7 +456,7 @@
   </div>
 </section>
 
-<!-- ═══════════ Final CTA banner ═══════════ -->
+<!-- ═══════════ Bandeau CTA final ═══════════ -->
 <section class="landing-cta" aria-label="Commencer">
   <h2>Prêt à simplifier votre gestion ?</h2>
   <p>Créez votre compte en 2 minutes et testez tous les modules gratuitement pendant 15 jours, sans carte bancaire.</p>

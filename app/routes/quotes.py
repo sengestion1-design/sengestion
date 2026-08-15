@@ -20,9 +20,10 @@ from io import BytesIO
 
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash, abort,
-    Response,
+    Response, current_app,
 )
 from flask_login import login_required, current_user
+from itsdangerous import BadSignature, URLSafeSerializer
 from sqlalchemy import func
 
 from app.extensions import db
@@ -608,6 +609,20 @@ def delete(quote_id):
     return redirect(url_for("quotes.index"))
 
 
+def _public_quote_serializer():
+    """Signed-token serializer for the public quote link (QR code).
+
+    Stateless by design: the token is an HMAC-signed quote id, so no DB
+    column or migration is needed and the link cannot be forged/guessed.
+    """
+    return URLSafeSerializer(current_app.config["SECRET_KEY"], salt="quote-public-view")
+
+
+def _quote_public_url(quote_id):
+    token = _public_quote_serializer().dumps(quote_id)
+    return url_for("quotes.public_view", token=token, _external=True, _scheme="https")
+
+
 @quotes_bp.route("/<int:quote_id>/pdf")
 @login_required
 @subscription_required
@@ -624,6 +639,133 @@ def pdf(quote_id):
         amount_excl=quote.amount_excl_tax,
         amount_incl=quote.amount_incl_tax,
         settings=settings,
+        public_url=_quote_public_url(quote.id),
+    )
+    return Response(
+        buffer.getvalue(),
+        mimetype="application/pdf",
+        headers={
+            "Content-Disposition": f'inline; filename="{quote.number}.pdf"',
+        },
+    )
+
+
+def _quote_from_public_token(token):
+    """Resolve a signed public token to its quote, or 404."""
+    try:
+        quote_id = _public_quote_serializer().loads(token)
+    except BadSignature:
+        abort(404)
+    return Quote.query.get_or_404(quote_id)
+
+
+@quotes_bp.route("/public/<token>")
+def public_view(token):
+    """Public consultation page of a quote via its signed QR link.
+
+    No login on purpose: the bearer of the signed token (printed as a QR
+    code on the PDF) can view this quote only - the token is bound to a
+    single quote id and signed with the server secret (OWASP: no IDOR,
+    ids are never exposed unsigned). The client can sign the quote
+    electronically from this page ("Bon pour accord").
+    """
+    quote = _quote_from_public_token(token)
+    settings = CompanySettings.query.filter_by(user_id=quote.user_id).first()
+    log_action(quote.user_id, "public_quote_view", {"quote_id": quote.id, "number": quote.number})
+    return render_template(
+        "quotes/public_view.html",
+        quote=quote, settings=settings, token=token, fmt=_fmt,
+    )
+
+
+@quotes_bp.route("/public/<token>/sign", methods=["POST"])
+def public_sign(token):
+    """Electronic signature of the quote by the client ("Bon pour accord").
+
+    Simple e-signature: the signer is authenticated by bearing the signed
+    link, and the proof (typed name, timestamp, IP) is recorded in the
+    activity log (MongoDB). Business-wise the quote becomes `accepted` -
+    an existing status, so no schema change.
+    """
+    quote = _quote_from_public_token(token)
+    if quote.status == "accepted":
+        flash("Ce devis est déjà signé.", "info")
+        return redirect(url_for("quotes.public_view", token=token))
+
+    signer_name = (request.form.get("signer_name") or "").strip()
+    approved = request.form.get("approved") == "on"
+    if len(signer_name) < 3 or not approved:
+        flash("Indiquez votre nom complet et cochez « Lu et approuvé ».", "warning")
+        return redirect(url_for("quotes.public_view", token=token))
+
+    quote.status = "accepted"
+    db.session.commit()
+    signed_at = datetime.utcnow()
+    log_action(quote.user_id, "public_quote_signed", {
+        "quote_id": quote.id,
+        "number": quote.number,
+        "signer_name": signer_name[:120],
+        "signed_at": signed_at.isoformat() + "Z",
+        "ip": request.headers.get("X-Forwarded-For", request.remote_addr),
+    })
+
+    # Notify the manager by email (best-effort: the signature stays valid
+    # even if the SMTP send fails - it is already recorded above).
+    notified = False
+    try:
+        from markupsafe import escape
+        from app.models.user import User
+        from app.services.email_service import send_email
+        manager = User.query.get(quote.user_id)
+        if manager and manager.email:
+            customer_name = quote.customer.name if quote.customer else "-"
+            when = signed_at.strftime("%d/%m/%Y à %H:%M UTC")
+            subject = f"SenGestion - Devis {quote.number} signé par votre client"
+            body = (
+                f"Bonjour {manager.name},\n\n"
+                f"Bonne nouvelle : votre devis {quote.number} ({customer_name}) "
+                f"vient d'être signé électroniquement.\n\n"
+                f"Signataire : {signer_name}\n"
+                f"Date : {when}\n\n"
+                f"Le devis est passé au statut « Accepté » dans votre espace. "
+                f"Vous pouvez le convertir en facture depuis la liste des devis.\n\n"
+                f"- L'équipe SenGestion"
+            )
+            html_body = (
+                f"<p><strong>Bonne nouvelle :</strong> votre devis "
+                f"<strong>{escape(quote.number)}</strong> "
+                f"({escape(customer_name)}) vient d'être signé électroniquement.</p>"
+                f"<p><strong>Signataire :</strong> {escape(signer_name)}<br>"
+                f"<strong>Date :</strong> {when}</p>"
+                f"<p>Le devis est passé au statut « Accepté » dans votre espace. "
+                f"Vous pouvez le convertir en facture depuis la liste des devis.</p>"
+            )
+            notified = send_email(manager.email, subject, body, html_body)
+    except Exception:
+        current_app.logger.exception("Notification signature devis échouée")
+
+    if notified:
+        flash("Devis signé - merci ! Le prestataire a été notifié de votre accord.", "success")
+    else:
+        flash("Devis signé - merci ! Votre accord a été enregistré.", "success")
+    return redirect(url_for("quotes.public_view", token=token))
+
+
+@quotes_bp.route("/public/<token>/pdf")
+def public_pdf(token):
+    """PDF of the quote, reachable from the public consultation page."""
+    quote = _quote_from_public_token(token)
+    settings = CompanySettings.query.filter_by(user_id=quote.user_id).first()
+    buffer = _build_document_pdf(
+        title="DEVIS",
+        number=quote.number,
+        doc_date=quote.quote_date,
+        customer=quote.customer,
+        items=quote.items,
+        amount_excl=quote.amount_excl_tax,
+        amount_incl=quote.amount_incl_tax,
+        settings=settings,
+        public_url=_quote_public_url(quote.id),
     )
     return Response(
         buffer.getvalue(),
@@ -1028,7 +1170,7 @@ def delete(invoice_id):
 # ------------------------------------------------------------
 def _build_document_pdf(title, number, doc_date, customer, items,
                         amount_excl, amount_incl, paid=None, due=None,
-                        settings=None):
+                        settings=None, public_url=None):
     """Build a PDF (quote or invoice) and return a BytesIO.
 
     Company header (logo + name + details from settings, otherwise SenGestion),
@@ -1247,7 +1389,7 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         canvas.setFillColor(INK_SOFT)
         canvas.setFont(FONT_BODY, 7.6)
         canvas.drawString(ML, 11 * mm,
-                          f"{brand_name} - Montants exprimés en francs CFA (FCFA).")
+                          f"{brand_name} - Montants exprimés en francs CFA.")
         canvas.drawRightString(PAGE_W - MR, 11 * mm, f"Page {doc_.page}")
         canvas.restoreState()
 
@@ -1481,10 +1623,17 @@ def _build_document_pdf(title, number, doc_date, customer, items,
     story.append(Spacer(1, 3 * mm))
 
     # -- "Sign online" QR: only on the QUOTE (an invoice is not signed) --
-    if is_devis:
+    # The QR encodes the signed public consultation URL (public_view route):
+    # the client scans it, reads the quote online and signs it electronically.
+    if is_devis and public_url:
         try:
             import qrcode
-            qr_img = qrcode.make(f"{brand_name} - {title} {number}")
+            # QR aux couleurs de la charte : modules marine #021A3D sur blanc
+            # (contraste ~14:1, largement suffisant pour la lecture optique)
+            _qr = qrcode.QRCode(box_size=10, border=2)
+            _qr.add_data(public_url)
+            _qr.make(fit=True)
+            qr_img = _qr.make_image(fill_color="#021A3D", back_color="white")
             from io import BytesIO as _BIO
             _qb = _BIO(); qr_img.save(_qb, format="PNG"); _qb.seek(0)
             qr_cell = RLImage(_qb, width=18 * mm, height=18 * mm)

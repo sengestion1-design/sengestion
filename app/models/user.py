@@ -19,6 +19,7 @@ from app.extensions import db, login_manager
 
 TRIAL_DAYS = 15
 SUBSCRIPTION_DAYS = 365
+PLAN_DAYS = {"monthly": 30, "annual": 365}
 CODE_VALIDITY_MINUTES = 15
 
 
@@ -93,11 +94,12 @@ class User(UserMixin, db.Model):
         self.trial_start = date.today()
         self.trial_end = date.today() + timedelta(days=TRIAL_DAYS)
 
-    def validate_subscription(self, admin_id: int) -> None:
-        """Admin validates the yearly subscription (1 year)."""
+    def validate_subscription(self, admin_id: int, plan: str = "annual") -> None:
+        """Admin validates the subscription (monthly = 30 days, annual = 365 days)."""
+        days = PLAN_DAYS.get(plan, SUBSCRIPTION_DAYS)
         self.status = "active"
         self.subscription_start = date.today()
-        self.subscription_end = date.today() + timedelta(days=SUBSCRIPTION_DAYS)
+        self.subscription_end = date.today() + timedelta(days=days)
         self.validated_by = admin_id
 
     def suspend(self) -> None:

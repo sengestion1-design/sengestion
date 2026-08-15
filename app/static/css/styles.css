@@ -2686,3 +2686,145 @@ body:has(.navbar) #main-content {
   .navbar-badge { display: none; }
   .navbar-user-info { display: none; }
 }
+
+/* Voice button: AI feature.
+   Base look = universal CSS only (works on any browser): pale-yellow face,
+   gold border, pulsing gold mic badge. The rotating gradient frame is a
+   progressive enhancement, gated behind @supports (@property + conic),
+   so unsupported browsers keep the full styled fallback. */
+.btn-voice {
+  position: relative;
+  color: var(--marine);
+  background: var(--jaune-pale);
+  border: 2px solid var(--marine);
+  overflow: hidden;               /* contains the shine sweep */
+  transition: transform var(--duration-fast), box-shadow var(--duration-fast),
+              background var(--duration-fast);
+}
+.btn-voice .mic-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--or);          /* gold as BACKGROUND only (brand rule) */
+  color: var(--marine);
+  animation: voice-pulse 2.2s ease-out infinite;
+}
+.btn-voice .mic-wrap i,
+.btn-voice .mic-wrap svg { width: 13px; height: 13px; }
+@keyframes voice-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(242, 177, 14, 0.55); }
+  70%  { box-shadow: 0 0 0 9px rgba(242, 177, 14, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(242, 177, 14, 0); }
+}
+/* Shine sweep on hover: a light band crossing the button once */
+.btn-voice::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%,
+              rgba(255, 255, 255, 0.45) 48%, transparent 62%);
+  background-size: 240% 100%;
+  background-position: 120% 0;
+  pointer-events: none;
+}
+.btn-voice:hover::after { animation: voice-shine 0.9s ease-out; }
+@keyframes voice-shine {
+  from { background-position: 120% 0; }
+  to   { background-position: -60% 0; }
+}
+.btn-voice:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(242, 177, 14, 0.35),
+              0 2px 8px rgba(2, 26, 61, 0.12);
+}
+.btn-voice:hover .mic-wrap { animation-duration: 0.9s; }
+.btn-voice:active { transform: translateY(0); background: var(--jaune-pale); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-voice, .btn-voice .mic-wrap { animation: none; }
+  .btn-voice:hover::after { animation: none; }
+  .btn-voice, .btn-voice:hover { transform: none; }
+}
+
+/* ── Bascule de vue Liste / Kanban (page Prospects) ─────────────────── */
+.view-toggle {
+  display: inline-flex;
+  border: 1.5px solid var(--marine);
+  border-radius: var(--radius-btn);
+  overflow: hidden;
+}
+.view-toggle-btn {
+  padding: 9px 16px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--marine);
+  text-decoration: none;
+  background: #fff;
+  transition: background var(--duration-fast);
+}
+.view-toggle-btn + .view-toggle-btn { border-left: 1.5px solid var(--marine); }
+.view-toggle-btn:hover { background: var(--jaune-pale); }
+.view-toggle-btn.is-active { background: var(--marine); color: var(--jaune-pale); }
+
+/* ── Tableau kanban du pipeline prospects ───────────────────────────── */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(230px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.kanban-col {
+  background: var(--bg-soft, #f4f6f8);
+  border: 1.5px solid var(--line-strong, #d5dbe3);
+  border-radius: var(--radius-card);
+  padding: 12px;
+  min-height: 240px;
+  transition: border-color var(--duration-fast), background var(--duration-fast);
+}
+.kanban-col.is-over { border-color: var(--or); background: var(--jaune-pale); }
+.kanban-col-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.kanban-count {
+  min-width: 26px;
+  text-align: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--marine);
+  color: var(--jaune-pale);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+}
+.kanban-cards { display: flex; flex-direction: column; gap: 10px; min-height: 60px; }
+.kanban-card {
+  background: #fff;
+  border: 1px solid var(--line-strong, #d5dbe3);
+  border-left: 4px solid var(--or);
+  border-radius: var(--radius-btn);
+  padding: 12px 14px;
+  cursor: grab;
+  transition: box-shadow var(--duration-fast), transform var(--duration-fast);
+}
+.kanban-card:hover { box-shadow: 0 4px 12px rgba(2, 26, 61, 0.12); transform: translateY(-1px); }
+.kanban-card.is-dragging { opacity: 0.5; cursor: grabbing; }
+.kanban-card[draggable="false"] { cursor: default; border-left-color: var(--marine); }
+.kanban-card-name { font-weight: var(--weight-bold); color: var(--marine); font-size: var(--text-sm); }
+.kanban-card-sub { color: var(--muted, #5a6b80); font-size: var(--text-xs); margin-top: 2px; }
+.kanban-card-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px; gap: 8px;
+}
+.kanban-card-link {
+  font-size: var(--text-xs); font-weight: var(--weight-bold);
+  color: var(--marine); text-decoration: underline;
+}
+@media (max-width: 1100px) { .kanban { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .kanban { grid-template-columns: 1fr; } }
+

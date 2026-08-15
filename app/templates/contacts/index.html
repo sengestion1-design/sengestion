@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  {# -- Search bar -- #}
+  {# ── Barre de recherche ── #}
   <form method="get" action="{{ url_for('contacts.index') }}"
         style="display:flex; gap:10px; align-items:center; margin-bottom:28px; max-width:540px;">
     <label class="sr-only" for="q">Rechercher</label>
@@ -82,7 +82,7 @@
               {% if not ct.email and not ct.phone %}-{% endif %}
             </td>
             <td class="col-actions">
-              {# Switch from the address book to the sales pipeline #}
+              {# Passer du carnet au pipeline commercial #}
               <form method="post" action="{{ url_for('contacts.promote', contact_id=ct.id) }}"
                     style="display:inline;"
                     onsubmit="return confirm('Suivre « {{ ct.name }} » comme prospect ?');">

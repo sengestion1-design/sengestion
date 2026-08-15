@@ -115,6 +115,75 @@
 
   </div>
 
+  {# -- Pending payment proofs -- #}
+  {% if payment_proofs %}
+  <div class="card" style="border-radius:12px; padding:28px; margin-bottom:28px;" id="payment-proofs">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;">
+      <div>
+        <h2 style="font-family:'Palatino','Palatino Linotype','Book Antiqua',Georgia,serif;
+                   font-size:18px; font-weight:600; color:var(--marine); margin:0 0 4px;">
+          Preuves de paiement à valider
+        </h2>
+        <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px; color:var(--muted); margin:0;">
+          {{ payment_proofs|length }} demande{{ 's' if payment_proofs|length > 1 else '' }} en attente
+        </p>
+      </div>
+      <span style="background:#F2B10E; border-radius:8px; padding:8px;
+                   display:flex; align-items:center; justify-content:center;">
+        <i data-lucide="receipt" style="width:16px;height:16px;color:#021A3D;"></i>
+      </span>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      {% for p in payment_proofs %}
+      <div style="border:1px solid var(--line); border-radius:12px; padding:18px;
+                  display:flex; gap:18px; flex-wrap:wrap; align-items:center;">
+
+        <a href="{{ url_for('static', filename=p.image_path) }}" target="_blank" rel="noopener">
+          <img src="{{ url_for('static', filename=p.image_path) }}" alt="Preuve de paiement"
+               style="width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+        </a>
+
+        <div style="flex:1; min-width:220px;">
+          <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:700;
+                     color:var(--marine); margin:0 0 4px;">
+            {{ p.user.name }} <span style="font-weight:400; color:var(--muted);">({{ p.user.company or 'sans entreprise' }})</span>
+          </p>
+          <p style="font-family:Arial,Helvetica,sans-serif; font-size:16px; color:var(--muted); margin:0;">
+            {{ 'Abonnement mensuel' if p.plan == 'monthly' else 'Abonnement annuel' }}
+            &middot; {{ 'Orange Money' if p.method == 'orange_money' else 'Wave' }}
+            &middot; N&deg; {{ p.transaction_number }}
+          </p>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <form method="POST" action="{{ url_for('admin.approve_payment_proof', proof_id=p.id) }}" style="display:inline; margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit"
+                    style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                           background:#F2B10E; color:#021A3D; border:none; border-radius:8px;
+                           padding:7px 14px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+              <i data-lucide="check" style="width:12px;height:12px;"></i> Valider
+            </button>
+          </form>
+          <form method="POST" action="{{ url_for('admin.reject_payment_proof', proof_id=p.id) }}" style="display:inline; margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit"
+                    style="font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:600;
+                           background:transparent; color:#021A3D; border:1.5px solid #021A3D;
+                           border-radius:8px; padding:6px 14px; cursor:pointer;
+                           display:inline-flex; align-items:center; gap:6px;">
+              <i data-lucide="x" style="width:12px;height:12px;"></i> Rejeter
+            </button>
+          </form>
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   {# -- Managers table -- #}
   <div class="card" style="border-radius:12px; padding:28px;">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;">

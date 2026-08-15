@@ -27,7 +27,7 @@
         id="quote-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    {# -- General information -- #}
+    {# ── Informations générales ── #}
     <div class="card" style="margin-bottom:20px;">
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px;">
         <div class="form-group" style="margin-bottom:0;">
@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    {# -- Quote line items -- #}
+    {# ── Lignes du devis ── #}
     <div class="card" style="margin-bottom:20px;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
         <h2 class="card-title">Lignes du devis</h2>
@@ -80,7 +80,7 @@
               <th style="padding:10px 8px; width:48px;"></th>
             </tr>
           </thead>
-          <tbody id="lines-body"><!-- rows injected via JS --></tbody>
+          <tbody id="lines-body"><!-- lignes injectées en JS --></tbody>
         </table>
       </div>
 
@@ -90,7 +90,7 @@
       </p>
     </div>
 
-    {# -- Totals -- #}
+    {# ── Totaux ── #}
     <div class="card" style="margin-bottom:20px;">
       <div style="max-width:340px; margin-left:auto;">
         <div class="total-row">
@@ -114,7 +114,7 @@
     </div>
   </form>
 
-  {# -- Initial row data (edit / re-display after error) -- #}
+  {# ── Données initiales des lignes (édition / réaffichage après erreur) ── #}
   <script type="application/json" id="initial-lines">
     {%- set rows = [] -%}
     {%- if form -%}

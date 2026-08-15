@@ -10,11 +10,11 @@
       <p class="page-subtitle">Créez vos devis, éditez-les en PDF et convertissez-les en factures</p>
     </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <a href="{{ url_for('invoices.index') }}" class="btn btn-primary">
+      <a href="{{ url_for('invoices.index') }}" class="btn btn-secondary">
         <i data-lucide="receipt" style="width:16px;height:16px;vertical-align:-3px;"></i> Factures
       </a>
-      <a href="{{ url_for('quotes.voice') }}" class="btn btn-secondary">
-        <i data-lucide="mic" style="width:16px;height:16px;vertical-align:-3px;"></i> Devis vocal
+      <a href="{{ url_for('quotes.voice') }}" class="btn btn-voice">
+        <span class="mic-wrap"><i data-lucide="mic"></i></span> Devis vocal
       </a>
       <a href="{{ url_for('quotes.new') }}" class="btn btn-accent">
         <i data-lucide="plus" style="width:16px;height:16px;vertical-align:-3px;"></i> Nouveau devis
@@ -126,6 +126,16 @@
                         title="Convertir en facture">
                   <i data-lucide="file-check" style="width:15px;height:15px;vertical-align:-3px;"></i>
                   Facturer
+                </button>
+              </form>
+              <form method="post" action="{{ url_for('quotes.delete', quote_id=q.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Supprimer définitivement le devis {{ q.number }} ?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-ghost btn-sm"
+                        aria-label="Supprimer le devis {{ q.number }}"
+                        title="Supprimer">
+                  <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
                 </button>
               </form>
               {% else %}

@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="auth-wrap">
-  <div class="auth-card" style="text-align:center;">
+  <div class="auth-card" style="text-align:center; max-width:560px;">
 
     <div class="auth-brand">
       <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SenGestion" class="auth-logo">
@@ -18,13 +18,79 @@
       {% endif %}
     </p>
 
-    <div class="banner-accent" style="margin:24px 0; text-align:left;">
-      Pour continuer à utiliser <strong>SenGestion</strong>, souscrivez à un
-      abonnement annuel. Contactez-nous pour activer votre compte.
-    </div>
+    {% if pending %}
+      {# A proof was already submitted and is awaiting admin review #}
+      <div class="banner-accent" style="margin:24px 0; text-align:left;">
+        <p style="margin:0;">
+          <strong>Preuve de paiement envoyée.</strong>
+          Votre demande d'activation ({{ 'Abonnement mensuel' if pending.plan == 'monthly' else 'Abonnement annuel' }}
+          par {{ 'Orange Money' if pending.method == 'orange_money' else 'Wave' }}) est en attente de validation
+          par un administrateur. Vous recevrez l'accès dès que ce sera fait.
+        </p>
+      </div>
+    {% else %}
+      <div class="banner-accent" style="margin:24px 0; text-align:left;">
+        <p style="margin:0;">
+          Pour continuer à utiliser <strong>SenGestion</strong>, choisissez votre formule,
+          effectuez le paiement par Orange Money ou Wave au numéro
+          <strong>+221 77 300 47 45</strong>, puis envoyez-nous la preuve ci-dessous.
+          Votre compte sera activé dès validation par un administrateur.
+        </p>
+      </div>
 
-    <p style="font-size:16px; color:var(--muted);">
-      contact@sengestion.sn &nbsp;·&nbsp; +221 …
+      <form method="post" action="{{ url_for('subscription.submit_payment') }}"
+            enctype="multipart/form-data" id="payment-form" style="text-align:left;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label class="form-label">Formule</label>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+              <input type="radio" name="plan" value="monthly" required> Mensuel
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+              <input type="radio" name="plan" value="annual" required> Annuel
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:16px;">
+          <label class="form-label">Moyen de paiement</label>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+              <input type="radio" name="method" value="orange_money" required> Orange Money
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+              <input type="radio" name="method" value="wave" required> Wave
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:16px;">
+          <label class="form-label" for="transaction_number">Numéro de transaction</label>
+          <input type="text" id="transaction_number" name="transaction_number"
+                 class="form-input" placeholder="Ex : 7A2B9C1D0E" maxlength="50" required>
+        </div>
+
+        <div class="form-group" style="margin-top:16px;">
+          <label class="form-label" for="proof-input">Photo de la preuve de paiement</label>
+          <input type="file" id="proof-input" name="proof" accept="image/*" capture="environment" required>
+        </div>
+
+        <div style="margin-top:24px;">
+          <button type="submit" class="btn btn-accent" id="payment-submit" style="width:100%;">
+            Envoyer la preuve de paiement
+          </button>
+        </div>
+      </form>
+    {% endif %}
+
+    <p style="font-size:15px; margin-top:20px;">
+      <a href="mailto:sengestion1@gmail.com?subject=Demande%20d%27activation%20de%20compte&body=Bonjour%2C%0A%0AMon%20essai%20gratuit%20SenGestion%20est%20termin%C3%A9%2C%20je%20souhaite%20activer%20mon%20abonnement.%0A%0AMerci.">
+        Ou contactez-nous directement par email
+      </a>
+      &nbsp;&middot;&nbsp;
+      <a href="tel:+221773004745">+221 77 300 47 45</a>
     </p>
 
     <p class="auth-alt" style="margin-top:24px;">
