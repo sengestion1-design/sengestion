@@ -169,7 +169,8 @@
               {% if not ct.is_converted %}
               <form method="post" action="{{ url_for('contacts.convert', contact_id=ct.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Convertir « {{ ct.name }} » en client ?');">
+                    data-confirm="Convertir « {{ ct.name }} » en client ?"
+                    data-confirm-title="Convertir en client" data-confirm-ok-label="Convertir">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-accent btn-sm"
                         aria-label="Convertir {{ ct.name }} en client">
@@ -192,7 +193,8 @@
               </a>
               <form method="post" action="{{ url_for('contacts.delete', contact_id=ct.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Supprimer le prospect « {{ ct.name }} » ?');">
+                    data-confirm="Supprimer le prospect « {{ ct.name }} » ?" data-confirm-danger="true"
+                    data-confirm-title="Supprimer ce prospect" data-confirm-ok-label="Supprimer">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger btn-sm" aria-label="Supprimer {{ ct.name }}">
                   <i data-lucide="trash-2" style="width:15px;height:15px;"></i>

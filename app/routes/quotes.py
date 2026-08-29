@@ -1339,19 +1339,19 @@ def _build_document_pdf(title, number, doc_date, customer, items,
         x_text = ML
         if logo_path:
             try:
-                img = RLImage(logo_path, width=30 * mm, height=14 * mm, kind="proportional")
+                img = RLImage(logo_path, width=42 * mm, height=20 * mm, kind="proportional")
                 iw, ih = img.wrap(0, 0)
-                img.drawOn(canvas, ML, PAGE_H - 20 * mm)
+                img.drawOn(canvas, ML, PAGE_H - 22 * mm)
             except Exception:
                 pass
         # Company name (brand title - Palatino, per brand guide)
         canvas.setFillColor(MARINE)
         canvas.setFont(FONT_TITLE_BOLD, 20)          # Palatino 20 pt
-        canvas.drawString(ML + 34 * mm, PAGE_H - 15 * mm, brand_name)
+        canvas.drawString(ML + 46 * mm, PAGE_H - 15 * mm, brand_name)
         # Contact details
         canvas.setFillColor(INK_SOFT)
         canvas.setFont(FONT_BODY, 10)
-        y = PAGE_H - 24 * mm
+        y = PAGE_H - 27 * mm
         if addr:
             canvas.drawString(ML, y, addr[:90]); y -= 4.6 * mm
         tel_bits = " / ".join(x for x in (phone,) if x)

@@ -68,7 +68,8 @@
               </a>
               <form method="post" action="{{ url_for('customers.delete', customer_id=c.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Supprimer le client « {{ c.name }} » ? Cette action est définitive.');">
+                    data-confirm="Supprimer le client « {{ c.name }} » ? Cette action est définitive." data-confirm-danger="true"
+                    data-confirm-title="Supprimer ce client" data-confirm-ok-label="Supprimer">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger btn-sm" aria-label="Supprimer {{ c.name }}">
                   <i data-lucide="trash-2" style="width:15px;height:15px;"></i>

@@ -13,12 +13,14 @@ import uuid
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash, current_app,
 )
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 
 from app.extensions import db
 from app.models.settings import CompanySettings
+from app.models.user import User
 from app.services.activity_log_service import log_action
 from app.services.crypto_service import encrypt
+from app.services.email_service import send_account_deletion_request, send_email_change_code
 from app.utils.access import subscription_required
 
 settings_bp = Blueprint("settings", __name__, url_prefix="/settings")
@@ -152,4 +154,147 @@ def update():
     db.session.commit()
     log_action(current_user.id, "update_settings", {"company": s.company_name})
     flash("Paramètres enregistrés.", "success")
+    return redirect(url_for("settings.index"))
+
+
+@settings_bp.route("/account/profile", methods=["POST"])
+@login_required
+@subscription_required
+def account_profile():
+    """Update my own name / company. Email change goes through a separate
+    confirmation flow (see account_email_request / account_email_confirm) —
+    the address must be proven owned before it becomes active."""
+    new_name = _clean(request.form.get("name"), 100)
+    new_company = _clean(request.form.get("company"), 150)
+
+    if not new_name:
+        flash("Le nom est requis.", "error")
+        return redirect(url_for("settings.index"))
+
+    current_user.name = new_name
+    current_user.company = new_company
+    db.session.commit()
+    log_action(current_user.id, "update_account_profile", {"name": new_name})
+    flash("Profil mis à jour.", "success")
+    return redirect(url_for("settings.index"))
+
+
+@settings_bp.route("/account/email/request", methods=["POST"])
+@login_required
+@subscription_required
+def account_email_request():
+    """Stage a new email address and send a confirmation code to it.
+    The current email stays active/usable until the code is confirmed."""
+    new_email = _clean(request.form.get("email"), 150).lower()
+
+    if not new_email:
+        flash("Email requis.", "error")
+        return redirect(url_for("settings.index"))
+    if new_email == current_user.email:
+        flash("C'est déjà votre adresse actuelle.", "error")
+        return redirect(url_for("settings.index"))
+
+    existing = User.query.filter(User.email == new_email, User.id != current_user.id).first()
+    if existing:
+        flash("Cet email est déjà utilisé par un autre compte.", "error")
+        return redirect(url_for("settings.index"))
+
+    code = current_user.start_email_change(new_email)
+    db.session.commit()
+    send_email_change_code(new_email, current_user.name, code)
+    log_action(current_user.id, "request_email_change", {"new_email": new_email})
+    flash(
+        f"Un code de confirmation a été envoyé à {new_email}. "
+        f"Votre adresse actuelle reste active tant que vous n'avez pas confirmé.",
+        "info",
+    )
+    return redirect(url_for("settings.index"))
+
+
+@settings_bp.route("/account/email/confirm", methods=["POST"])
+@login_required
+@subscription_required
+def account_email_confirm():
+    """Confirm the pending email change with the 6-digit code."""
+    code = (request.form.get("code") or "").strip()
+
+    if not current_user.pending_email:
+        flash("Aucun changement d'email en attente.", "error")
+        return redirect(url_for("settings.index"))
+
+    if not current_user.check_pending_email_code(code):
+        flash("Code incorrect ou expiré.", "error")
+        return redirect(url_for("settings.index"))
+
+    old_email = current_user.email
+    current_user.confirm_email_change()
+    db.session.commit()
+    log_action(current_user.id, "email_change_confirmed", {"old_email": old_email, "new_email": current_user.email})
+    flash("Votre nouvelle adresse email est confirmée et active.", "success")
+    return redirect(url_for("settings.index"))
+
+
+@settings_bp.route("/account/email/cancel", methods=["POST"])
+@login_required
+@subscription_required
+def account_email_cancel():
+    """Cancel a pending email change."""
+    current_user.cancel_email_change()
+    db.session.commit()
+    flash("Changement d'email annulé.", "info")
+    return redirect(url_for("settings.index"))
+
+
+@settings_bp.route("/account/password", methods=["POST"])
+@login_required
+@subscription_required
+def account_password():
+    """Change my own password."""
+    current_password = request.form.get("current_password") or ""
+    new_password = request.form.get("new_password") or ""
+
+    if not current_user.check_password(current_password):
+        flash("Mot de passe actuel incorrect.", "error")
+    elif len(new_password) < 8:
+        flash("Le nouveau mot de passe doit contenir au moins 8 caractères.", "error")
+    else:
+        current_user.set_password(new_password)
+        db.session.commit()
+        log_action(current_user.id, "change_password", {})
+        flash("Mot de passe modifié.", "success")
+    return redirect(url_for("settings.index"))
+
+
+@settings_bp.route("/account/delete", methods=["POST"])
+@login_required
+@subscription_required
+def account_delete():
+    """Request account deletion. Not automatic (billing/accounting data):
+    an alert email is sent to the platform admin(s), who processes it manually."""
+    confirm_password = request.form.get("confirm_password") or ""
+    if not current_user.check_password(confirm_password):
+        flash("Mot de passe incorrect.", "error")
+        return redirect(url_for("settings.index"))
+
+    log_action(current_user.id, "request_account_deletion", {"email": current_user.email})
+
+    admins = User.query.filter_by(role="admin").all()
+    for admin in admins:
+        try:
+            send_account_deletion_request(
+                admin_email=admin.email,
+                admin_name=admin.name,
+                manager_name=current_user.name,
+                manager_company=current_user.company,
+                manager_email=current_user.email,
+                manager_id=current_user.id,
+            )
+        except Exception:
+            current_app.logger.warning("Failed to send account deletion alert", exc_info=True)
+
+    flash(
+        "Votre demande de suppression a été transmise à l'administrateur. "
+        "Elle sera traitée sous peu.",
+        "success",
+    )
     return redirect(url_for("settings.index"))

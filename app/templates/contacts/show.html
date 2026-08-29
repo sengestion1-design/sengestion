@@ -93,7 +93,8 @@
       <div class="contact-show-actions">
         {% if contact.kind != 'prospect' %}
         <form method="post" action="{{ url_for('contacts.promote', contact_id=contact.id) }}"
-              onsubmit="return confirm('Suivre « {{ contact.name }} » comme prospect ?');">
+              data-confirm="Suivre « {{ contact.name }} » comme prospect ?"
+              data-confirm-title="Passer en prospect" data-confirm-ok-label="Passer en prospect">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="btn btn-ghost btn-sm">
             <i data-lucide="trending-up" style="width:15px;height:15px;vertical-align:-3px;"></i>
@@ -102,7 +103,8 @@
         </form>
         {% endif %}
         <form method="post" action="{{ url_for('contacts.delete', contact_id=contact.id) }}"
-              onsubmit="return confirm('Supprimer « {{ contact.name }} » ?');">
+              data-confirm="Supprimer « {{ contact.name }} » ?" data-confirm-danger="true"
+              data-confirm-title="Supprimer ce contact" data-confirm-ok-label="Supprimer">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="btn btn-danger btn-sm">
             <i data-lucide="trash-2" style="width:15px;height:15px;vertical-align:-3px;"></i>

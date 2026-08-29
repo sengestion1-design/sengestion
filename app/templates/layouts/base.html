@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}SenGestion{% endblock %}</title>
 
-  <!-- Favicon SG (logo officiel) - .ico multi-résolutions + PNG -->
+  <!-- Favicon SG (official logo) - multi-resolution .ico + PNG -->
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" sizes="16x16 32x32 48x48">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
 
-  <!-- Feuilles de style (versionnées : rechargement auto à chaque modif) -->
+  <!-- Stylesheets (versioned: auto-reload on every change) -->
   <link rel="stylesheet" href="{{ static_v('css/tokens.css') }}">
   <link rel="stylesheet" href="{{ static_v('css/styles.css') }}">
 
-  <!-- Lucide Icons v1.23.0 - version épinglée + hash SRI vérifié (sécurité) -->
+  <!-- Lucide Icons v1.23.0 - pinned version + verified SRI hash (security) -->
   <script
     src="https://cdn.jsdelivr.net/npm/lucide@1.23.0/dist/umd/lucide.min.js"
     integrity="sha384-ouAVEJVCMsf8Svzn+BwqbaBhxBEA0xgeVBhHnxmWd+Wqyv18yhWCQwGegFD/OHLq"
@@ -34,7 +34,7 @@
   <!-- ═══════════════════════ MAIN ═══════════════════════ -->
   <main id="main-content">
 
-    <!-- Flash messages (les layouts qui gèrent eux-mêmes les flash surchargent ce bloc) -->
+    <!-- Flash messages (layouts that handle their own flash messages override this block) -->
     {% block flash %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -62,8 +62,182 @@
 
   </main>
 
-  <!-- Bandeau cookies (informatif : uniquement des cookies techniques, exemptés
-       de consentement - lignes directrices CNIL). Mémorisé en stockage local. -->
+  <!-- ═══════════ Confirmation modal (replaces window.confirm on forms with [data-confirm]) ═══════════ -->
+  <style>
+    /* No transform/scale/animation on the modal box itself: any overshoot briefly makes
+       the content taller than the box, which flashes the modal's own scrollbar on its
+       right edge with real (non-overlay) OS scrollbars. Kept intentionally simple. */
+    .cm-icon-wrap {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    #confirm-modal-ok { position: relative; transition: box-shadow .12s ease; }
+    #confirm-modal-ok:disabled { cursor: default; opacity: .85; }
+    #confirm-modal-ok .cm-spinner {
+      width: 15px; height: 15px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.4); border-top-color: currentColor;
+      animation: cm-spin .6s linear infinite; display: inline-block; vertical-align: -3px;
+    }
+    @keyframes cm-spin { to { transform: rotate(360deg); } }
+
+    #confirm-modal-close { transition: background .15s ease, color .15s ease; }
+  </style>
+  <div class="modal-backdrop" id="confirm-modal-backdrop" style="display:none;" role="presentation">
+    <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-modal-title" style="max-width:440px;">
+      <div class="modal-header">
+        <span id="confirm-modal-title" class="modal-title" style="display:flex; align-items:center; gap:10px; font-size:var(--text-lg);">
+          <span id="confirm-modal-icon-wrap" class="cm-icon-wrap">
+            <i data-lucide="help-circle" aria-hidden="true" style="width:19px;height:19px;"></i>
+          </span>
+          <span id="confirm-modal-title-text">Confirmation</span>
+        </span>
+        <button type="button" class="modal-close" id="confirm-modal-close" aria-label="Annuler">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-modal-message" style="margin:0; color:var(--ink); font-size:var(--text-base); line-height:1.55;"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="confirm-modal-cancel">Annuler</button>
+        <button type="button" class="btn btn-accent" id="confirm-modal-ok">
+          <i data-lucide="check" id="confirm-modal-ok-icon" style="width:16px;height:16px;" aria-hidden="true"></i>
+          <span id="confirm-modal-ok-text">Confirmer</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', function () {
+      var backdrop = document.getElementById('confirm-modal-backdrop');
+      var titleText = document.getElementById('confirm-modal-title-text');
+      var messageEl = document.getElementById('confirm-modal-message');
+      var okBtn = document.getElementById('confirm-modal-ok');
+      var okText = document.getElementById('confirm-modal-ok-text');
+      var cancelBtn = document.getElementById('confirm-modal-cancel');
+      var closeBtn = document.getElementById('confirm-modal-close');
+      var iconWrap = document.getElementById('confirm-modal-icon-wrap');
+      var pendingForm = null;
+      var lastTrigger = null;
+
+      function openConfirm(form, message, danger, title, okLabel) {
+        pendingForm = form;
+        lastTrigger = document.activeElement;
+        messageEl.textContent = message;
+        titleText.textContent = title || (danger ? 'Confirmer la suppression' : 'Confirmation');
+        okText.textContent = okLabel || 'Confirmer';
+        okBtn.disabled = false;
+
+        // restore the check icon + remove any leftover spinner from a previous open
+        var spinner = okBtn.querySelector('.cm-spinner');
+        if (spinner) { spinner.remove(); }
+        if (!document.getElementById('confirm-modal-ok-icon')) {
+          okText.insertAdjacentHTML('beforebegin', '<i data-lucide="check" id="confirm-modal-ok-icon" style="width:16px;height:16px;" aria-hidden="true"></i>');
+        }
+
+        // Danger actions (delete) get a navy-on-pale-yellow warning icon; neutral actions get the gold accent.
+        iconWrap.style.background = 'var(--marine-100, #E8E7A2)';
+        iconWrap.style.color = 'var(--marine)';
+        if (danger) {
+          iconWrap.innerHTML = '<i data-lucide="triangle-alert" aria-hidden="true" style="width:19px;height:19px;"></i>';
+          okBtn.classList.remove('btn-accent');
+          okBtn.classList.add('btn-primary');
+        } else {
+          iconWrap.innerHTML = '<i data-lucide="help-circle" aria-hidden="true" style="width:19px;height:19px;"></i>';
+          okBtn.classList.remove('btn-primary');
+          okBtn.classList.add('btn-accent');
+        }
+
+        // Measure + apply the scrollbar compensation BEFORE the backdrop becomes visible,
+        // so the layout never renders a frame with the old (uncompensated) width.
+        lockBodyScroll();
+        backdrop.style.display = 'flex';
+        if (window.lucide) { lucide.createIcons(); }
+        okBtn.focus({ preventScroll: true });
+      }
+
+      function closeConfirm() {
+        if (backdrop.style.display !== 'flex') return;
+        backdrop.style.display = 'none';
+        unlockBodyScroll();
+        pendingForm = null;
+        if (lastTrigger) { lastTrigger.focus(); lastTrigger = null; }
+      }
+
+      // Hiding the page scrollbar (body { overflow: hidden }) widens the viewport by the
+      // scrollbar's own width. Since .main-content is flex:1, it instantly stretches into
+      // that extra space - visible as the page/sidebar edge "flickering" on open/close.
+      // Compensate with a matching padding-right on body so the layout width never changes.
+      var __scrollLockCount = 0;
+      function lockBodyScroll() {
+        if (__scrollLockCount === 0) {
+          var scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+          if (scrollbarWidth > 0) {
+            document.body.style.paddingRight = scrollbarWidth + 'px';
+          }
+          document.body.style.overflow = 'hidden';
+        }
+        __scrollLockCount++;
+      }
+      function unlockBodyScroll() {
+        __scrollLockCount = Math.max(0, __scrollLockCount - 1);
+        if (__scrollLockCount === 0) {
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+        }
+      }
+
+      document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+          if (form.dataset.confirmed === 'true') { return; }
+          e.preventDefault();
+          openConfirm(
+            form,
+            form.dataset.confirm,
+            form.dataset.confirmDanger === 'true',
+            form.dataset.confirmTitle,
+            form.dataset.confirmOkLabel
+          );
+        });
+      });
+
+      okBtn.addEventListener('click', function () {
+        if (okBtn.disabled) return;
+        var form = pendingForm;
+        // Brief loading state so the click feels acknowledged before the page navigates away.
+        okBtn.disabled = true;
+        var okIcon = document.getElementById('confirm-modal-ok-icon');
+        if (okIcon) { okIcon.remove(); }
+        if (!okBtn.querySelector('.cm-spinner')) {
+          okText.insertAdjacentHTML('beforebegin', '<span class="cm-spinner"></span> ');
+        }
+        setTimeout(function () {
+          if (form) {
+            form.dataset.confirmed = 'true';
+            form.submit();
+          }
+          closeConfirm();
+        }, 220);
+      });
+      cancelBtn.addEventListener('click', closeConfirm);
+      closeBtn.addEventListener('click', closeConfirm);
+      backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeConfirm(); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && backdrop.style.display === 'flex') closeConfirm();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Tab' || backdrop.style.display !== 'flex') return;
+        var focusables = backdrop.querySelectorAll('button');
+        var first = focusables[0], last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
+    });
+  </script>
+
+  <!-- Cookie notice (informational only: technical cookies exempt from consent
+       under CNIL guidelines). Dismissal remembered in local storage. -->
   <div id="cookie-notice"
        style="position:fixed; left:0; right:0; bottom:0; z-index:9999; background:#021A3D;
               padding:14px 20px; display:none; flex-wrap:wrap; gap:12px; align-items:center;
@@ -84,7 +258,7 @@
       var KEY = 'sg_cookie_notice', banner = document.getElementById('cookie-notice');
       try {
         var seen = localStorage.getItem(KEY);
-        // ré-affiche après 12 mois
+        // re-show after 12 months
         if (!seen || Date.now() - Number(seen) > 365 * 24 * 3600 * 1000) banner.style.display = 'flex';
       } catch (e) { banner.style.display = 'flex'; }
       document.getElementById('cookie-notice-ok').addEventListener('click', function () {

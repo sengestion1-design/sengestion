@@ -131,7 +131,8 @@
               </a>
               <form method="post" action="{{ url_for('expenses.delete', expense_id=e.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Supprimer la dépense « {{ e.label }} » ?');">
+                    data-confirm="Supprimer la dépense « {{ e.label }} » ?" data-confirm-danger="true"
+                    data-confirm-title="Supprimer cette dépense" data-confirm-ok-label="Supprimer">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger btn-sm"
                         aria-label="Supprimer la dépense {{ e.label }}">

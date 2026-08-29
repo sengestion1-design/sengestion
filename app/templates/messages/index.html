@@ -61,7 +61,8 @@
               {% if recipient %}
               <form method="post" action="{{ url_for('messages.resend', message_id=m.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Renvoyer ce message à {{ recipient.name }} ?');">
+                    data-confirm="Renvoyer ce message à {{ recipient.name }} ?"
+                    data-confirm-title="Renvoyer le message" data-confirm-ok-label="Renvoyer">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-secondary btn-sm" aria-label="Renvoyer">
                   <i data-lucide="rotate-cw" style="width:15px;height:15px;vertical-align:-3px;"></i>

@@ -202,6 +202,113 @@
     </div>
   </form>
 
+  <section class="card settings-section settings-section--full" style="margin-top:24px;">
+    <h2 class="settings-title"><i data-lucide="user-circle"></i> Mon compte</h2>
+    <p class="settings-hint">Vos informations personnelles de connexion (différentes des informations de l'entreprise ci-dessus).</p>
+
+    <form method="post" action="{{ url_for('settings.account_profile') }}" class="form-grid-2" style="margin-bottom:24px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label class="form-label" for="acc_name">Nom complet</label>
+        <input type="text" id="acc_name" name="name" class="form-input" maxlength="100"
+               value="{{ current_user.name or '' }}" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="acc_company">Société</label>
+        <input type="text" id="acc_company" name="company" class="form-input" maxlength="150"
+               value="{{ current_user.company or '' }}">
+      </div>
+      <div class="form-group" style="align-self:end;">
+        <button type="submit" class="btn btn-accent">
+          <i data-lucide="check" style="width:16px;height:16px;vertical-align:-3px;"></i>
+          Enregistrer le profil
+        </button>
+      </div>
+    </form>
+
+    {% if current_user.pending_email %}
+    <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:16px 18px; margin-bottom:24px;">
+      <p style="margin:0 0 12px; font-size:.85rem; color:#92400e;">
+        <i data-lucide="clock" style="width:15px;height:15px;vertical-align:-2px;"></i>
+        Changement d'email en attente vers <strong>{{ current_user.pending_email }}</strong>.
+        Saisissez le code reçu par email pour confirmer (valable 15 min).
+      </p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <form method="post" action="{{ url_for('settings.account_email_confirm') }}" style="display:flex; gap:8px;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="text" name="code" class="form-input" placeholder="Code à 6 chiffres" maxlength="6" style="width:150px;" required>
+          <button type="submit" class="btn btn-accent">Confirmer</button>
+        </form>
+        <form method="post" action="{{ url_for('settings.account_email_cancel') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn" style="background:#fff; border:1px solid #d0dae6;">Annuler</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('settings.account_email_request') }}" class="form-grid-2" style="margin-bottom:24px; padding-top:16px; border-top:1px solid var(--line);">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label class="form-label" for="acc_email">Email de connexion actuel</label>
+        <input type="email" class="form-input" value="{{ current_user.email or '' }}" disabled
+               style="background:var(--bg); color:rgba(2,26,61,0.6);">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="acc_new_email">Nouvelle adresse email</label>
+        <input type="email" id="acc_new_email" name="email" class="form-input" maxlength="150" placeholder="nouvelle@adresse.com">
+      </div>
+      <div class="form-group" style="align-self:end;">
+        <button type="submit" class="btn btn-accent">
+          <i data-lucide="mail" style="width:16px;height:16px;vertical-align:-3px;"></i>
+          Envoyer un code de confirmation
+        </button>
+      </div>
+    </form>
+
+    <form method="post" action="{{ url_for('settings.account_password') }}" class="form-grid-2" style="margin-bottom:8px; padding-top:16px; border-top:1px solid var(--line);">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label class="form-label" for="acc_current_pwd">Mot de passe actuel</label>
+        <input type="password" id="acc_current_pwd" name="current_password" class="form-input" autocomplete="current-password" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="acc_new_pwd">Nouveau mot de passe (8 caractères min.)</label>
+        <input type="password" id="acc_new_pwd" name="new_password" class="form-input" minlength="8" autocomplete="new-password" required>
+      </div>
+      <div class="form-group" style="align-self:end;">
+        <button type="submit" class="btn btn-accent">
+          <i data-lucide="key" style="width:16px;height:16px;vertical-align:-3px;"></i>
+          Changer le mot de passe
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card settings-section settings-section--full" style="margin-top:24px; border-color:#fecaca;">
+    <h2 class="settings-title" style="color:#dc2626;"><i data-lucide="trash-2" style="color:#dc2626;"></i> Supprimer mon compte</h2>
+    <p class="settings-hint" style="color:#dc2626;">
+      La suppression n'est pas immédiate : une demande sera envoyée à l'administrateur de la plateforme,
+      qui la traitera manuellement (vos données de facturation sont concernées).
+    </p>
+    <form method="post" action="{{ url_for('settings.account_delete') }}"
+          data-confirm="Envoyer une demande de suppression définitive de votre compte à l'administrateur ?" data-confirm-danger="true"
+          data-confirm-title="Supprimer mon compte" data-confirm-ok-label="Envoyer la demande"
+          class="form-grid-2">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label class="form-label" for="acc_confirm_pwd">Confirmez avec votre mot de passe</label>
+        <input type="password" id="acc_confirm_pwd" name="confirm_password" class="form-input" autocomplete="current-password" required>
+      </div>
+      <div class="form-group" style="align-self:end;">
+        <button type="submit" class="btn" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca;">
+          <i data-lucide="trash-2" style="width:16px;height:16px;vertical-align:-3px;"></i>
+          Demander la suppression
+        </button>
+      </div>
+    </form>
+  </section>
+
   <style>
     /* Full-width grid: Identity on top across the full width,
        then the other sections split into 2 columns. */

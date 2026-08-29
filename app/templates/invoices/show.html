@@ -165,7 +165,8 @@
               <form method="post"
                     action="{{ url_for('invoices.delete_payment', invoice_id=invoice.id, payment_id=p.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Supprimer ce paiement ?');">
+                    data-confirm="Supprimer ce paiement ?" data-confirm-danger="true"
+                    data-confirm-title="Supprimer ce paiement" data-confirm-ok-label="Supprimer">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger btn-sm" aria-label="Supprimer le paiement">
                   <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
@@ -188,7 +189,8 @@
   <div style="text-align:right;">
     <form method="post" action="{{ url_for('invoices.delete', invoice_id=invoice.id) }}"
           style="display:inline;"
-          onsubmit="return confirm('Supprimer définitivement la facture {{ invoice.number }} et ses paiements ?');">
+          data-confirm="Supprimer définitivement la facture {{ invoice.number }} et ses paiements ?" data-confirm-danger="true"
+          data-confirm-title="Supprimer cette facture" data-confirm-ok-label="Supprimer">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="btn btn-danger">
         <i data-lucide="trash-2" style="width:16px;height:16px;vertical-align:-3px;"></i> Supprimer cette facture

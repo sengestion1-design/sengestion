@@ -1204,6 +1204,8 @@
 .landing-hero-photo img {
   width: 100%;
   height: auto;
+  max-height: 520px;
+  object-fit: cover;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--line);
@@ -1335,8 +1337,45 @@
   aspect-ratio: 3 / 2;
   object-fit: cover;
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-md);
+  display: block;
+  transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
 }
+
+/* Scroll-reveal wrapper: fades/slides each showcase photo in as it enters the viewport,
+   staggered per-item via inline transition-delay set in the template. A spring easing
+   (slight overshoot) gives the entrance a bit of bounce instead of a flat linear settle. */
+.showcase-reveal {
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateY(28px) scale(.98);
+  transition: opacity .6s ease-out,
+              transform .7s cubic-bezier(.34, 1.56, .64, 1),
+              box-shadow .35s var(--ease-out, ease);
+}
+.showcase-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.showcase-reveal:hover {
+  /* Warm gold-tinted shadow on hover instead of a neutral one - ties the interaction back
+     to the brand accent color rather than a generic elevation effect. */
+  box-shadow: 0 20px 40px -12px rgba(2, 26, 61, .28), 0 0 0 1px rgba(242, 177, 14, .18),
+              0 10px 24px -8px rgba(242, 177, 14, .22);
+}
+.showcase-reveal:hover img {
+  transform: scale(1.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .showcase-reveal {
+    opacity: 1;
+    transform: none;
+    transition: box-shadow .35s ease;
+  }
+  .landing-showcase-grid img { transition: none; }
+}
+
 @media (max-width: 900px) {
   .landing-showcase-grid { grid-template-columns: 1fr; }
 }
@@ -1457,6 +1496,29 @@
   margin-bottom: var(--space-4);
 }
 .module-modal-icon i { width: 24px; height: 24px; }
+.module-modal-image {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  margin-bottom: var(--space-5);
+  animation: module-image-in .5s cubic-bezier(.34, 1.56, .64, 1),
+             module-image-float 3.6s ease-in-out .5s infinite;
+}
+@keyframes module-image-in {
+  from { opacity: 0; transform: translateY(14px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes module-image-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .module-modal-image { animation: none; }
+}
 .module-modal-lead {
   font-size: var(--text-base);
   color: var(--muted);

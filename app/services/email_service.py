@@ -215,6 +215,46 @@ def send_verification_code(to_email: str, name: str, code: str) -> bool:
         return False
 
 
+def send_email_change_code(to_email: str, name: str, code: str) -> bool:
+    """Send the 6-digit confirmation code to a NEW email address (account settings)."""
+    subject = "SenGestion - Confirmez votre nouvelle adresse email"
+    body = (
+        f"Bonjour {name},\n\n"
+        f"Vous avez demandé à changer l'adresse email de connexion de votre compte SenGestion "
+        f"pour celle-ci.\n"
+        f"Votre code de confirmation est : {code}\n\n"
+        f"Ce code est valable 15 minutes. Votre ancienne adresse reste active tant que "
+        f"vous n'avez pas confirmé.\n"
+        f"Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.\n\n"
+        f"- L'équipe SenGestion"
+    )
+
+    html = _branded_html(
+        title="Confirmez votre nouvelle adresse",
+        name=name,
+        intro="Vous avez demand&eacute; à changer l'adresse email de connexion de votre "
+              "compte SenGestion. Saisissez le code ci-dessous pour confirmer :",
+        code=code,
+        outro="Votre ancienne adresse reste active tant que vous n'avez pas confirm&eacute;. "
+              "Si vous n'&ecirc;tes pas &agrave; l'origine de cette demande, ignorez cet email.",
+    )
+
+    if not current_app.config.get("MAIL_PASSWORD"):
+        current_app.logger.warning(
+            "[DEV] SMTP not configured - email-change code for %s: %s", to_email, code
+        )
+        print(f"\n[DEV] Code de changement d'email pour {to_email} : {code}\n")
+        return True
+
+    try:
+        msg = MailMessage(subject=subject, recipients=[to_email], body=body, html=html)
+        mail.send(msg)
+        return True
+    except Exception as exc:  # noqa: BLE001
+        current_app.logger.error("Failed to send email to %s: %s", to_email, exc)
+        return False
+
+
 def send_password_reset_code(to_email: str, name: str, code: str) -> bool:
     """Send the 6-digit password reset code."""
     subject = "SenGestion - Réinitialisation du mot de passe"
@@ -305,5 +345,55 @@ def send_payment_proof_notification(
         body_html=body_block,
         outro="Une fois v&eacute;rifi&eacute;e, validez ou rejetez la demande depuis "
               "l'interface d'administration.",
+    )
+    return send_email(admin_email, subject, body, html=html)
+
+
+def send_account_deletion_request(
+    admin_email: str, admin_name: str, manager_name: str, manager_company: str,
+    manager_email: str, manager_id: int,
+) -> bool:
+    """Notify the admin that a manager requested the definitive deletion of their account."""
+    subject = f"SenGestion - Demande de suppression de compte ({manager_name})"
+
+    safe_manager = escape(manager_name)
+    safe_company = escape(manager_company or "sans entreprise")
+    safe_email = escape(manager_email)
+
+    body = (
+        f"Bonjour {admin_name},\n\n"
+        f"{manager_name} ({manager_company or 'sans entreprise'}) a demandé la "
+        f"suppression définitive de son compte SenGestion.\n\n"
+        f"Email : {manager_email}\n"
+        f"ID utilisateur : {manager_id}\n\n"
+        f"Cette suppression n'est pas automatique (données de facturation en jeu).\n"
+        f"Vérifiez la demande puis supprimez manuellement le compte si confirmé.\n\n"
+        f"- L'équipe SenGestion"
+    )
+
+    body_block = f"""\
+        <tr>
+          <td style="padding:0 40px 24px; font-family:Arial, Helvetica, sans-serif;">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                   style="background-color:{_JAUNE_PALE}; border-radius:12px;">
+              <tr>
+                <td style="padding:20px 22px; font-size:14px; line-height:1.8; color:{_MARINE};">
+                  <strong>G&eacute;rant :</strong> {safe_manager} ({safe_company})<br>
+                  <strong>Email :</strong> {safe_email}<br>
+                  <strong>ID utilisateur :</strong> {manager_id}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>"""
+
+    html = _branded_html_shell(
+        title="Demande de suppression de compte",
+        name=admin_name,
+        intro=f"<strong>{safe_manager}</strong> a demand&eacute; la suppression "
+              f"d&eacute;finitive de son compte SenGestion. Voici le d&eacute;tail :",
+        body_html=body_block,
+        outro="Cette suppression n'est pas automatique (donn&eacute;es de facturation en jeu). "
+              "V&eacute;rifiez la demande puis supprimez manuellement le compte si confirm&eacute;e.",
     )
     return send_email(admin_email, subject, body, html=html)

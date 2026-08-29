@@ -119,7 +119,8 @@
               </a>
               <form method="post" action="{{ url_for('quotes.to_invoice', quote_id=q.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Convertir le devis {{ q.number }} en facture ?');">
+                    data-confirm="Convertir le devis {{ q.number }} en facture ?"
+                    data-confirm-title="Convertir en facture" data-confirm-ok-label="Convertir">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-accent btn-sm"
                         aria-label="Convertir le devis {{ q.number }} en facture"
@@ -130,7 +131,8 @@
               </form>
               <form method="post" action="{{ url_for('quotes.delete', quote_id=q.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Supprimer définitivement le devis {{ q.number }} ?');">
+                    data-confirm="Supprimer définitivement le devis {{ q.number }} ?" data-confirm-danger="true"
+                    data-confirm-title="Supprimer ce devis" data-confirm-ok-label="Supprimer">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-ghost btn-sm"
                         aria-label="Supprimer le devis {{ q.number }}"

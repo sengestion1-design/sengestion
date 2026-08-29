@@ -64,8 +64,8 @@
 
     <div class="landing-hero-photo">
       <img src="{{ url_for('static', filename='img/landing/hero-gerante.jpg') }}"
-           alt="Une gérante de boutique sénégalaise consulte SenGestion sur sa tablette"
-           width="1600" height="900" fetchpriority="high">
+           alt="Une gérante scanne ses factures et reçus avec SenGestion"
+           width="1254" height="1254" fetchpriority="high">
     </div>
 
   </div>
@@ -75,14 +75,40 @@
 <!-- ═══════════ SenGestion au quotidien (photos) ═══════════ -->
 <section class="landing-showcase" aria-label="SenGestion au quotidien">
   <div class="landing-showcase-grid">
-    <img src="{{ url_for('static', filename='img/landing/vitrine-boutique.jpg') }}"
-         alt="Une commerçante ajoute un contact depuis une carte de visite" loading="lazy">
-    <img src="{{ url_for('static', filename='img/landing/vitrine-vocal.jpg') }}"
-         alt="Un gérant crée une facture par la voix sur son téléphone" loading="lazy">
-    <img src="{{ url_for('static', filename='img/landing/vitrine-atelier.jpg') }}"
-         alt="Un artisan suit ses factures depuis son atelier" loading="lazy">
+    <div class="showcase-reveal" style="transition-delay:0ms;">
+      <img src="{{ url_for('static', filename='img/landing/vitrine-boutique.jpg') }}"
+           alt="Une commerçante ajoute un contact depuis une carte de visite" loading="lazy">
+    </div>
+    <div class="showcase-reveal" style="transition-delay:120ms;">
+      <img src="{{ url_for('static', filename='img/landing/vitrine-vocal.jpg') }}"
+           alt="Un gérant crée une facture par la voix sur son téléphone" loading="lazy">
+    </div>
+    <div class="showcase-reveal" style="transition-delay:240ms;">
+      <img src="{{ url_for('static', filename='img/landing/vitrine-atelier.jpg') }}"
+           alt="Un artisan suit ses factures depuis son atelier" loading="lazy">
+    </div>
   </div>
 </section>
+
+<script>
+  (function () {
+    var items = document.querySelectorAll('.showcase-reveal');
+    if (!items.length) return;
+    if (!('IntersectionObserver' in window)) {
+      items.forEach(function (el) { el.classList.add('is-visible'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    items.forEach(function (el) { io.observe(el); });
+  })();
+</script>
 
 <!-- ═══════════ Modules ═══════════ -->
 <section class="landing-modules" aria-label="Modules de l'application">
@@ -151,6 +177,7 @@
       </button>
     </div>
     <div class="modal-body">
+      <img class="module-modal-image" id="module-modal-image" src="" alt="" aria-hidden="true">
       <p class="module-modal-lead" id="module-modal-lead"></p>
       <ul class="module-modal-list" id="module-modal-list"></ul>
     </div>
@@ -170,6 +197,7 @@
     dashboard: {
       icon: 'layout-dashboard',
       title: 'Tableau de bord',
+      image: "{{ url_for('static', filename='img/landing/modules/dashboard.png') }}",
       lead: "Dès la connexion, retrouvez en un coup d'œil la santé de votre activité : rien à configurer, tout est calculé automatiquement à partir de vos données.",
       items: [
         'Chiffre d’affaires encaissé (paiements reçus moins dépenses)',
@@ -181,6 +209,7 @@
     customers: {
       icon: 'users',
       title: 'Clients & contacts',
+      image: "{{ url_for('static', filename='img/landing/modules/customers.png') }}",
       lead: "Centralisez vos fiches clients et prospects, avec une recherche rapide et un scan de carte de visite par intelligence artificielle.",
       items: [
         'Liste de vos clients avec recherche par nom ou entreprise',
@@ -192,6 +221,7 @@
     quotes: {
       icon: 'file-text',
       title: 'Devis & factures',
+      image: "{{ url_for('static', filename='img/landing/modules/quotes.png') }}",
       lead: "Créez vos documents commerciaux rapidement - au clavier ou à la voix - et transformez un devis accepté en facture sans ressaisie.",
       items: [
         'Création de devis, y compris par dictée vocale',
@@ -203,6 +233,7 @@
     expenses: {
       icon: 'wallet',
       title: 'Dépenses',
+      image: "{{ url_for('static', filename='img/landing/modules/expenses.png') }}",
       lead: "Suivez vos charges par catégorie et scannez vos reçus au lieu de les ressaisir à la main.",
       items: [
         'Enregistrement des dépenses par catégorie personnalisable',
@@ -214,6 +245,7 @@
     messages: {
       icon: 'mail',
       title: 'Messages & relances',
+      image: "{{ url_for('static', filename='img/landing/modules/messages.png') }}",
       lead: "Envoyez des emails de relance ou de suivi à vos clients directement depuis l’application, sans changer d’outil.",
       items: [
         'Rédaction et envoi d’emails depuis SenGestion',
@@ -224,6 +256,7 @@
     settings: {
       icon: 'settings',
       title: 'Paramètres',
+      image: "{{ url_for('static', filename='img/landing/modules/settings.png') }}",
       lead: "Renseignez une fois les informations de votre entreprise : elles sont ensuite réutilisées automatiquement sur tous vos documents.",
       items: [
         'Logo et cachet d’entreprise, intégrés aux PDF générés',
@@ -237,6 +270,7 @@
     const backdrop = document.getElementById('module-modal-backdrop');
     const titleText = document.getElementById('module-modal-title-text');
     const iconWrap = document.getElementById('module-modal-icon');
+    const image = document.getElementById('module-modal-image');
     const lead = document.getElementById('module-modal-lead');
     const list = document.getElementById('module-modal-list');
 
@@ -250,11 +284,25 @@
       titleText.textContent = data.title;
       lead.textContent = data.lead;
       iconWrap.innerHTML = '<i data-lucide="' + data.icon + '" aria-hidden="true"></i>';
+      if (data.image) {
+        image.src = data.image;
+        image.alt = data.title;
+        image.style.display = 'block';
+        // Replay the CSS entrance/float animation on every open, not just the first time.
+        image.style.animation = 'none';
+        void image.offsetWidth;
+        image.style.animation = '';
+      } else {
+        image.style.display = 'none';
+      }
       list.innerHTML = data.items.map(function (item) {
         return '<li><span class="check"><i data-lucide="check" aria-hidden="true"></i></span><span>' + item + '</span></li>';
       }).join('');
 
       backdrop.style.display = 'flex';
+      // Compensate the scrollbar width removed by overflow:hidden so the layout doesn't shift.
+      var scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      if (scrollbarWidth > 0) { document.body.style.paddingRight = scrollbarWidth + 'px'; }
       document.body.style.overflow = 'hidden';
       if (window.lucide) { lucide.createIcons(); }
       // focus initial dans la modale (WCAG 2.4.3)
@@ -264,6 +312,7 @@
     function closeModal() {
       backdrop.style.display = 'none';
       document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
       // retour du focus à la carte qui a ouvert la modale
       if (lastTrigger) { lastTrigger.focus(); lastTrigger = null; }
     }

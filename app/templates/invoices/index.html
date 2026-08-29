@@ -129,7 +129,8 @@
               </a>
               <form method="post" action="{{ url_for('invoices.delete', invoice_id=inv.id) }}"
                     style="display:inline;"
-                    onsubmit="return confirm('Supprimer définitivement la facture {{ inv.number }} ? Les paiements associés seront aussi supprimés.');">
+                    data-confirm="Supprimer définitivement la facture {{ inv.number }} ? Les paiements associés seront aussi supprimés." data-confirm-danger="true"
+                    data-confirm-title="Supprimer cette facture" data-confirm-ok-label="Supprimer">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-ghost btn-sm"
                         aria-label="Supprimer la facture {{ inv.number }}"

@@ -40,6 +40,11 @@ class User(UserMixin, db.Model):
     verification_code = db.Column(db.String(6))          # 6-digit code
     verification_expires = db.Column(db.DateTime)        # code validity limit
 
+    # --- email change (pending confirmation on the NEW address) ---
+    pending_email = db.Column(db.String(150))             # new address, not active until confirmed
+    pending_email_code = db.Column(db.String(6))
+    pending_email_expires = db.Column(db.DateTime)
+
     # --- subscription ---
     status = db.Column(
         db.Enum("trial", "active", "expired", "suspended"),
@@ -84,6 +89,36 @@ class User(UserMixin, db.Model):
         self.email_verified = True
         self.verification_code = None
         self.verification_expires = None
+
+    # ------------------------------------------------------------------
+    # Email change (confirmation required on the new address before it
+    # becomes active - the current email stays valid until then).
+    # ------------------------------------------------------------------
+    def start_email_change(self, new_email: str) -> str:
+        """Stage a new email and return a fresh 6-digit code (valid 15 min)."""
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        self.pending_email = new_email
+        self.pending_email_code = code
+        self.pending_email_expires = datetime.utcnow() + timedelta(minutes=CODE_VALIDITY_MINUTES)
+        return code
+
+    def check_pending_email_code(self, code: str) -> bool:
+        if not self.pending_email or not self.pending_email_code or not self.pending_email_expires:
+            return False
+        if datetime.utcnow() > self.pending_email_expires:
+            return False
+        return secrets.compare_digest(self.pending_email_code, (code or "").strip())
+
+    def confirm_email_change(self) -> None:
+        self.email = self.pending_email
+        self.pending_email = None
+        self.pending_email_code = None
+        self.pending_email_expires = None
+
+    def cancel_email_change(self) -> None:
+        self.pending_email = None
+        self.pending_email_code = None
+        self.pending_email_expires = None
 
     # ------------------------------------------------------------------
     # Subscription business logic
