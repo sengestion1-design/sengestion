@@ -15,9 +15,9 @@ Application **Flask (Python)** en architecture **MVC**, avec **deux bases de don
 
 - **Back-end** : Python, Flask, SQLAlchemy (MySQL), PyMongo (MongoDB)
 - **Front-end** : HTML5, CSS3, JavaScript, Jinja2 - responsive, accessible **RGAA**
-- **Sécurité** : Flask-Login (auth), hachage des mots de passe (werkzeug), protection **CSRF**, requêtes paramétrées
+- **Sécurité** : Flask-Login (auth), hachage des mots de passe scrypt (via werkzeug), protection **CSRF**, requêtes paramétrées
 - **Migrations** : Flask-Migrate
-- **Déploiement** : Docker (à venir), variables d'environnement (`.env`)
+- **Déploiement** : Docker + docker-compose (web, MySQL, MongoDB), reverse proxy Caddy (TLS/HSTS), variables d'environnement (`.env`)
 
 ## Charte graphique (conforme RGAA)
 
