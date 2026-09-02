@@ -35,3 +35,6 @@ app/static/fonts/*.ttf
 
 app/static/uploads/recus/*
 !app/static/uploads/recus/.gitkeep
+
+# support de soutenance, hors depot
+presentation/
