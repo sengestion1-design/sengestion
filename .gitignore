@@ -38,3 +38,6 @@ app/static/uploads/recus/*
 
 # support de soutenance, hors depot
 presentation/
+
+# prototypes HTML d exploration visuelle, hors depot
+maquettes/
