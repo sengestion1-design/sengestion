@@ -44,3 +44,8 @@ maquettes/
 
 # brouillon de page vitrine, non deploye
 landing/
+
+# anciennes versions d images et sauvegardes de logos, hors depot
+app/static/img/landing/anciennes/
+app/static/img/logo-old.png
+app/static/img/logo-with-text.backup.png
